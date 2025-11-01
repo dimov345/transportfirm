@@ -63,6 +63,10 @@ public class VehicleRecord {
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
 
+    @ManyToOne
+    @JoinColumn(name = "speditor_id")
+    private Speditor speditor;
+
     @PrePersist
     @PreUpdate
     private void validateDates() {

@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Speditor extends Employees {
-
     @OneToMany(mappedBy = "speditor")
     private List<VehicleRecord> vehicles;
 }

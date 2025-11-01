@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Mechanic extends Employees {
-
     private String specialty;
 
     @ManyToMany

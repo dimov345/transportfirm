@@ -42,8 +42,34 @@ public class EmployeesService {
         if (employee.getRole() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role must be specified");
         }
+
+        // Създаваме конкретен подтип според ролята
+        if (employee.getRole() == Role.MECHANIC && !(employee instanceof Mechanic)) {
+            Mechanic mechanic = new Mechanic();
+            copyBaseFields(employee, mechanic);
+            return employeeRepository.save(mechanic);
+        } else if (employee.getRole() == Role.SPEDITOR && !(employee instanceof Speditor)) {
+            Speditor speditor = new Speditor();
+            copyBaseFields(employee, speditor);
+            return employeeRepository.save(speditor);
+        }
+
         return employeeRepository.save(employee);
     }
+
+    private void copyBaseFields(Employees source, Employees target) {
+        target.setEgn(source.getEgn());
+        target.setFirstName(source.getFirstName());
+        target.setLastName(source.getLastName());
+        target.setPhone(source.getPhone());
+        target.setEmail(source.getEmail());
+        target.setAddress(source.getAddress());
+        target.setHireDate(source.getHireDate());
+        target.setSalary(source.getSalary());
+        target.setRole(source.getRole());
+        target.setActive(source.isActive());
+    }
+
 
     public Employees update(Long id, Employees updated) {
         Employees existing = getById(id);

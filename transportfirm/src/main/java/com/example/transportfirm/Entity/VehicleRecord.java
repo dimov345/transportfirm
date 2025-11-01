@@ -5,9 +5,10 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
-@Table(name = "VehicleRecords")
+@Table(name = "vehicle_records")
 @Data
 public class VehicleRecord {
 
@@ -39,14 +40,18 @@ public class VehicleRecord {
 
     @NotBlank(message = "Тип ППС е задължителен")
     @Column(length = 50)
-    @Pattern(regexp = "Лек автомобил|Автобус|Лекотоварен автомобил \\(до 3\\.5 т\\)|Тежкотоварен камион|Автоплатформен и специализиран камион \\(бетоновози, самосвали и др\\.\\)|Линейка|Пожарна кола|Полицейски автомобил|Снегорини, почистваща техника и др\\.|Ремаркета и полуремаркета|Влекачи \\(тягови ППС за ремаркета\\)",
-            message = "Невалиден тип ППС")
+    @Pattern(
+            regexp = "Лек автомобил|Автобус|Лекотоварен автомобил \\(до 3\\.5 т\\)|Тежкотоварен камион|Автоплатформен и специализиран камион \\(бетоновози, самосвали и др\\.\\)|Линейка|Пожарна кола|Полицейски автомобил|Снегорини, почистваща техника и др\\.|Ремаркета и полуремаркета|Влекачи \\(тягови ППС за ремаркета\\)",
+            message = "Невалиден тип ППС"
+    )
     private String typePps;
 
     @NotBlank(message = "Техническо състояние е задължително")
     @Column(length = 50)
-    @Pattern(regexp = "В движение|С временно отстранени неизправности|Спряно от движение|Повредено|Бракувано",
-            message = "Невалидно техническо състояние")
+    @Pattern(
+            regexp = "В движение|С временно отстранени неизправности|Спряно от движение|Повредено|Бракувано",
+            message = "Невалидно техническо състояние"
+    )
     private String technicalCondition;
 
     @NotBlank(message = "Стандарт на емисии е задължителен")
@@ -63,9 +68,14 @@ public class VehicleRecord {
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
 
+    // 🔹 Връзка към спедитор (много автомобили за един спедитор)
     @ManyToOne
     @JoinColumn(name = "speditor_id")
     private Speditor speditor;
+
+    // 🔹 Връзка към механици (един автомобил може да се обслужва от няколко механици)
+    @ManyToMany(mappedBy = "vehicles")
+    private List<Mechanic> mechanics;
 
     @PrePersist
     @PreUpdate

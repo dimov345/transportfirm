@@ -6,13 +6,12 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "employees")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Data
 public class Employees {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String egn;
     private String firstName;
     private String lastName;
@@ -23,7 +22,6 @@ public class Employees {
     private double salary;
 
     @Enumerated(EnumType.STRING)
-    private Role role; // ADMIN, ACCOUNTANT, SPEDITOR, DRIVER, MECHANIC
-
+    private Role role; // SPEDITOR, MECHANIC
     private boolean active = true;
 }

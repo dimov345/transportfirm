@@ -1,0 +1,13 @@
+.app-content {
+  transition: margin-left 0.3s ease;
+  padding: 40px;
+  min-height: 100vh;
+  background: #ffffff;
+  margin-left: 80px; /* базово — за тясната версия на sidebar-а */
+}
+
+.app-content.overlay-active {
+  /* когато sidebar е отворен — не местим съдържанието, оставяме го отзад */
+  margin-left: 80px;
+  filter: brightness(0.9); /* по избор, лек ефект при overlay */
+}

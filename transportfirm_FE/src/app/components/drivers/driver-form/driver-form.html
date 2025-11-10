@@ -1,0 +1,83 @@
+<div class="drivers-form">
+  <div class="header">
+    <div>
+      <h2>{{ isEdit ? 'Редакция на шофьор' : 'Нов шофьор' }}</h2>
+      <p class="subtitle">
+        {{ isEdit ? 'Променете данните на съществуващ шофьор' : 'Въведете данните на нов шофьор' }}
+      </p>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ЕГН</label>
+          <input type="text" formControlName="egn" [readonly]="isEdit" placeholder="10 цифри">
+        </div>
+
+        <div class="form-group">
+          <label>Име</label>
+          <input type="text" formControlName="name" placeholder="Пълно име">
+        </div>
+
+        <div class="form-group">
+          <label>Телефон</label>
+          <input type="text" formControlName="phone" placeholder="+359...">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="example@mail.com">
+        </div>
+
+        <div class="form-group">
+          <label>СУМПС издадено на</label>
+          <input type="date" formControlName="driverLicenseIssuedOn">
+        </div>
+
+        <div class="form-group">
+          <label>СУМПС валидно до</label>
+          <input type="date" formControlName="driverLicenseExpiresOn">
+        </div>
+
+        <div class="form-group">
+          <label>Квалификационна карта издадена на</label>
+          <input type="date" formControlName="qualificationCardIssuedOn">
+        </div>
+
+        <div class="form-group">
+          <label>Квалификационна карта валидна до</label>
+          <input type="date" formControlName="qualificationCardExpiresOn">
+        </div>
+
+        <div class="form-group">
+          <label>Психологическо изследване издадено на</label>
+          <input type="date" formControlName="psychologicalExamIssuedOn">
+        </div>
+
+        <div class="form-group">
+          <label>Психологическо изследване валидно до</label>
+          <input type="date" formControlName="psychologicalExamExpiresOn">
+        </div>
+
+        <div class="form-group">
+          <label>Дигитална карта издадена на</label>
+          <input type="date" formControlName="digitalCardIssuedOn">
+        </div>
+
+        <div class="form-group">
+          <label>Дигитална карта валидна до</label>
+          <input type="date" formControlName="digitalCardExpiresOn">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="form.invalid">
+          {{ isEdit ? 'Запази промените' : 'Добави шофьор' }}
+        </button>
+        <button type="button" class="btn-secondary" routerLink="/">Отказ</button>
+      </div>
+    </form>
+  </div>
+</div>

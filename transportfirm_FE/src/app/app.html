@@ -1,0 +1,7 @@
+<app-sidebar (toggleWidth)="onSidebarToggle($event)"></app-sidebar>
+
+<main class="app-content" 
+      [class.collapsed]="isSidebarCollapsed" 
+      [class.overlay]="!isSidebarCollapsed">
+  <router-outlet></router-outlet>
+</main>

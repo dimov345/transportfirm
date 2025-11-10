@@ -1,0 +1,31 @@
+<div class="list-container">
+  <div class="header">
+    <h2>Шофьори</h2>
+    <button (click)="addDriver()">+ Нов шофьор</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ЕГН</th>
+        <th>Име</th>
+        <th>Телефон</th>
+        <th>Имейл</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of drivers">
+        <td>{{ d.egn }}</td>
+        <td>{{ d.name }}</td>
+        <td>{{ d.phone }}</td>
+        <td>{{ d.email }}</td>
+        <td class="actions">
+          <button (click)="editDriver(d.egn)">✏️</button>
+          <button (click)="viewDocuments(d.egn)">📄</button>
+          <button (click)="deleteDriver(d.egn)">🗑️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

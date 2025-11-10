@@ -1,0 +1,105 @@
+.list-container {
+  color: #2d3748;
+  background: #ffffff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+
+    h2 {
+      color: #1a365d;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: #4299e1;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+
+      &:hover {
+        background: #3182ce;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
+      }
+    }
+  }
+
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f7fafc;
+      color: #4a5568;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      background: #ffffff;
+      color: #2d3748;
+      font-size: 14px;
+    }
+
+    tr {
+      transition: background-color 0.15s ease;
+      
+      &:hover {
+        background: #f7fafc;
+      }
+      
+      &:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+
+      button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #718096;
+        font-size: 18px;
+        padding: 6px;
+        border-radius: 4px;
+        transition: all 0.15s ease;
+
+        &:hover {
+          color: #4299e1;
+          background: #edf2f7;
+        }
+      }
+    }
+  }
+}

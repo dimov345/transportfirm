@@ -1,0 +1,67 @@
+<nav class="sidebar"
+     [@expand]="isExpanded ? 'expanded' : 'collapsed'"
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="onMouseLeave()">
+
+  <!-- Лого -->
+  <div class="logo" [@logoAnimation]="isExpanded ? 'expanded' : 'collapsed'">
+  <div class="logo-wrapper">
+    <img src="assets/logo.png" alt="Logo" class="logo-img">
+    <div class="logo-dot"></div>
+  </div>
+  <span class="app-name">TranTrack</span>
+</div>
+
+
+  <!-- Основно меню -->
+  <ul class="menu">
+    <!-- Начало -->
+    <li routerLink="/" routerLinkActive="active" [@menuItem]>
+      <span class="icon">🏠</span>
+      <span *ngIf="isExpanded" class="menu-text">Начало</span>
+      <div class="active-indicator"></div>
+    </li>
+
+    <!-- Документи с подменю -->
+    <li (click)="toggleMenu('services')" class="has-submenu">
+      <span class="icon">📂</span>
+      <span *ngIf="isExpanded" class="menu-text">Документи</span>
+      <span *ngIf="isExpanded" class="submenu-arrow" [@arrowRotate]="activeMenu === 'services' ? 'rotated' : 'normal'">
+        ▼
+      </span>
+      <div class="active-indicator"></div>
+    </li>
+
+    <!-- Подменю Документи -->
+    <div [@submenu]="activeMenu === 'services' && isExpanded ? 'expanded' : 'collapsed'">
+      <ul class="submenu" *ngIf="isExpanded">
+        <li routerLink="/drivers" routerLinkActive="active" [@submenuItem]>
+          <div class="submenu-line"></div>
+          Шофьори
+        </li>
+        <li routerLink="/vehicles" routerLinkActive="active" [@submenuItem]>
+          <div class="submenu-line"></div>
+          ППС
+        </li>
+        <li routerLink="/workers" routerLinkActive="active" [@submenuItem]>
+          <div class="submenu-line"></div>
+          Работници
+        </li>
+      </ul>
+    </div>
+
+    <!-- Отчет -->
+    <li routerLink="/reports" routerLinkActive="active" [@menuItem]>
+      <span class="icon">📊</span>
+      <span *ngIf="isExpanded" class="menu-text">Отчет</span>
+      <div class="active-indicator"></div>
+    </li>
+
+    <!-- Админ -->
+    <li routerLink="/admin" routerLinkActive="active" [@menuItem]>
+      <span class="icon">⚙️</span>
+      <span *ngIf="isExpanded" class="menu-text">Админ</span>
+      <div class="active-indicator"></div>
+    </li>
+  </ul>
+</nav>

@@ -1,0 +1,25 @@
+<div class="docs-container">
+  <h2>Документи на шофьор {{ egn }}</h2>
+
+  <div class="upload">
+    <input type="file" (change)="onFileSelected($event)" accept="application/pdf" />
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Име на файл</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let doc of documents">
+        <td>{{ doc.fileName }}</td>
+        <td class="actions">
+          <button (click)="download(doc.id, doc.fileName)">⬇️</button>
+          <button (click)="delete(doc.id)">🗑️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

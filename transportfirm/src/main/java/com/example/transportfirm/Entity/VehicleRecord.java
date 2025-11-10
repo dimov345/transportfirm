@@ -68,15 +68,6 @@ public class VehicleRecord {
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
 
-    // 🔹 Връзка към спедитор (много автомобили за един спедитор)
-    @ManyToOne
-    @JoinColumn(name = "speditor_id")
-    private Speditor speditor;
-
-    // 🔹 Връзка към механици (един автомобил може да се обслужва от няколко механици)
-    @ManyToMany(mappedBy = "vehicles")
-    private List<Mechanic> mechanics;
-
     @PrePersist
     @PreUpdate
     private void validateDates() {

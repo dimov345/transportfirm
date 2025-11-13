@@ -1,67 +1,64 @@
 <nav class="sidebar"
-     [@expand]="isExpanded ? 'expanded' : 'collapsed'"
+     [class.expanded]="isExpanded" 
+     [class.collapsed]="!isExpanded"
      (mouseenter)="onMouseEnter()"
      (mouseleave)="onMouseLeave()">
 
   <!-- Лого -->
-  <div class="logo" [@logoAnimation]="isExpanded ? 'expanded' : 'collapsed'">
-  <div class="logo-wrapper">
-    <img src="assets/logo.png" alt="Logo" class="logo-img">
-    <div class="logo-dot"></div>
+  <div class="logo">
+    <div class="logo-wrapper">
+      <img src="logo (1).ico" alt="Logo" class="logo-img">
+    </div>
+    <span class="app-name">TransTrack</span>
   </div>
-  <span class="app-name">TranTrack</span>
-</div>
-
 
   <!-- Основно меню -->
   <ul class="menu">
     <!-- Начало -->
-    <li routerLink="/" routerLinkActive="active" [@menuItem]>
-      <span class="icon">🏠</span>
-      <span *ngIf="isExpanded" class="menu-text">Начало</span>
-      <div class="active-indicator"></div>
+    <li routerLink="/" routerLinkActive="active">
+      <img src="dashboard_icon.ico" alt="Icon" class="icon">
+      <span class="menu-text">Начало</span>
     </li>
 
     <!-- Документи с подменю -->
-    <li (click)="toggleMenu('services')" class="has-submenu">
+    <li 
+      routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: false }"
+      (click)="toggleMenu('services')" 
+      class="has-submenu"
+    >
       <span class="icon">📂</span>
-      <span *ngIf="isExpanded" class="menu-text">Документи</span>
-      <span *ngIf="isExpanded" class="submenu-arrow" [@arrowRotate]="activeMenu === 'services' ? 'rotated' : 'normal'">
-        ▼
-      </span>
-      <div class="active-indicator"></div>
+      <span class="menu-text">Документи</span>
+      <span class="submenu-arrow">▼</span>
     </li>
 
+
     <!-- Подменю Документи -->
-    <div [@submenu]="activeMenu === 'services' && isExpanded ? 'expanded' : 'collapsed'">
-      <ul class="submenu" *ngIf="isExpanded">
-        <li routerLink="/drivers" routerLinkActive="active" [@submenuItem]>
-          <div class="submenu-line"></div>
-          Шофьори
-        </li>
-        <li routerLink="/vehicles" routerLinkActive="active" [@submenuItem]>
-          <div class="submenu-line"></div>
-          ППС
-        </li>
-        <li routerLink="/workers" routerLinkActive="active" [@submenuItem]>
-          <div class="submenu-line"></div>
-          Работници
-        </li>
-      </ul>
-    </div>
+   <ul class="submenu" *ngIf="activeMenu === 'services'">
+      <li routerLink="/drivers" routerLinkActive="active">
+        <div class="submenu-line"></div>
+        Шофьори
+      </li>
+      <li routerLink="/vehicles" routerLinkActive="active">
+        <div class="submenu-line"></div>
+        ППС
+      </li>
+      <li routerLink="/workers" routerLinkActive="active">
+        <div class="submenu-line"></div>
+        Работници
+      </li>
+    </ul>
 
     <!-- Отчет -->
-    <li routerLink="/reports" routerLinkActive="active" [@menuItem]>
+    <li routerLink="/reports" routerLinkActive="active">
       <span class="icon">📊</span>
-      <span *ngIf="isExpanded" class="menu-text">Отчет</span>
-      <div class="active-indicator"></div>
+      <span class="menu-text">Отчет</span>
     </li>
 
     <!-- Админ -->
-    <li routerLink="/admin" routerLinkActive="active" [@menuItem]>
+    <li routerLink="/admin" routerLinkActive="active">
       <span class="icon">⚙️</span>
-      <span *ngIf="isExpanded" class="menu-text">Админ</span>
-      <div class="active-indicator"></div>
+      <span class="menu-text">Админ</span>
     </li>
   </ul>
 </nav>

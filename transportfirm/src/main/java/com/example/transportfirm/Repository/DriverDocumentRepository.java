@@ -7,5 +7,5 @@ import java.util.List;
 
 
 public interface DriverDocumentRepository extends JpaRepository<DriverDocument, Long> {
-    List<DriverDocument> findByEgn(String egn);
+    List<DriverDocument> findByDriverEgn(String egn);
 }

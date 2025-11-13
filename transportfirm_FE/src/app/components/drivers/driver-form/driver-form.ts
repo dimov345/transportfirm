@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DriverService, DriverInfo } from '../../../core/services/driver';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-driver-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './driver-form.html',
   styleUrls: ['./driver-form.scss']
 })

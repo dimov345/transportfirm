@@ -1,1 +1,220 @@
-<p>driver-details works!</p>
+<div class="driver-details">
+  <!-- Error State -->
+  @if (error) {
+    <div class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h3>Грешка</h3>
+      <p>{{ error }}</p>
+      <button class="btn btn-secondary" (click)="goBack()">Назад към списъка</button>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @if (!error && driver) {
+    <!-- Header -->
+    <div class="details-header">
+      <div class="header-content">
+        <div class="driver-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+          </svg>
+        </div>
+        <div class="driver-title">
+          <h1>{{ driver.name }}</h1>
+          <div class="driver-subtitle">
+            <span class="egn-badge">{{ driver.egn }}</span>
+            <span class="status-badge" [class.expired]="hasExpiredDocuments">
+              {{ hasExpiredDocuments ? 'Има изтекли документи' : 'Всички документи са валидни' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="goBack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Назад
+        </button>
+        <button class="btn btn-primary" (click)="editDriver()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>
+          Редактирай
+        </button>
+      </div>
+    </div>
+
+    <div class="details-content">
+      <!-- Лична информация -->
+      <div class="info-section">
+        <div class="section-header">
+          <h2>Лична информация</h2>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>ЕГН</label>
+            <div class="info-value">{{ driver.egn || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Име</label>
+            <div class="info-value">{{ driver.name || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Телефон</label>
+            <div class="info-value">
+              <a [href]="'tel:' + driver.phone" class="contact-link">
+                {{ driver.phone || '—' }}
+              </a>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>Email</label>
+            <div class="info-value">
+              @if (driver.email) {
+                <a [href]="'mailto:' + driver.email" class="contact-link">
+                  {{ driver.email }}
+                </a>
+              } @else {
+                <span class="no-data">—</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Документи -->
+      <div class="documents-section">
+        <div class="section-header">
+          <h2>Документи</h2>
+          <div class="documents-summary">
+            <span class="summary-item" [class.expiring]="expiringDocumentsCount > 0">
+              {{ expiringDocumentsCount }} изтичат скоро
+            </span>
+            <span class="summary-item" [class.expired]="expiredDocumentsCount > 0">
+              {{ expiredDocumentsCount }} изтекли
+            </span>
+          </div>
+        </div>
+
+        <div class="documents-grid">
+          <!-- Шофьорска книжка -->
+          <div class="document-card" [class.expired]="isExpired(driver.driverLicenseExpiresOn)" 
+                                  [class.expiring]="isExpiring(driver.driverLicenseExpiresOn)">
+            <div class="document-header">
+              <div class="document-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                </svg>
+              </div>
+              <h3>Шофьорска книжка</h3>
+              <div class="document-status" [class.expired]="isExpired(driver.driverLicenseExpiresOn)"
+                                        [class.expiring]="isExpiring(driver.driverLicenseExpiresOn)">
+                {{ getDocumentStatus(driver.driverLicenseExpiresOn) }}
+              </div>
+            </div>
+            <div class="document-dates">
+              <div class="date-item">
+                <label>Издадена на:</label>
+                <span>{{ formatDate(driver.driverLicenseIssuedOn) }}</span>
+              </div>
+              <div class="date-item">
+                <label>Валидна до:</label>
+                <span [class.expired-date]="isExpired(driver.driverLicenseExpiresOn)">
+                  {{ formatDate(driver.driverLicenseExpiresOn) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Квалификационна карта -->
+          <div class="document-card" [class.expired]="isExpired(driver.qualificationCardExpiresOn)" 
+                                  [class.expiring]="isExpiring(driver.qualificationCardExpiresOn)">
+            <div class="document-header">
+              <div class="document-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
+                </svg>
+              </div>
+              <h3>Квалификационна карта</h3>
+              <div class="document-status" [class.expired]="isExpired(driver.qualificationCardExpiresOn)"
+                                        [class.expiring]="isExpiring(driver.qualificationCardExpiresOn)">
+                {{ getDocumentStatus(driver.qualificationCardExpiresOn) }}
+              </div>
+            </div>
+            <div class="document-dates">
+              <div class="date-item">
+                <label>Издадена на:</label>
+                <span>{{ formatDate(driver.qualificationCardIssuedOn) }}</span>
+              </div>
+              <div class="date-item">
+                <label>Валидна до:</label>
+                <span [class.expired-date]="isExpired(driver.qualificationCardExpiresOn)">
+                  {{ formatDate(driver.qualificationCardExpiresOn) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Психологическо изследване -->
+          <div class="document-card" [class.expired]="isExpired(driver.psychologicalExamExpiresOn)" 
+                                  [class.expiring]="isExpiring(driver.psychologicalExamExpiresOn)">
+            <div class="document-header">
+              <div class="document-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <h3>Психологическо изследване</h3>
+              <div class="document-status" [class.expired]="isExpired(driver.psychologicalExamExpiresOn)"
+                                        [class.expiring]="isExpiring(driver.psychologicalExamExpiresOn)">
+                {{ getDocumentStatus(driver.psychologicalExamExpiresOn) }}
+              </div>
+            </div>
+            <div class="document-dates">
+              <div class="date-item">
+                <label>Издадено на:</label>
+                <span>{{ formatDate(driver.psychologicalExamIssuedOn) }}</span>
+              </div>
+              <div class="date-item">
+                <label>Валидно до:</label>
+                <span [class.expired-date]="isExpired(driver.psychologicalExamExpiresOn)">
+                  {{ formatDate(driver.psychologicalExamExpiresOn) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Дигитална карта -->
+          <div class="document-card" [class.expired]="isExpired(driver.digitalCardExpiresOn)" 
+                                  [class.expiring]="isExpiring(driver.digitalCardExpiresOn)">
+            <div class="document-header">
+              <div class="document-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-8 6h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                </svg>
+              </div>
+              <h3>Дигитална карта</h3>
+              <div class="document-status" [class.expired]="isExpired(driver.digitalCardExpiresOn)"
+                                        [class.expiring]="isExpiring(driver.digitalCardExpiresOn)">
+                {{ getDocumentStatus(driver.digitalCardExpiresOn) }}
+              </div>
+            </div>
+            <div class="document-dates">
+              <div class="date-item">
+                <label>Издадена на:</label>
+                <span>{{ formatDate(driver.digitalCardIssuedOn) }}</span>
+              </div>
+              <div class="date-item">
+                <label>Валидна до:</label>
+                <span [class.expired-date]="isExpired(driver.digitalCardExpiresOn)">
+                  {{ formatDate(driver.digitalCardExpiresOn) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

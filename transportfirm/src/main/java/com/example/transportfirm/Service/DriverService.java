@@ -6,14 +6,22 @@ import com.example.transportfirm.Repository.DriverDocumentRepository;
 import com.example.transportfirm.Repository.DriverRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
 public class DriverService {
     private final DriverRepository driverRepository;
     private final DriverDocumentRepository driverDocumentRepository;
+
+    private final String uploadDir = "documents";
 
     public DriverService(DriverRepository driverRepository, DriverDocumentRepository driverDocumentRepository) {
         this.driverRepository = driverRepository;
@@ -58,24 +66,42 @@ public class DriverService {
     public List<DriverDocument> getDocumentsByDriver(String egn) {
         if (!driverRepository.existsById(egn))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-        return driverDocumentRepository.findByEgn(egn);
+        return driverDocumentRepository.findByDriverEgn(egn);
+    }
+
+    public Path getDocumentPath(String filePath) {
+        return Paths.get(filePath);
     }
 
     /** Добавя нов документ към конкретен шофьор */
-    public DriverDocument addDocument(String egn, String fileName, byte[] pdfData) {
+    public DriverDocument addDocument(String egn, MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
+        }
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
+        }
+
         DriverInfo driver = driverRepository.findById(egn)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
 
-        if (pdfData == null || pdfData.length == 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PDF data is empty");
+        // Създаваме уникално име на файла
+        String storedFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path targetLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Files.createDirectories(targetLocation);
+        Path filePath = targetLocation.resolve(storedFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         DriverDocument doc = new DriverDocument();
         doc.setDriver(driver);
-        doc.setFileName(fileName);
-        doc.setPdfData(pdfData);
+        doc.setFileName(file.getOriginalFilename());
+        doc.setFilePath(filePath.toString());
 
         return driverDocumentRepository.save(doc);
     }
+
+
+
 
     /** Изтрива документ по ID */
     public void deleteDocument(Long id) {

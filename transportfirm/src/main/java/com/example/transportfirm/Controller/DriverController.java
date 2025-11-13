@@ -4,7 +4,10 @@ import com.example.transportfirm.Entity.DriverDocument;
 import com.example.transportfirm.Entity.DriverInfo;
 import com.example.transportfirm.Service.DriverService;
 import jakarta.validation.Valid;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -60,41 +64,33 @@ public class DriverController {
     // DRIVER DOCUMENTS CRUD
     // =============================
 
-
     @GetMapping("/{egn}/documents")
     public List<DriverDocument> getAllDocuments(@PathVariable String egn) {
         return service.getDocumentsByDriver(egn);
     }
 
-
     @PostMapping(value = "/{egn}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public DriverDocument uploadDocument(
-            @PathVariable String egn,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "File is empty");
-        }
-
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-        }
-
-        return service.addDocument(egn, file.getOriginalFilename(), file.getBytes());
+    public DriverDocument uploadDocument(@PathVariable String egn,
+                                         @RequestParam("file") MultipartFile file) throws IOException {
+        return service.addDocument(egn, file);
     }
-
 
     @GetMapping("/{egn}/documents/{id}")
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable String egn, @PathVariable Long id) {
-        DriverDocument document = service.getDocumentById(id);
+    public ResponseEntity<Resource> downloadDocument(@PathVariable String egn, @PathVariable Long id) throws IOException {
+        DriverDocument doc = service.getDocumentById(id);
+
+        Path path = service.getDocumentPath(doc.getFilePath());
+        Resource resource = new UrlResource(path.toUri());
+
+        if (!resource.exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        }
 
         return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + document.getFileName() + "\"")
-                .body(document.getPdfData());
+                .body(resource);
     }
-
 
     @DeleteMapping("/{egn}/documents/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable String egn, @PathVariable Long id) {

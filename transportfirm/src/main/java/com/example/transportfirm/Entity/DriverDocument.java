@@ -1,10 +1,11 @@
 package com.example.transportfirm.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "Documents")
+@Table(name = "documents")
 @Data
 public class DriverDocument {
 
@@ -12,16 +13,11 @@ public class DriverDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 10, nullable = false)
-    private String egn;
-
-    private String fileName;
-
-    @Lob
-    @Column(columnDefinition = "bytea")
-    private byte[] pdfData;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "egn", referencedColumnName = "egn", insertable = false, updatable = false)
+    @JoinColumn(name = "driver_egn", referencedColumnName = "egn", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DriverInfo driver;
+
+    private String fileName; // Оригинално име на файла
+    private String filePath; // Пътя до файла на сървъра
 }

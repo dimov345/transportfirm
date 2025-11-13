@@ -1,5 +1,6 @@
 package com.example.transportfirm.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "Drivers_InfoTable")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DriverInfo {
 
     @Id

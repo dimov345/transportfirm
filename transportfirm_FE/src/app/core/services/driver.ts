@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export interface DriverInfo {
   egn: string;
@@ -19,8 +19,11 @@ export interface DriverInfo {
 
 export interface DriverDocument {
   id: number;
-  egn: string;
   fileName: string;
+  filePath: string;
+  driver: {
+    egn: string;
+  };
 }
 
 @Injectable({ providedIn: 'root' })

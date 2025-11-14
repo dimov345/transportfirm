@@ -87,6 +87,19 @@
     gap: 20px;
   }
 
+  .form-grid .form-group {
+    min-width: 0;
+    max-width: 100%; /* спира препълването */
+  }
+
+  .form-grid .form-input {
+    width: 100%;
+    max-width: 100%; /* забранява разтягането извън колоната */
+    overflow: hidden;
+    text-overflow: ellipsis; /* ако placeholder-ът е дълъг */
+    box-sizing: border-box;
+  }
+
   .documents-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

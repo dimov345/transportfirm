@@ -13,7 +13,8 @@ import { DriverService, DriverDocument } from '../../../core/services/driver';
 export class DriverDocumentsComponent implements OnInit {
   egn!: string;
   documents: DriverDocument[] = [];
-  isLoading = false;
+  
+  isLoading = true;     // ✔ започваме като loading → без премигване
   isUploading = false;
 
   constructor(
@@ -30,9 +31,10 @@ export class DriverDocumentsComponent implements OnInit {
   /** Зарежда всички документи за даден шофьор */
   loadDocuments() {
     this.isLoading = true;
+
     this.driverService.getDocuments(this.egn).subscribe({
       next: docs => {
-        this.documents = [...docs]; // Винаги създаваме нов масив
+        this.documents = [...docs];
         this.isLoading = false;
         this.forceUpdate();
       },
@@ -43,18 +45,18 @@ export class DriverDocumentsComponent implements OnInit {
     });
   }
 
-  /** Качва избрания файл веднага */
+  /** Качване */
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // Проверки
     if (file.type !== 'application/pdf') {
       alert('Моля, качете само PDF файл!');
       input.value = '';
       return;
     }
+
     if (file.size > 5 * 1024 * 1024) {
       alert('Файлът е твърде голям (макс. 5 MB)');
       input.value = '';
@@ -64,11 +66,9 @@ export class DriverDocumentsComponent implements OnInit {
     this.isUploading = true;
     this.forceUpdate();
 
-    // Качване веднага
     this.driverService.uploadDocument(this.egn, file).subscribe({
-      next: (newDocument) => {
-        // Създаваме напълно нов масив
-        this.documents = [...this.documents, newDocument];
+      next: doc => {
+        this.documents = [...this.documents, doc];
         this.isUploading = false;
         input.value = '';
         this.forceUpdate();
@@ -85,7 +85,7 @@ export class DriverDocumentsComponent implements OnInit {
   /** Изтегляне */
   download(id: number, fileName: string) {
     this.driverService.downloadDocument(this.egn, id).subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -96,18 +96,17 @@ export class DriverDocumentsComponent implements OnInit {
 
   /** Изтриване */
   delete(id: number) {
-    if (confirm('Наистина ли искате да изтриете този документ?')) {
-      this.driverService.deleteDocument(this.egn, id).subscribe({
-        next: () => {
-          // Създаваме напълно нов масив
-          this.documents = this.documents.filter(doc => doc.id !== id);
-          this.forceUpdate();
-        },
-        error: () => {
-          alert('Грешка при изтриване на документа!');
-        }
-      });
-    }
+    if (!confirm('Наистина ли искате да изтриете този документ?')) return;
+
+    this.driverService.deleteDocument(this.egn, id).subscribe({
+      next: () => {
+        this.documents = this.documents.filter(d => d.id !== id);
+        this.forceUpdate();
+      },
+      error: () => {
+        alert('Грешка при изтриване на документа!');
+      }
+    });
   }
 
   /** Принудително обновяване на view */

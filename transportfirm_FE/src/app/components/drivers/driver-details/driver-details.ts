@@ -123,7 +123,7 @@ export class DriverDetails implements OnInit {
   //edit не работи
   editDriver() {
     if (this.driver) {
-      this.router.navigate(['/drivers/new', this.driver.egn]);
+      this.router.navigate(['/drivers/edit', this.driver.egn]);
     }
   }
 

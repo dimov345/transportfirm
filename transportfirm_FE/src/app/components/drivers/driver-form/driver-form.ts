@@ -52,9 +52,9 @@ export class DriverFormComponent implements OnInit {
   onSubmit() {
     const value = this.form.getRawValue() as DriverInfo;
     if (this.isEdit) {
-      this.driverService.update(this.egn, value).subscribe(() => this.router.navigate(['/']));
+      this.driverService.update(this.egn, value).subscribe(() => this.router.navigate(['/drivers']));
     } else {
-      this.driverService.create(value).subscribe(() => this.router.navigate(['/']));
+      this.driverService.create(value).subscribe(() => this.router.navigate(['/drivers']));
     }
   }
 }

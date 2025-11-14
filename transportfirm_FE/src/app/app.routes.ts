@@ -11,6 +11,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'drivers', component: DriversListComponent },
   { path: 'drivers/new', component: DriverFormComponent },
+  { path: 'drivers/edit/:egn', component: DriverFormComponent },
   { path: 'drivers/:egn', component: DriverDetails },
   { path: 'driver-documents/:egn', component: DriverDocumentsComponent },
   { path: '**', redirectTo: '' }

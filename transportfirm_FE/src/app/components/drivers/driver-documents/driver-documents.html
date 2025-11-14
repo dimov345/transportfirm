@@ -9,6 +9,7 @@
   </div>
 
   <div class="docs-content">
+
     <!-- Upload Card -->
     <div class="upload-card">
       <div class="upload-header">
@@ -39,6 +40,7 @@
 
     <!-- Documents List -->
     <div class="documents-section" *ngIf="!isLoading">
+
       <div class="section-header">
         <h2>Прикачени документи</h2>
         <span class="doc-count">{{ documents.length }} файла</span>
@@ -51,18 +53,8 @@
             <div class="doc-name">{{ doc.fileName }}</div>
           </div>
           <div class="doc-actions">
-            <button 
-              class="btn-download" 
-              (click)="download(doc.id, doc.fileName)" 
-              title="Изтегли"
-              [disabled]="isUploading"
-            >⬇️</button>
-            <button 
-              class="btn-delete" 
-              (click)="delete(doc.id)" 
-              title="Изтрий"
-              [disabled]="isUploading"
-            >🗑️</button>
+            <button class="btn-download" (click)="download(doc.id, doc.fileName)" [disabled]="isUploading">⬇️</button>
+            <button class="btn-delete" (click)="delete(doc.id)" [disabled]="isUploading">🗑️</button>
           </div>
         </div>
       </div>

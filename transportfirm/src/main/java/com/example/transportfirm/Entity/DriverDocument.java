@@ -18,6 +18,6 @@ public class DriverDocument {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DriverInfo driver;
 
-    private String fileName; // Оригинално име на файла
-    private String filePath; // Пътя до файла на сървъра
+    private String fileName;
+    private String filePath;
 }

@@ -1,5 +1,6 @@
 package com.example.transportfirm.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -10,6 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "vehicle_records")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class VehicleRecord {
 
     @Id

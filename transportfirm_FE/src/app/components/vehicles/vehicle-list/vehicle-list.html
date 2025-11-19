@@ -1,1 +1,152 @@
-<p>vehicle-list works!</p>
+<div class="vehicles-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Управление на Превозни средства</h1>
+      <div class="breadcrumb">Списък на всички превозни средства</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" routerLink="/vehicles/new">
+        <i class="material-icons">add</i>
+        Добави ново ППС
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="filters-card">
+    <div class="card-body">
+      <div class="filters-row">
+
+        <!-- Search -->
+        <div class="filter-group search-group">
+          <div class="search-box">
+            <i class="material-icons search-icon">search</i>
+            <input
+              type="text"
+              placeholder="Търсене по номер, модел, собственик..."
+              [(ngModel)]="searchTerm"
+              (input)="applyFilters()"
+            />
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="filter-group small-filter">
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">Всички статуси</option>
+            <option value="В движение">В движение</option>
+            <option value="Спряно от движение">Спряно</option>
+            <option value="Повредено">Повредено</option>
+          </select>
+        </div>
+
+        <!-- Type -->
+        <div class="filter-group small-filter">
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="">Всички типове</option>
+            <option value="Лек автомобил">Лек автомобил</option>
+            <option value="Автобус">Автобус</option>
+            <option value="Тежкотоварен камион">Тежкотоварен камион</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicles Grid -->
+  <div class="vehicles-grid" *ngIf="filteredVehicles.length > 0">
+    <div
+      class="vehicle-card"
+      *ngFor="let vehicle of filteredVehicles"
+      [class.card-expired]="hasExpiredDocuments(vehicle)"
+    >
+      <div class="card-body">
+
+        <div class="vehicle-header">
+          <div class="vehicle-plate">{{ vehicle.plateNumber }}</div>
+          <div class="vehicle-status" [class]="getStatusClass(vehicle.technicalCondition)">
+            {{ vehicle.technicalCondition }}
+          </div>
+        </div>
+
+        <div class="vehicle-info">
+          <div class="info-item">
+            <i class="material-icons">directions_car</i>
+            <span class="text-truncate">{{ vehicle.model }}</span>
+          </div>
+          <div class="info-item">
+            <i class="material-icons">person</i>
+            <span class="text-truncate">{{ vehicle.owner }}</span>
+          </div>
+          <div class="info-item">
+            <i class="material-icons">category</i>
+            <span>{{ vehicle.typePps }}</span>
+          </div>
+          <div class="info-item">
+            <i class="material-icons">calendar_today</i>
+            <span>{{ vehicle.yearOfManufacture }} г.</span>
+          </div>
+        </div>
+   
+        <div class="documents-status">
+          <div class="docs-grid">
+            <div class="doc-item" 
+                [class.expired]="isExpired(vehicle.kaskoDo)"
+                [class.expiring]="isExpiring(vehicle.kaskoDo)">
+                Каско
+              <div class="doc-date">{{ formatDate(vehicle.kaskoDo) }}</div>
+            </div>
+            <div class="doc-item" 
+                [class.expired]="isExpired(vehicle.grazhdanskaOtgovornostDo)"
+                [class.expiring]="isExpiring(vehicle.grazhdanskaOtgovornostDo)">
+                Гражданска
+              <div class="doc-date">{{ formatDate(vehicle.grazhdanskaOtgovornostDo) }}</div>
+            </div>
+            <div class="doc-item" 
+                [class.expired]="isExpired(vehicle.gtpDo)"
+                [class.expiring]="isExpiring(vehicle.gtpDo)">
+                ГТП
+              <div class="doc-date">{{ formatDate(vehicle.gtpDo) }}</div>
+            </div>
+            <div class="doc-item" 
+                [class.expired]="isExpired(vehicle.vinetkaDo)"
+                [class.expiring]="isExpiring(vehicle.vinetkaDo)">
+                Винетка
+              <div class="doc-date">{{ formatDate(vehicle.vinetkaDo) }}</div>
+          </div>
+        </div>
+
+        <div class="vehicle-actions">
+          <div class="actions-group">
+            <button class="btn-action" [routerLink]="['/vehicles', vehicle.plateNumber]">
+              <i class="material-icons">edit</i>
+            </button>
+            <button class="btn-action"
+                    [routerLink]="['/vehicles-documents', vehicle.plateNumber]">
+              <i class="material-icons">folder</i>
+            </button>
+            <button class="btn-action btn-danger" (click)="deleteVehicle(vehicle.plateNumber)">
+              <i class="material-icons">delete</i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="filteredVehicles.length === 0">
+    <div class="empty-icon">
+      <i class="material-icons">directions_car</i>
+    </div>
+    <h3>Няма намерени превозни средства</h3>
+    <p>Добавете първото превозно средство към системата</p>
+    <button class="btn-primary" routerLink="/vehicles/new">
+      <i class="material-icons">add</i>
+      Добави ППС
+    </button>
+  </div>
+</div>

@@ -4,7 +4,10 @@ import com.example.transportfirm.Entity.VehicleRecord;
 import com.example.transportfirm.Entity.VehicleDocument;
 import com.example.transportfirm.Service.VehicleService;
 import jakarta.validation.Valid;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -35,7 +39,7 @@ public class VehicleController {
     }
 
     @GetMapping("/{plateNumber}")
-    public VehicleRecord getByPlate(@PathVariable String plateNumber) {
+    public VehicleRecord getByPlateNumber(@PathVariable String plateNumber) {
         return service.getByPlate(plateNumber);
     }
 
@@ -45,10 +49,12 @@ public class VehicleController {
     }
 
     @PutMapping("/{plateNumber}")
-    public ResponseEntity<VehicleRecord> update(@PathVariable String plateNumber,
-                                                @Valid @RequestBody VehicleRecord vehicle) {
+    public ResponseEntity<VehicleRecord> update(
+            @PathVariable String plateNumber,
+            @Valid @RequestBody VehicleRecord vehicle) {
+
         VehicleRecord updated = service.update(plateNumber, vehicle);
-        return ResponseEntity.ok(updated);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{plateNumber}")
@@ -71,29 +77,38 @@ public class VehicleController {
             @RequestParam("file") MultipartFile file) throws IOException {
 
         if (file.isEmpty()) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "File is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
         }
 
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-        }
-
-        return service.addDocument(plateNumber, file.getOriginalFilename(), file.getBytes());
+        return service.addDocument(plateNumber, file);
     }
 
     @GetMapping("/{plateNumber}/documents/{id}")
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable String plateNumber, @PathVariable Long id) {
-        VehicleDocument document = service.getDocumentById(id);
+    public ResponseEntity<Resource> downloadDocument(
+            @PathVariable String plateNumber,
+            @PathVariable Long id) throws IOException {
+
+        VehicleDocument doc = service.getDocumentById(id);
+
+        Path path = service.getDocumentPath(doc.getFilepath());
+        Resource resource = new UrlResource(path.toUri());
+
+        if (!resource.exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + document.getFileName() + "\"")
-                .body(document.getPdfData());
+                        "attachment; filename=\"" + doc.getFileName() + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
     }
 
     @DeleteMapping("/{plateNumber}/documents/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable String plateNumber, @PathVariable Long id) {
+    public ResponseEntity<Void> deleteDocument(
+            @PathVariable String plateNumber,
+            @PathVariable Long id) {
+
         service.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,6 @@
 package com.example.transportfirm.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,14 +13,11 @@ public class VehicleDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String plateNumber;
-    private String fileName;
-
-    @Lob
-    @Column(columnDefinition = "bytea")
-    private byte[] pdfData;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plateNumber", referencedColumnName = "plateNumber", insertable = false, updatable = false)
+    @JoinColumn(name = "plateNumber", referencedColumnName = "plateNumber", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private VehicleRecord vehicle;
+
+    private String fileName;
+    private String filepath;
 }

@@ -1,0 +1,507 @@
+// Main container
+.vehicles-container {
+  padding: 24px;
+  background: #f8f9fc;
+  min-height: calc(100vh - 70px);
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .page-title {
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2a3547;
+        margin: 0;
+      }
+      
+      .breadcrumb {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 4px;
+      }
+    }
+    
+    .header-actions {
+      .btn-primary {
+        background: linear-gradient(135deg, #5d87ff 0%, #4a6fdc 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(93, 135, 255, 0.4);
+        }
+        
+        i {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+  
+  // Filters section
+  .filters-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border: none;
+
+  .card-body {
+    padding: 20px;
+
+    .filters-row {
+      display: flex;
+      gap: 100px;
+      align-items: end;
+      flex-wrap: wrap;
+
+      /* ❗ РЕШЕНИЕТО — Търсачката се разширява, другите стоят компактни */
+      .filter-group:first-child {
+        min-width: 260px;
+      }
+
+      .filter-group:not(:first-child) {
+        flex: 0 0 200px;
+      }
+
+      .filter-group {
+
+        label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #2a3547;
+          margin-bottom: 6px;
+          display: block;
+        }
+
+        .search-box {
+          position: relative;
+
+          input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+
+            &:focus {
+              outline: none;
+              border-color: #5d87ff;
+              box-shadow: 0 0 0 3px rgba(93, 135, 255, 0.1);
+            }
+          }
+
+          .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1rem;
+          }
+        }
+
+        select {
+          width: 100%;
+          padding: 10px 16px;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          background: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:focus {
+            outline: none;
+            border-color: #5d87ff;
+            box-shadow: 0 0 0 3px rgba(93, 135, 255, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+  
+  // Loading state
+  .loading-state {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 60px 20px;
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #5d87ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    p {
+      color: #6c757d;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+  
+  // Vehicles grid
+  .vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    
+    .vehicle-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      
+      &.card-expired {
+        border-left: 4px solid #fa896b;
+      }
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      .card-body {
+        padding: 20px;
+        
+        // Vehicle header
+        .vehicle-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 16px;
+          
+          .vehicle-plate {
+            background: linear-gradient(135deg, #5d87ff 0%, #4a6fdc 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+          }
+          
+          .vehicle-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            
+            &.status-active {
+              background: rgba(19, 222, 185, 0.1);
+              color: #13deb9;
+            }
+            
+            &.status-inactive {
+              background: rgba(255, 174, 31, 0.1);
+              color: #ffae1f;
+            }
+            
+            &.status-stopped {
+              background: rgba(250, 137, 107, 0.1);
+              color: #fa896b;
+            }
+          }
+        }
+        
+        // Vehicle info
+        .vehicle-info {
+          margin-bottom: 16px;
+          
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+            
+            i {
+              color: #6c757d;
+              font-size: 1rem;
+              width: 16px;
+              text-align: center;
+            }
+            
+            span {
+              color: #2a3547;
+              
+              &.text-truncate {
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+          }
+        }
+        
+        // Documents status
+        .documents-status {
+          margin-bottom: 16px;
+          
+          .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            
+            .doc-item {
+              text-align: center;
+              padding: 8px 4px;
+              border-radius: 8px;
+              background: #f8f9fc;
+              transition: all 0.3s ease;
+              cursor: pointer;
+              
+              &.expired {
+                background: rgba(250, 137, 107, 0.1);
+                color: #fa896b;
+                
+                i {
+                  color: #fa896b;
+                }
+              }
+              
+              // Добави този стил за expiring (жълто)
+              &.expiring {
+                background: rgba(255, 174, 31, 0.1);
+                color: #ffae1f;
+                
+                i {
+                  color: #ffae1f;
+                }
+              }
+              
+              &:not(.expired):not(.expiring):hover {
+                background: rgba(93, 135, 255, 0.1);
+              }
+              
+              i {
+                font-size: 0.875rem;
+                color: #6c757d;
+                margin-bottom: 4px;
+                display: block;
+              }
+              
+              .doc-date {
+                font-size: 0.75rem;
+                font-weight: 500;
+                line-height: 1.2;
+              }
+            }
+          }
+        }
+        
+        // Vehicle actions
+        .vehicle-actions {
+          .actions-group {
+            display: flex;
+            gap: 4px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            padding: 4px;
+            
+            .btn-action {
+              flex: 1;
+              background: transparent;
+              border: none;
+              border-radius: 6px;
+              padding: 8px;
+              color: #6c757d;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              
+              &:hover {
+                background: #5d87ff;
+                color: white;
+                transform: scale(1.05);
+                
+                &.btn-danger {
+                  background: #fa896b;
+                }
+              }
+              
+              i {
+                font-size: 1rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Empty state
+  .empty-state {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 60px 20px;
+    
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #5d87ff 0%, #4a6fdc 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      
+      i {
+        font-size: 2rem;
+        color: white;
+      }
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2a3547;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      color: #6c757d;
+      margin-bottom: 20px;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #5d87ff 0%, #4a6fdc 100%);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-weight: 500;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(93, 135, 255, 0.4);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehicles-grid .vehicle-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .vehicles-container {
+    padding: 16px;
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      
+      .header-actions {
+        width: 100%;
+        
+        .btn-primary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+    
+    .filters-card .card-body .filters-row {
+      flex-direction: column;
+      
+      .filter-group {
+        min-width: auto;
+      }
+    }
+    
+    .vehicles-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .vehicles-container {
+    padding: 12px;
+    
+    .vehicle-card .card-body {
+      padding: 16px;
+      
+      .documents-status .docs-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        
+        .doc-item {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 8px;
+          padding: 8px 12px;
+          text-align: left;
+          
+          i {
+            margin-bottom: 0;
+            font-size: 1rem;
+          }
+          
+          .doc-date {
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+}

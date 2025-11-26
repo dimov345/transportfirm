@@ -136,10 +136,30 @@ export class VehicleListComponent implements OnInit {
       next: () => {
         this.vehicles = this.vehicles.filter(v => v.plateNumber !== plateNumber);
         this.applyFilters();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error deleting vehicle:', error);
       }
     });
   }
+
+  isAnyExpired(vehicle: any): boolean {
+  return (
+    this.isExpired(vehicle.kaskoDo) ||
+    this.isExpired(vehicle.grazhdanskaOtgovornostDo) ||
+    this.isExpired(vehicle.gtpDo) ||
+    this.isExpired(vehicle.vinetkaDo)
+  );
+}
+
+isAnyExpiring(vehicle: any): boolean {
+  return (
+    this.isExpiring(vehicle.kaskoDo) ||
+    this.isExpiring(vehicle.grazhdanskaOtgovornostDo) ||
+    this.isExpiring(vehicle.gtpDo) ||
+    this.isExpiring(vehicle.vinetkaDo)
+  );
+}
+
 }

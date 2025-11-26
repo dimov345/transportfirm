@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { VehicleService, VehicleDocument } from '../../../core/services/vehicle';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-vehicle-documents',
@@ -13,12 +14,14 @@ import { VehicleService, VehicleDocument } from '../../../core/services/vehicle'
 export class VehicleDocumentsComponent implements OnInit {
   plateNumber!: string;
   documents: VehicleDocument[] = [];
-  isLoading = false;
+  
+  isLoading = true;
   isUploading = false;
 
   constructor(
     private route: ActivatedRoute,
-    private vehicleService: VehicleService
+    private vehicleService: VehicleService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -26,19 +29,24 @@ export class VehicleDocumentsComponent implements OnInit {
     this.loadDocuments();
   }
 
+  /** Зарежда всички документи за дадено ППС */
   loadDocuments() {
     this.isLoading = true;
+
     this.vehicleService.getDocuments(this.plateNumber).subscribe({
       next: (docs) => {
-        this.documents = docs;
+        this.documents = [...docs];
         this.isLoading = false;
+        this.forceUpdate();
       },
       error: () => {
         this.isLoading = false;
+        this.forceUpdate();
       }
     });
   }
 
+  /** Качване на документ */
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -49,6 +57,7 @@ export class VehicleDocumentsComponent implements OnInit {
       input.value = '';
       return;
     }
+
     if (file.size > 5 * 1024 * 1024) {
       alert('Файлът е твърде голям (макс. 5 MB)');
       input.value = '';
@@ -56,23 +65,28 @@ export class VehicleDocumentsComponent implements OnInit {
     }
 
     this.isUploading = true;
+    this.forceUpdate();
+
     this.vehicleService.uploadDocument(this.plateNumber, file).subscribe({
       next: (newDocument) => {
         this.documents = [...this.documents, newDocument];
         this.isUploading = false;
         input.value = '';
+        this.forceUpdate();
       },
       error: () => {
         alert('Грешка при качване на документа!');
         input.value = '';
         this.isUploading = false;
+        this.forceUpdate();
       }
     });
   }
 
+  /** Изтегляне на документ */
   download(id: number, fileName: string) {
     this.vehicleService.downloadDocument(this.plateNumber, id).subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -81,16 +95,25 @@ export class VehicleDocumentsComponent implements OnInit {
     });
   }
 
+  /** Изтриване на документ */
   delete(id: number) {
-    if (confirm('Наистина ли искате да изтриете този документ?')) {
-      this.vehicleService.deleteDocument(this.plateNumber, id).subscribe({
-        next: () => {
-          this.documents = this.documents.filter(doc => doc.id !== id);
-        },
-        error: () => {
-          alert('Грешка при изтриване на документа!');
-        }
-      });
-    }
+    if (!confirm('Наистина ли искате да изтриете този документ?')) return;
+
+    this.vehicleService.deleteDocument(this.plateNumber, id).subscribe({
+      next: () => {
+        this.documents = this.documents.filter(doc => doc.id !== id);
+        this.forceUpdate();
+      },
+      error: () => {
+        alert('Грешка при изтриване на документа!');
+      }
+    });
+  }
+
+  /** Принудително обновяване на view */
+  private forceUpdate() {
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
   }
 }

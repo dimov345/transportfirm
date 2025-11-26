@@ -1,27 +1,30 @@
 <div class="details-container">
   <!-- Page Header -->
-  <div class="details-header">
-    <button class="back-btn" routerLink="/vehicles">
-      <i class="material-icons">arrow_back_ios</i>
-      Назад
-    </button>
-    <div class="header-content">
-      <div class="title-section">
-        <h1>Детайли за ППС</h1>
-        <div class="plate-number">{{ vehicle.plateNumber }}</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-secondary" [routerLink]="['/vehicles/edit', vehicle.plateNumber]">
-          <i class="material-icons">edit</i>
-          Редактирай
-        </button>
-        <button class="btn-primary" [routerLink]="['/vehicles-documents', vehicle.plateNumber]">
-          <i class="material-icons">folder</i>
-          Документи
-        </button>
-      </div>
+  <div class="details-header" *ngIf="vehicle as v">
+  <button class="back-btn" routerLink="/vehicles">
+    <i class="material-icons">arrow_back_ios</i>
+    Назад
+  </button>
+
+  <div class="header-content">
+    <div class="title-section">
+      <h1>Детайли за ППС</h1>
+      <div class="plate-number">{{ v.plateNumber }}</div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-secondary" [routerLink]="['/vehicles/edit', v.plateNumber]">
+        <i class="material-icons">edit</i>
+        Редактирай
+      </button>
+
+      <button class="btn-primary" [routerLink]="['/vehicles-documents', v.plateNumber]">
+        <i class="material-icons">folder</i>
+        Документи
+      </button>
     </div>
   </div>
+</div>
 
   <!-- Vehicle Details -->
   <div class="details-content" *ngIf="vehicle">

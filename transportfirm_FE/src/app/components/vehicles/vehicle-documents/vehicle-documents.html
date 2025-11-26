@@ -1,96 +1,75 @@
-<div class="docs-container">
+<div class="vehicle-docs-container">
   <div class="docs-header">
-    <div class="driver-info">
+    <div class="header-content">
       <button class="back-btn" routerLink="/vehicles">
         <i class="material-icons">arrow_back_ios</i>
         Назад
       </button>
-      <h1>Документи на ППС</h1>
-      <div class="plate-badge">{{ plateNumber }}</div>
+      <div class="header-info">
+        <h1>Документи на ППС</h1>
+        <div class="plate-number">{{ plateNumber }}</div>
+      </div>
     </div>
-    <p class="subtitle">Управление на прикачени документи (PDF)</p>
   </div>
 
   <div class="docs-content">
-    <!-- Upload Card -->
-    <div class="upload-card">
-      <div class="upload-header">
-        <div class="upload-icon">
-          <i class="material-icons">cloud_upload</i>
-        </div>
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <div class="upload-card">
         <h3>Добавяне на документ</h3>
+        <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
+        
+        <label class="file-input-wrapper">
+          <input
+            type="file"
+            #fileInput
+            (change)="onFileSelected($event)"
+            accept="application/pdf"
+            [disabled]="isUploading"
+          />
+          <span class="file-input-button" [class.uploading]="isUploading">
+            <span *ngIf="!isUploading">Качи документ</span>
+            <span *ngIf="isUploading">Качване...</span>
+          </span>
+        </label>
       </div>
-      <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
-
-      <label class="file-input-wrapper">
-        <input
-          type="file"
-          #fileInput
-          (change)="onFileSelected($event)"
-          accept="application/pdf"
-          [disabled]="isUploading"
-        />
-        <button 
-          class="upload-button"
-          [class.uploading]="isUploading"
-          [disabled]="isUploading"
-        >
-          <i class="material-icons" *ngIf="!isUploading">upload</i>
-          <div class="spinner" *ngIf="isUploading"></div>
-          {{ isUploading ? 'Качване...' : 'Качи документ' }}
-        </button>
-      </label>
-    </div>
-
-    <!-- Loading State -->
-    <div class="loading-state" *ngIf="isLoading">
-      <div class="spinner large"></div>
-      <p>Зареждане на документи...</p>
     </div>
 
     <!-- Documents List -->
-    <div class="documents-section" *ngIf="!isLoading">
+    <div class="documents-section">
       <div class="section-header">
         <h2>Прикачени документи</h2>
         <span class="doc-count">{{ documents.length }} файла</span>
       </div>
 
       <div class="documents-list" *ngIf="documents.length > 0">
-        <div class="document-card" *ngFor="let doc of documents">
-          <div class="doc-icon">
-            <i class="material-icons">description</i>
-          </div>
+        <div class="document-item" *ngFor="let doc of documents">
+          <div class="doc-icon">📄</div>
           <div class="doc-info">
-            <div class="doc-name">{{ doc.fileName }}</div>
-            <div class="doc-meta">PDF документ</div>
+            <span class="doc-name">{{ doc.fileName }}</span>
           </div>
           <div class="doc-actions">
-            <button 
-              class="btn-download" 
-              (click)="download(doc.id, doc.fileName)" 
-              title="Изтегли"
-              [disabled]="isUploading"
-            >
+            <button class="btn-download" (click)="download(doc.id, doc.fileName)">
               <i class="material-icons">download</i>
             </button>
-            <button 
-              class="btn-delete" 
-              (click)="delete(doc.id)" 
-              title="Изтрий"
-              [disabled]="isUploading"
-            >
+            <button class="btn-delete" (click)="delete(doc.id)">
               <i class="material-icons">delete</i>
             </button>
           </div>
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="documents.length === 0">
-        <div class="empty-icon">
-          <i class="material-icons">folder_open</i>
-        </div>
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="documents.length === 0 && !isLoading">
+        <div class="empty-icon">📂</div>
         <h3>Няма прикачени документи</h3>
         <p>Качете първия PDF документ</p>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="loading-spinner"></div>
+        <p>Зареждане на документи...</p>
       </div>
     </div>
   </div>

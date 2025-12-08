@@ -1,11 +1,13 @@
 package com.example.transportfirm.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.transportfirm.Enum.VehicleDocumentType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "VehicleDocuments")
+@Table(name = "vehicle_documents")
 @Data
 public class VehicleDocument {
 
@@ -13,11 +15,15 @@ public class VehicleDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plateNumber", referencedColumnName = "plateNumber", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", referencedColumnName = "plateNumber", nullable = false)
     private VehicleRecord vehicle;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VehicleDocumentType type;
+
     private String fileName;
-    private String filepath;
+    private String filePath;
+
 }

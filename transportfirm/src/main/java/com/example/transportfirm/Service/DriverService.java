@@ -2,117 +2,123 @@ package com.example.transportfirm.Service;
 
 import com.example.transportfirm.Entity.DriverDocument;
 import com.example.transportfirm.Entity.DriverInfo;
+import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.Enum.DriverDocumentType;
 import com.example.transportfirm.Repository.DriverDocumentRepository;
 import com.example.transportfirm.Repository.DriverRepository;
+import com.example.transportfirm.Repository.EmployeeRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.List;
 
 @Service
 public class DriverService {
+
     private final DriverRepository driverRepository;
-    private final DriverDocumentRepository driverDocumentRepository;
+    private final DriverDocumentRepository documentRepository;
+    private final EmployeeRepository employeeRepository;
 
-    private final String uploadDir = "documents";
+    private final String uploadDir = "driver_documents";
 
-    public DriverService(DriverRepository driverRepository, DriverDocumentRepository driverDocumentRepository) {
+    public DriverService(DriverRepository driverRepository,
+                         DriverDocumentRepository documentRepository, EmployeeRepository employeeRepository) {
         this.driverRepository = driverRepository;
-        this.driverDocumentRepository = driverDocumentRepository;
+        this.documentRepository = documentRepository;
+        this.employeeRepository = employeeRepository;
     }
 
-    // ==========================
+    // =========================
     // DRIVER CRUD
-    // ==========================
-
-    public List<DriverInfo> getAll() {
+    // =========================
+    public List<DriverInfo> getAllDrivers() {
         return driverRepository.findAll();
     }
 
-    public DriverInfo getByEgn(String egn) {
-        return driverRepository.findById(egn)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+    public DriverInfo getDriver(Long employeeId) {
+        return driverRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "No driverInfo for this employee"));
     }
 
-    public DriverInfo save(DriverInfo driver) {
+    public DriverInfo saveDriver(DriverInfo driver) {
         return driverRepository.save(driver);
     }
 
-    public DriverInfo update(String egn, DriverInfo driver) {
-        if (!driverRepository.existsById(egn))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-        driver.setEgn(egn);
-        return driverRepository.save(driver);
+    public DriverInfo updateDriver(Long employeeId, DriverInfo updated) {
+        DriverInfo existing = driverRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
+
+        // ❗ Променяй директно съществуващия обект
+        existing.setDriverLicenseIssuedOn(updated.getDriverLicenseIssuedOn());
+        existing.setDriverLicenseExpiresOn(updated.getDriverLicenseExpiresOn());
+        existing.setQualificationCardIssuedOn(updated.getQualificationCardIssuedOn());
+        existing.setQualificationCardExpiresOn(updated.getQualificationCardExpiresOn());
+        existing.setMedicalExamIssuedOn(updated.getMedicalExamIssuedOn());
+        existing.setMedicalExamExpiresOn(updated.getMedicalExamExpiresOn());
+        existing.setPsychologicalExamIssuedOn(updated.getPsychologicalExamIssuedOn());
+        existing.setPsychologicalExamExpiresOn(updated.getPsychologicalExamExpiresOn());
+        existing.setDigitalCardIssuedOn(updated.getDigitalCardIssuedOn());
+        existing.setDigitalCardExpiresOn(updated.getDigitalCardExpiresOn());
+        existing.setAdrIssuedOn(updated.getAdrIssuedOn());
+        existing.setAdrExpiresOn(updated.getAdrExpiresOn());
+
+        // ❗ НЕ пипай ID, НЕ замествай employee, НЕ прави save(updated)
+        return driverRepository.save(existing);
     }
 
-    public void delete(String egn) {
-        if (!driverRepository.existsById(egn))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-        driverRepository.deleteById(egn);
+    public void deleteDriver(Long id) {
+        driverRepository.deleteById(id);
     }
 
-    // ==========================
-    // DRIVER DOCUMENTS CRUD
-    // ==========================
 
-    /** Връща всички документи за даден шофьор по ЕГН */
-    public List<DriverDocument> getDocumentsByDriver(String egn) {
-        if (!driverRepository.existsById(egn))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-        return driverDocumentRepository.findByDriverEgn(egn);
+    // =========================
+    // DOCUMENTS
+    // =========================
+    public List<DriverDocument> getDriverDocuments(Long Id) {
+        return documentRepository.findByEmployee_Id(Id);
     }
 
-    public Path getDocumentPath(String filePath) {
-        return Paths.get(filePath);
-    }
+    public DriverDocument addDocument(Long employeeId,
+                                      DriverDocumentType type,
+                                      MultipartFile file) throws IOException {
 
-    /** Добавя нов документ към конкретен шофьор */
-    public DriverDocument addDocument(String egn, MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
+        if (file.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-        }
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-        }
 
-        DriverInfo driver = driverRepository.findById(egn)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF allowed");
 
-        // Създаваме уникално име на файла
-        String storedFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path targetLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(targetLocation);
-        Path filePath = targetLocation.resolve(storedFileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+        Files.createDirectories(Paths.get(uploadDir));
+
+        String storedName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path path = Paths.get(uploadDir).resolve(storedName);
+        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
         DriverDocument doc = new DriverDocument();
-        doc.setDriver(driver);
+        doc.setEmployee(employee);
+        doc.setType(type);
         doc.setFileName(file.getOriginalFilename());
-        doc.setFilePath(filePath.toString());
+        doc.setFilePath(path.toString());
 
-        return driverDocumentRepository.save(doc);
+        return documentRepository.save(doc);
     }
 
 
+    public DriverDocument getDocument(Long id) {
+        return documentRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+    }
 
-
-    /** Изтрива документ по ID */
     public void deleteDocument(Long id) {
-        if (!driverDocumentRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
-        driverDocumentRepository.deleteById(id);
-    }
-
-    /** Връща документ по ID (например за download) */
-    public DriverDocument getDocumentById(Long id) {
-        return driverDocumentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+        documentRepository.deleteById(id);
     }
 }

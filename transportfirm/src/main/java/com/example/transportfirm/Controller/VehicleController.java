@@ -2,18 +2,16 @@ package com.example.transportfirm.Controller;
 
 import com.example.transportfirm.Entity.VehicleRecord;
 import com.example.transportfirm.Entity.VehicleDocument;
+import com.example.transportfirm.Enum.VehicleDocumentType;
 import com.example.transportfirm.Service.VehicleService;
-import jakarta.validation.Valid;
+
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,93 +21,91 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class VehicleController {
 
-    private final VehicleService service;
+    private final VehicleService vehicleService;
 
-    public VehicleController(VehicleService service) {
-        this.service = service;
+    public VehicleController(VehicleService vehicleService) {
+        this.vehicleService = vehicleService;
     }
 
-    // =============================
+
+    // ===========================================================
     // VEHICLE CRUD
-    // =============================
+    // ===========================================================
 
     @GetMapping
-    public List<VehicleRecord> getAll() {
-        return service.getAll();
+    public List<VehicleRecord> getAllVehicles() {
+        return vehicleService.getAll();
     }
 
     @GetMapping("/{plateNumber}")
-    public VehicleRecord getByPlateNumber(@PathVariable String plateNumber) {
-        return service.getByPlate(plateNumber);
+    public VehicleRecord getVehicle(@PathVariable String plateNumber) {
+        return vehicleService.getByPlate(plateNumber);
     }
 
     @PostMapping
-    public VehicleRecord create(@Valid @RequestBody VehicleRecord vehicle) {
-        return service.save(vehicle);
+    public VehicleRecord createVehicle(@RequestBody VehicleRecord vehicle) {
+        return vehicleService.save(vehicle);
     }
 
     @PutMapping("/{plateNumber}")
-    public ResponseEntity<VehicleRecord> update(
+    public VehicleRecord updateVehicle(
             @PathVariable String plateNumber,
-            @Valid @RequestBody VehicleRecord vehicle) {
-
-        VehicleRecord updated = service.update(plateNumber, vehicle);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+            @RequestBody VehicleRecord vehicle
+    ) {
+        return vehicleService.update(plateNumber, vehicle);
     }
 
     @DeleteMapping("/{plateNumber}")
-    public void delete(@PathVariable String plateNumber) {
-        service.delete(plateNumber);
+    public ResponseEntity<Void> deleteVehicle(@PathVariable String plateNumber) {
+        vehicleService.delete(plateNumber);
+        return ResponseEntity.noContent().build();
     }
 
-    // =============================
-    // VEHICLE DOCUMENTS CRUD
-    // =============================
+
+    // ===========================================================
+    // DOCUMENT LOGIC
+    // ===========================================================
 
     @GetMapping("/{plateNumber}/documents")
-    public List<VehicleDocument> getAllDocuments(@PathVariable String plateNumber) {
-        return service.getDocumentsByVehicle(plateNumber);
+    public List<VehicleDocument> getVehicleDocuments(@PathVariable String plateNumber) {
+        return vehicleService.getDocumentsByVehicle(plateNumber);
     }
 
-    @PostMapping(value = "/{plateNumber}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping("/{plateNumber}/documents")
     public VehicleDocument uploadDocument(
             @PathVariable String plateNumber,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-        }
-
-        return service.addDocument(plateNumber, file);
+            @RequestParam("type") VehicleDocumentType type,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        return vehicleService.addDocument(plateNumber, type, file);
     }
 
-    @GetMapping("/{plateNumber}/documents/{id}")
-    public ResponseEntity<Resource> downloadDocument(
-            @PathVariable String plateNumber,
-            @PathVariable Long id) throws IOException {
 
-        VehicleDocument doc = service.getDocumentById(id);
+    @GetMapping("/documents/{id}/download")
+    public ResponseEntity<Resource> downloadVehicleDocument(@PathVariable Long id) {
 
-        Path path = service.getDocumentPath(doc.getFilepath());
-        Resource resource = new UrlResource(path.toUri());
+        VehicleDocument doc = vehicleService.getDocumentById(id);
+        Path filePath = vehicleService.getDocumentPath(doc.getFilePath());
 
-        if (!resource.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        File file = filePath.toFile();
+        if (!file.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        FileSystemResource resource = new FileSystemResource(file);
+
         return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + doc.getFileName() + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
 
-    @DeleteMapping("/{plateNumber}/documents/{id}")
-    public ResponseEntity<Void> deleteDocument(
-            @PathVariable String plateNumber,
-            @PathVariable Long id) {
 
-        service.deleteDocument(id);
+    @DeleteMapping("/documents/{id}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+        vehicleService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }
 }

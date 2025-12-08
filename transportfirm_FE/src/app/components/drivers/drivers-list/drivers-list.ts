@@ -2,22 +2,20 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DriverService, DriverInfo } from '../../../core/services/driver';
+import { DriverService, DriverInfo, DriverListItem } from '../../../core/services/driver';
 
 @Component({
-  selector: 'app-drivers-list',
   standalone: true,
+  selector: 'app-drivers-list',
   imports: [CommonModule, FormsModule],
   templateUrl: './drivers-list.html',
   styleUrls: ['./drivers-list.scss']
 })
 export class DriversListComponent implements OnInit {
-  
-  drivers: any[] = [];
-  allDrivers: any[] = []; // ✔ за филтъра
 
-  searchText = ""; // ✔ input модел
-
+  drivers: DriverListItem[] = [];
+  allDrivers: DriverListItem[] = [];
+  searchText = "";
   loading = true;
 
   constructor(
@@ -31,102 +29,112 @@ export class DriversListComponent implements OnInit {
   }
 
   loadDrivers() {
-    this.loading = true;
-
-    this.driverService.getAll().subscribe(drivers => {
-
-      const mapped = drivers.map(d => ({
-        ...d,
-        statusClass: this.getStatusClass(d),
-        statusTooltip: this.getStatusTooltip(d)
-      }));
-
-      this.drivers = mapped;
-      this.allDrivers = [...mapped]; // ✔ за търсене
-
-      this.loading = false;
-      this.cdr.detectChanges();
+    this.driverService.getAllDriversFromEmployee().subscribe({
+      next: (drivers) => {
+        this.drivers = drivers;
+        this.allDrivers = drivers;
+        this.markStatuses();
+        this.loading = false;        
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading drivers:', error);
+        this.loading = false;        
+      }
     });
   }
 
-  // === SEARCH FILTER ===
-  applyFilter() {
-    const text = this.searchText.toLowerCase().trim();
 
-    if (!text) {
+
+  isExpired(d: DriverListItem): boolean {
+    const fields = [
+      d.driverLicenseExpiresOn,
+      d.qualificationCardExpiresOn,
+      d.psychologicalExamExpiresOn,
+      d.digitalCardExpiresOn
+    ];
+    return fields.some(date => !!date && new Date(date) < new Date());
+  }
+
+  isExpiring(d: DriverListItem): boolean {
+    const now = new Date();
+    const in30 = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+
+    const fields = [
+      d.driverLicenseExpiresOn,
+      d.qualificationCardExpiresOn,
+      d.psychologicalExamExpiresOn,
+      d.digitalCardExpiresOn
+    ];
+
+    return fields.some(date =>
+      !!date && new Date(date) > now && new Date(date) <= in30
+    );
+  }
+
+  markStatuses() {
+  this.allDrivers = this.allDrivers.map(d => {
+    const expired = this.isExpired(d);
+    const expiring = this.isExpiring(d);
+
+    if (expired) {
+      d.statusClass = 'expired-row';
+      d.statusTooltip = 'Документът е изтекъл';
+    } 
+    else if (expiring) {
+      d.statusClass = 'expiring-row';
+      d.statusTooltip = 'Остава по-малко от месец';
+    } 
+    else {
+      d.statusClass = '';
+      d.statusTooltip = '';
+    }
+
+    return d;
+  });
+
+  this.drivers = [...this.allDrivers];
+}
+
+
+  // === Search ===
+  applyFilter() {
+    const t = this.searchText.toLowerCase().trim();
+
+    if (!t) {
       this.drivers = [...this.allDrivers];
       return;
     }
 
     this.drivers = this.allDrivers.filter(d =>
-      d.name.toLowerCase().includes(text) ||
-      d.egn.includes(text)
+      d.name?.toLowerCase().includes(t) ||
+      d.egn?.includes(t)
     );
   }
 
-  // Останалата логика (status, delete, etc.) остава същата...
-  
-  trackByEgn(index: number, driver: DriverInfo) {
-    return driver.egn;
+  trackByEgn(index: number, d: DriverListItem) {
+    return d.egn;
   }
 
-  hasExpiredDocuments(driver: DriverInfo): boolean {
-    const today = new Date();
-    return [
-      driver.driverLicenseExpiresOn,
-      driver.qualificationCardExpiresOn,
-      driver.psychologicalExamExpiresOn,
-      driver.digitalCardExpiresOn
-    ].some(date => date && new Date(date) < today);
+  // === ROUTES ===
+  driverDetail(id: number) {
+    this.router.navigate(['/drivers', id]);
   }
 
-  hasExpiringDocuments(driver: DriverInfo): boolean {
-    const today = new Date();
-    const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-    return [
-      driver.driverLicenseExpiresOn,
-      driver.qualificationCardExpiresOn,
-      driver.psychologicalExamExpiresOn,
-      driver.digitalCardExpiresOn
-    ].some(date => {
-      if (!date) return false;
-      const exp = new Date(date);
-      return exp > today && exp <= in30Days;
-    });
+  viewDocuments(id: number) {
+    this.router.navigate(['/driver-documents', id]);
   }
 
-  getStatusClass(driver: DriverInfo): string {
-    if (this.hasExpiredDocuments(driver)) return 'expired-row';
-    if (this.hasExpiringDocuments(driver)) return 'expiring-row';
-    return '';
+  addDriverInfo(id: number) {
+    this.router.navigate(['/drivers/edit', id]);
   }
 
-  getStatusTooltip(driver: DriverInfo): string {
-    if (this.hasExpiredDocuments(driver)) return 'Има изтекли документи';
-    if (this.hasExpiringDocuments(driver)) return 'Има документи, които изтичат скоро';
-    return 'Всички документи са валидни';
-  }
-
-  deleteDriver(egn: string) {
-    if (!confirm('Сигурни ли сте, че искате да изтриете шофьора?')) return;
-
-    this.driverService.delete(egn).subscribe(() => {
-      this.allDrivers = this.allDrivers.filter(d => d.egn !== egn);
-      this.applyFilter(); // ✔ за да не чупи филтъра
+  deleteDriver(id: number) {
+    if (!confirm('Да изтрием ли шофьора?')) return;
+    this.driverService.delete(id).subscribe(() => {
+      this.allDrivers = this.allDrivers.filter(d => d.id !== id);
+      this.applyFilter();
       this.cdr.detectChanges();
     });
-  }
-
-  addDriver() {
-    this.router.navigate(['/drivers/new']);
-  }
-
-  editDriver(egn: string) {
-    this.router.navigate(['/drivers', egn]);
-  }
-
-  viewDocuments(egn: string) {
-    this.router.navigate(['/driver-documents', egn]);
   }
 }

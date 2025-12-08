@@ -1,0 +1,131 @@
+<div class="employee-form">
+  <h2>{{ isEdit ? 'Редакция на служител' : 'Нов служител' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="grid">
+
+      <!-- PERSONAL -->
+      <div class="card">
+        <h3>Лични данни</h3>
+        <label>ЕГН *</label>
+        <input formControlName="egn" type="text" placeholder="10 цифри" />
+        <div class="error" *ngIf="field('egn')?.touched && field('egn')?.invalid">
+          <small *ngIf="field('egn')?.errors?.['required']">ЕГН е задължително.</small>
+          <small *ngIf="field('egn')?.errors?.['pattern']">ЕГН трябва да е 10 цифри.</small>
+        </div>
+
+        <label>Име *</label>
+        <input formControlName="name" type="text" />
+        <div class="error" *ngIf="field('name')?.touched && field('name')?.invalid">
+          <small>Името е задължително.</small>
+        </div>
+
+      
+
+        <label>Дата на раждане</label>
+        <input formControlName="dateOfBirth" type="date" />
+
+        <label>Телефон *</label>
+        <input formControlName="phone" type="text" />
+        <div class="error" *ngIf="field('phone')?.touched && field('phone')?.invalid">
+          <small>Телефон е задължителен.</small>
+        </div>
+
+        <label>Email *</label>
+        <input formControlName="email" type="email" />
+        <div class="error" *ngIf="field('email')?.touched && field('email')?.invalid">
+          <small *ngIf="field('email')?.errors?.['required']">Email е задължителен.</small>
+          <small *ngIf="field('email')?.errors?.['email']">Невалиден email.</small>
+        </div>
+      </div>
+
+      <!-- EMPLOYMENT -->
+      <div class="card">
+        <h3>Фирмени данни</h3>
+
+        <label>Длъжност *</label>
+        <select formControlName="jobTitle">
+          <option value="">-- избери --</option>
+          <option *ngFor="let j of jobTitleOptions" [value]="j">{{ j }}</option>
+        </select>
+        <div class="error" *ngIf="field('jobTitle')?.touched && field('jobTitle')?.invalid">
+          <small>Длъжност е задължителна.</small>
+        </div>
+
+
+        <label>Дата на назначаване *</label>
+        <input formControlName="hiredDate" type="date" />
+        <div class="error" *ngIf="field('hiredDate')?.touched && field('hiredDate')?.invalid">
+          <small>Дата на назначаване е задължителна.</small>
+        </div>
+
+        <label>Статус</label>
+        <select formControlName="employmentStatus">
+          <option *ngFor="let s of employmentStatusOptions" [value]="s">{{ s }}</option>
+        </select>
+
+        <label>Дата на уволнение</label>
+        <input formControlName="firedDate" type="date" />
+
+        <label>Вид договор</label>
+        <select formControlName="contractType">
+          <option value="">--</option>
+          <option *ngFor="let c of contractTypeOptions" [value]="c">{{ c }}</option>
+        </select>
+
+        <label>Заплата</label>
+        <input formControlName="salary" type="number" step="0.01" />
+
+        <label>Нетна заплата</label>
+        <input formControlName="salaryNeto" type="number" step="0.01" />
+
+        <label>Валута на заплатата</label>
+        <input formControlName="salaryCurrency" type="text" />
+
+        <label>Работно време</label>
+        <input formControlName="workingHours" type="text" />
+      </div>
+
+      <!-- ADDITIONAL -->
+      <div class="card">
+        <h3>Банкови и достъп</h3>
+
+        <label>Банка</label>
+        <input formControlName="bankName" type="text" />
+
+        <label>IBAN</label>
+        <input formControlName="iban" type="text" />
+
+        <label>Потребителско име</label>
+        <input formControlName="username" type="text" />
+
+        <label>Парола <small>(оставете празно ако не сменяте)</small></label>
+        <input formControlName="password" type="password" />
+
+        <label>Роля</label>
+        <select formControlName="role">
+          <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <!-- ADDRESSES (separate card) -->
+      <div class="card wide">
+        <h3>Адреси</h3>
+        <label>Постоянен адрес</label>
+        <input formControlName="addressPermanent" type="text" />
+        <label>Текущ адрес</label>
+        <input formControlName="addressCurrent" type="text" />
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn cancel" (click)="cancel()">Отказ</button>
+      <button type="submit" class="btn save" [disabled]="saving">
+        {{ saving ? 'Записвам...' : (isEdit ? 'Запази промените' : 'Добави служител') }}
+      </button>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </form>
+</div>

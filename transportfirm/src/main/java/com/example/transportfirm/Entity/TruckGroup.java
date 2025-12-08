@@ -1,0 +1,27 @@
+package com.example.transportfirm.Entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "truck_groups")
+@Data
+public class TruckGroup {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String groupName;
+
+    @ManyToOne
+    @JoinColumn(name = "mechanic_id")
+    private MechanicInfo mechanic;
+
+    @OneToMany(mappedBy = "truckGroup")
+    private List<VehicleRecord> vehicles = new ArrayList<>();
+}
+

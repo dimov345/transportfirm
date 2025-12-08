@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DriverService, DriverInfo } from '../../../core/services/driver';
+import { DriverService } from '../../../core/services/driver';
+import { DriverInfo } from '../../../core/services/driver';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -15,7 +16,7 @@ import { RouterModule } from '@angular/router';
 export class DriverFormComponent implements OnInit {
   form!: FormGroup;
   isEdit = false;
-  egn!: string;
+  id!: number;
 
   constructor(
     private fb: FormBuilder,
@@ -25,36 +26,51 @@ export class DriverFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // създаваме формата тук, когато fb вече е наличен
     this.form = this.fb.group({
-      egn: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      name: ['', Validators.required],
-      phone: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      employeeId: [null, Validators.required],
       driverLicenseIssuedOn: ['', Validators.required],
       driverLicenseExpiresOn: ['', Validators.required],
       qualificationCardIssuedOn: ['', Validators.required],
       qualificationCardExpiresOn: ['', Validators.required],
-      psychologicalExamIssuedOn: [''],
-      psychologicalExamExpiresOn: [''],
-      digitalCardIssuedOn: [''],
-      digitalCardExpiresOn: ['']
+      psychologicalExamIssuedOn: ['', Validators.required],
+      psychologicalExamExpiresOn: ['', Validators.required],
+      digitalCardIssuedOn: ['', Validators.required],
+      digitalCardExpiresOn: ['', Validators.required],
     });
 
-    this.egn = this.route.snapshot.paramMap.get('egn')!;
-    if (this.egn) {
+    // ВЗИМАМЕ id от URL
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.id = Number(idParam);
       this.isEdit = true;
-      this.driverService.getByEgn(this.egn).subscribe(driver => this.form.patchValue(driver));
-      this.form.get('egn')?.disable();
+
+      // Зареждаме данните
+      this.driverService.getDriverById(this.id).subscribe(driver => {
+         this.form.patchValue({
+            employeeId: driver.employee?.id ?? null,  // 🔥 важен ред
+            ...driver
+        });
+      });
     }
   }
 
   onSubmit() {
-    const value = this.form.getRawValue() as DriverInfo;
+    const raw = this.form.getRawValue();
+     const payload: any = {
+      ...raw,
+      employee: { id: raw.employeeId }  // 🔥 задължително
+    };
+
+    delete payload.employeeId;
+
     if (this.isEdit) {
-      this.driverService.update(this.egn, value).subscribe(() => this.router.navigate(['/drivers']));
+      this.driverService.update(this.id, payload).subscribe(() => {
+        this.router.navigate(['/drivers']);
+      });
     } else {
-      this.driverService.create(value).subscribe(() => this.router.navigate(['/drivers']));
+      this.driverService.create(payload).subscribe(() => {
+        this.router.navigate(['/drivers']);
+      });
     }
   }
 }

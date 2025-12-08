@@ -15,37 +15,61 @@ import { of } from 'rxjs';
 export class DriverDetails implements OnInit {
   driver: any = null;
   error = '';
+  noInfo = false; // 👉 НОВО - ако няма DriverInfo запис
+  id!: string | null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef // ✅ за принудително обновяване на view
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.id = this.route.snapshot.paramMap.get('id'); // 🔥 вече използваме id, НЕ egn
     this.loadDriverDetails();
   }
 
   loadDriverDetails() {
-    const egn = this.route.snapshot.paramMap.get('egn');
-    if (!egn) {
-      this.error = 'Не е посочен ЕГН на шофьора';
+    if (!this.id) {
+      this.error = 'Не е посочен ID на шофьора';
       return;
     }
 
-    this.http.get(`http://localhost:8080/api/drivers/${egn}`)
+    this.http.get(`http://localhost:8080/api/drivers/${this.id}`)
       .pipe(
-        catchError(error => {
+        catchError(err => {
           this.error = 'Грешка при зареждане на данните за шофьора';
           return of(null);
         })
       )
       .subscribe(data => {
+
+        if (!data) return;
+
+        // 👉 Backend връща "NO_INFO"
+        if (data === "NO_INFO") {
+          this.noInfo = true;
+          return;
+        }
+
         this.driver = data;
-        this.cdr.detectChanges(); // ✅ обновяваме view след като данните са заредени
+
+        // 👉 гарантираме, че employee винаги съществува
+        if (!this.driver.employee) {
+          this.driver.employee = {
+            name: '',
+            egn: '',
+            phone: '',
+            email: ''
+          };
+        }
+
+        this.cdr.detectChanges();
       });
   }
+
+  // ---------------- DOCUMENT STATUS ------------------
 
   get hasExpiredDocuments(): boolean {
     if (!this.driver) return false;
@@ -83,53 +107,49 @@ export class DriverDetails implements OnInit {
       this.driver.digitalCardExpiresOn
     ].filter(date => {
       if (!date) return false;
-      const expiryDate = new Date(date);
-      return expiryDate > today && expiryDate <= in30Days;
+      const expiry = new Date(date);
+      return expiry > today && expiry <= in30Days;
     }).length;
   }
 
-  isExpired(dateString: string | null): boolean {
-    if (!dateString) return false;
-    return new Date(dateString) < new Date();
+  isExpired(date: string | null): boolean {
+    return !!date && new Date(date) < new Date();
   }
 
-  isExpiring(dateString: string | null): boolean {
-    if (!dateString) return false;
-    const expiryDate = new Date(dateString);
+  isExpiring(date: string | null): boolean {
+    if (!date) return false;
+    const expiry = new Date(date);
     const today = new Date();
     const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-    
-    return expiryDate > today && expiryDate <= in30Days;
+    return expiry > today && expiry <= in30Days;
   }
 
-  getDocumentStatus(dateString: string | null): string {
-    if (!dateString) return 'Няма данни';
-    
-    if (this.isExpired(dateString)) return 'Изтекъл';
-    if (this.isExpiring(dateString)) return 'Изтича скоро';
-    
+  getDocumentStatus(date: string | null): string {
+    if (!date) return 'Няма данни';
+    if (this.isExpired(date)) return 'Изтекъл';
+    if (this.isExpiring(date)) return 'Изтича скоро';
     return 'Валиден';
   }
 
-  formatDate(dateString: string | null): string {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('bg-BG');
+  formatDate(date: string | null) {
+    return date ? new Date(date).toLocaleDateString('bg-BG') : '—';
   }
+
+  // ---------------- ACTIONS ------------------
 
   goBack() {
     this.router.navigate(['/drivers']);
   }
 
-  //edit не работи
   editDriver() {
-    if (this.driver) {
-      this.router.navigate(['/drivers/edit', this.driver.egn]);
+    if (this.driver && this.id) {
+      this.router.navigate(['/drivers/edit', this.id]); // 🔥 ID, не egn
     }
   }
 
   viewDocuments() {
-    if (this.driver) {
-      this.router.navigate(['/driver-documents', this.driver.egn]);
+    if (this.driver && this.driver.id) {
+      this.router.navigate(['/driver-documents', this.id]);
     }
   }
 }

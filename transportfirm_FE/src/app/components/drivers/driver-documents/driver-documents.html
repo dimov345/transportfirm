@@ -7,7 +7,7 @@
       </button>
       <div class="header-info">
         <h1>Документи на шофьор</h1>
-        <div class="egn-number">{{ egn }}</div>
+        <div class="egn-number">ID: {{ id }}</div>
       </div>
     </div>
   </div>
@@ -18,7 +18,18 @@
       <div class="upload-card">
         <h3>Добавяне на документ</h3>
         <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
-        
+        <div class="type-select">
+          <label>Тип документ:</label>
+          <select [(ngModel)]="selectedType">
+            <option value="" disabled selected>Изберете тип</option>
+            <option value="DRIVER_LICENSE">Шофьорска книжка</option>
+            <option value="QUALIFICATION_CARD">Професионална карта</option>
+            <option value="PSYCHOLOGICAL_EXAM">Психо удостоверение</option>
+            <option value="ADR_CERTIFICATE">ADR</option>
+            <option value="MEDICAL_EXAM">Медицинско</option>
+            <option value="EMPLOYMENT_CONTRACT">Трудов договор</option>
+          </select>
+        </div>
         <label class="file-input-wrapper">
           <input
             type="file"

@@ -5,12 +5,6 @@
         <h1>Шофьори</h1>
         <p class="subtitle">Общо {{ drivers.length }} шофьори</p>
       </div>
-      <button class="btn-add" (click)="addDriver()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        Нов шофьор
-      </button>
     </div>
   </div>
 
@@ -66,19 +60,25 @@
 
           <td class="actions-cell">
             <div class="actions-group">
-              <button class="btn-action btn-edit" (click)="editDriver(d.egn)" title="Редактирай">
+              <button class="btn-action btn-edit" (click)="addDriverInfo(d.id)" title="Добави срокове на документи">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                 <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                 </svg>
               </button>
 
-              <button class="btn-action btn-docs" (click)="viewDocuments(d.egn)" title="Документи">
+              <button class="btn-action btn-edit" (click)="driverDetail(d.id)" title="Детайли">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 10c-1.93 0-3.5-1.57-3.5-3.5S10.07 8 12 8s3.5 1.57 3.5 3.5S13.93 15 12 15z"/>
+                </svg>
+              </button>
+
+              <button class="btn-action btn-docs" (click)="viewDocuments(d.id)" title="Документи">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                 </svg>
               </button>
 
-              <button class="btn-action btn-delete" (click)="deleteDriver(d.egn)" title="Изтрий">
+              <button class="btn-action btn-delete" (click)="deleteDriver(d.id)" title="Изтрий">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>
@@ -97,14 +97,7 @@
           <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
         </svg>
       </div>
-      <h3>Няма добавени шофьори</h3>
-      <p>Започнете като добавите първия шофьор</p>
-      <button class="btn-add-empty" (click)="addDriver()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        Добави първи шофьор
-      </button>
+      <h3>Няма намерени шофьори</h3>
     </div>
 
   </div>

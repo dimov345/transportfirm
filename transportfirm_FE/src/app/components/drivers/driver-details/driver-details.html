@@ -20,9 +20,9 @@
           </svg>
         </div>
         <div class="driver-title">
-          <h1>{{ driver.name }}</h1>
+          <h1>{{ driver.employee?.name }}</h1>
           <div class="driver-subtitle">
-            <span class="egn-badge">{{ driver.egn }}</span>
+            <span class="egn-badge">{{ driver.employee?.egn }}</span>
             <span class="status-badge" [class.expired]="hasExpiredDocuments">
               {{ hasExpiredDocuments ? 'Има изтекли документи' : 'Всички документи са валидни' }}
             </span>
@@ -54,26 +54,26 @@
         <div class="info-grid">
           <div class="info-item">
             <label>ЕГН</label>
-            <div class="info-value">{{ driver.egn || '—' }}</div>
+            <div class="info-value">{{ driver.employee?.egn || '—' }}</div>
           </div>
           <div class="info-item">
             <label>Име</label>
-            <div class="info-value">{{ driver.name || '—' }}</div>
+            <div class="info-value">{{ driver.employee?.name || '—' }}</div>
           </div>
           <div class="info-item">
             <label>Телефон</label>
             <div class="info-value">
-              <a [href]="'tel:' + driver.phone" class="contact-link">
-                {{ driver.phone || '—' }}
+              <a [href]="'tel:' + driver.employee?.phone" class="contact-link">
+                {{ driver.employee?.phone || '—' }}
               </a>
             </div>
           </div>
           <div class="info-item">
             <label>Email</label>
             <div class="info-value">
-              @if (driver.email) {
-                <a [href]="'mailto:' + driver.email" class="contact-link">
-                  {{ driver.email }}
+              @if (driver.employee?.email) {
+                <a [href]="'mailto:' + driver.employee?.email" class="contact-link">
+                  {{ driver.employee?.email }}
                 </a>
               } @else {
                 <span class="no-data">—</span>

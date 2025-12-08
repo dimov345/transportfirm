@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -69,6 +70,19 @@ public class VehicleRecord {
     private LocalDate gtpDo;
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
+
+    // Група към която принадлежи камионът
+    @ManyToOne
+    @JoinColumn(name = "truck_group_id")
+    private TruckGroup truckGroup;
+
+    // Един шофьор кара един камион
+    @OneToOne(mappedBy = "vehicle")
+    private DriverInfo driver;
+
+    // Документи на камиона
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    private List<VehicleDocument> documents = new ArrayList<>();
 
     @PrePersist
     @PreUpdate

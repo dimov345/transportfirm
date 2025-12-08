@@ -19,7 +19,10 @@
       <img src="dashboard_icon.ico" alt="Icon" class="icon">
       <span class="menu-text">Начало</span>
     </li>
-
+    <li routerLink="/employees" routerLinkActive="active">
+      <span class="icon">👷‍♂️</span>
+      <span class="menu-text"> Работници</span>
+    </li>
     <!-- Документи с подменю -->
     <li 
       routerLinkActive="active" 
@@ -31,7 +34,7 @@
       <span class="menu-text">Документи</span>
       <span class="submenu-arrow">▼</span>
     </li>
-
+    
 
     <!-- Подменю Документи -->
    <ul class="submenu" *ngIf="activeMenu === 'services'">
@@ -42,10 +45,6 @@
       <li routerLink="/vehicles" routerLinkActive="active">
         <div class="submenu-line"></div>
         ППС
-      </li>
-      <li routerLink="/workers" routerLinkActive="active">
-        <div class="submenu-line"></div>
-        Работници
       </li>
     </ul>
 

@@ -2,39 +2,42 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DriverService, DriverDocument } from '../../../core/services/driver';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-driver-documents',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './driver-documents.html',
   styleUrls: ['./driver-documents.scss']
 })
 export class DriverDocumentsComponent implements OnInit {
-  egn!: string;
+  id!: number; // driverId, НЕ egn
   documents: DriverDocument[] = [];
+
+  selectedType = '';
   
-  isLoading = true;     // ✔ започваме като loading → без премигване
+  isLoading = true;
   isUploading = false;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private driverService: DriverService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.egn = this.route.snapshot.paramMap.get('egn')!;
+    this.id = Number(this.route.snapshot.paramMap.get('id')); // 👈 id от URL
     this.loadDocuments();
   }
 
-  /** Зарежда всички документи за даден шофьор */
+  /** Зареждане на документи */
   loadDocuments() {
     this.isLoading = true;
 
-    this.driverService.getDocuments(this.egn).subscribe({
+    this.driverService.getDocuments(this.id).subscribe({
       next: docs => {
-        this.documents = [...docs];
+        this.documents = docs;
         this.isLoading = false;
         this.forceUpdate();
       },
@@ -46,45 +49,52 @@ export class DriverDocumentsComponent implements OnInit {
   }
 
   /** Качване */
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+ onFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      alert('Моля, качете само PDF файл!');
-      input.value = '';
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Файлът е твърде голям (макс. 5 MB)');
-      input.value = '';
-      return;
-    }
-
-    this.isUploading = true;
-    this.forceUpdate();
-
-    this.driverService.uploadDocument(this.egn, file).subscribe({
-      next: doc => {
-        this.documents = [...this.documents, doc];
-        this.isUploading = false;
-        input.value = '';
-        this.forceUpdate();
-      },
-      error: () => {
-        alert('Грешка при качване на документа!');
-        input.value = '';
-        this.isUploading = false;
-        this.forceUpdate();
-      }
-    });
+  if (!this.selectedType) {
+    alert("Моля, изберете тип документ!");
+    input.value = '';
+    return;
   }
 
-  /** Изтегляне */
-  download(id: number, fileName: string) {
-    this.driverService.downloadDocument(this.egn, id).subscribe(blob => {
+  if (file.type !== 'application/pdf') {
+    alert('Моля, качете само PDF файл!');
+    input.value = '';
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Файлът е твърде голям (макс. 5 MB)');
+    input.value = '';
+    return;
+  }
+
+  this.isUploading = true;
+  this.forceUpdate();
+
+  this.driverService.uploadDocument(this.id, this.selectedType, file).subscribe({
+    next: (doc: any) => {
+      this.documents.push(doc);
+      this.isUploading = false;
+      input.value = '';
+      this.forceUpdate();
+    },
+    error: () => {
+      alert('Грешка при качване!');
+      this.isUploading = false;
+      input.value = '';
+      this.forceUpdate();
+    }
+  });
+}
+
+
+  /** 📥 Изтегляне */
+  download(docId: number, fileName: string) {
+    this.driverService.downloadDocument(docId).subscribe(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -94,25 +104,20 @@ export class DriverDocumentsComponent implements OnInit {
     });
   }
 
-  /** Изтриване */
-  delete(id: number) {
+  /** 🗑️ Изтриване */
+  delete(docId: number) {
     if (!confirm('Наистина ли искате да изтриете този документ?')) return;
 
-    this.driverService.deleteDocument(this.egn, id).subscribe({
+    this.driverService.deleteDocument(docId).subscribe({
       next: () => {
-        this.documents = this.documents.filter(d => d.id !== id);
+        this.documents = this.documents.filter(d => d.id !== docId);
         this.forceUpdate();
       },
-      error: () => {
-        alert('Грешка при изтриване на документа!');
-      }
+      error: () => alert('Грешка при изтриване на документа!')
     });
   }
 
-  /** Принудително обновяване на view */
   private forceUpdate() {
-    setTimeout(() => {
-      this.cdr.detectChanges();
-    }, 0);
+    setTimeout(() => this.cdr.detectChanges(), 0);
   }
 }

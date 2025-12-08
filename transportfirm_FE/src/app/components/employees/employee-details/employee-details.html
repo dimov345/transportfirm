@@ -1,0 +1,51 @@
+@if (employee) {
+<div class="details-container">
+
+  <h2>Детайли за служител</h2>
+
+  <section>
+    <h3>Лични данни</h3>
+    <div class="row">
+      <div><strong>Име:</strong> {{ employee.name }}</div>
+      <div><strong>ЕГН:</strong> {{ employee.egn }}</div>
+      <div><strong>Дата на раждане:</strong> {{ employee.dateOfBirth }}</div>
+      <div><strong>Телефон:</strong> {{ employee.phone }}</div>
+      <div><strong>Имейл:</strong> {{ employee.email }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h3>Адреси</h3>
+    <div class="row">
+      <div><strong>Постоянен адрес:</strong> {{ employee.addressPermanent }}</div>
+      <div><strong>Настоящ адрес:</strong> {{ employee.addressCurrent }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h3>Фирмени данни</h3>
+    <div class="row">
+      <div><strong>Длъжност:</strong> {{ employee.jobTitle }}</div>
+      <div><strong>Назначен на:</strong> {{ employee.hiredDate }}</div>
+      <div><strong>Статус:</strong> {{ employee.employmentStatus }}</div>
+      <div><strong>Освободен на:</strong> {{ employee.firedDate || '-' }}</div>
+      <div><strong>Тип договор:</strong> {{ employee.contractType }}</div>
+      <div><strong>Заплата:</strong> {{ employee.salary }} </div>
+      <div><strong>Заплата Нето:</strong> {{ employee.salaryNeto }} </div>
+      <div><strong>Валута на заплата:</strong> {{ employee.salaryCurrency }}</div>
+      <div><strong>Работно време:</strong> {{ employee.workingHours }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h3>Банкови данни</h3>
+    <div class="row">
+      <div><strong>Банка:</strong> {{ employee.bankName }}</div>
+      <div><strong>IBAN:</strong> {{ employee.iban }}</div>
+    </div>
+  </section>
+
+  <a routerLink="/employees" class="back-btn">⬅ Назад</a>
+
+</div>
+}

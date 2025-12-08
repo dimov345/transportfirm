@@ -124,6 +124,38 @@
           }
         }
       }
+      .type-select {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+        }
+
+        select {
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid #ccd4dd;
+          font-size: 14px;
+          background: white;
+          cursor: pointer;
+          transition: border-color 0.2s ease;
+
+          &:hover {
+            border-color: #0066cc;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: #0052b3;
+            box-shadow: 0 0 3px rgba(0, 102, 204, 0.3);
+          }
+        }
+      }
     }
   }
 
@@ -284,6 +316,7 @@
     }
   }
 }
+
 
 @keyframes spin {
   0% { transform: rotate(0deg); }

@@ -17,44 +17,11 @@
 
   <div class="form-body">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <!-- Лични данни -->
-      <div class="form-section">
-        <div class="section-header">
-          <span class="section-number">01</span>
-          <h2>Лични данни</h2>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">ЕГН</label>
-            <input type="text" formControlName="egn" [readonly]="isEdit" 
-                   class="form-input" placeholder="Въведете ЕГН">
-            <div class="input-hint">10 цифри</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Име</label>
-            <input type="text" formControlName="name" 
-                   class="form-input" placeholder="Пълно име">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Телефон</label>
-            <input type="text" formControlName="phone" 
-                   class="form-input" placeholder="+359 888 123 456">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" formControlName="email" 
-                   class="form-input" placeholder="example@company.com">
-          </div>
-        </div>
-      </div>
 
       <!-- Шофьорски документи -->
       <div class="form-section">
         <div class="section-header">
-          <span class="section-number">02</span>
+          <span class="section-number">01</span>
           <h2>Шофьорски документи</h2>
         </div>
         
@@ -138,7 +105,7 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" routerLink="/">
+        <button type="button" class="btn btn-secondary" routerLink="/drivers">
           Отказ
         </button>
         <button type="submit" class="btn btn-primary" [disabled]="form.invalid">

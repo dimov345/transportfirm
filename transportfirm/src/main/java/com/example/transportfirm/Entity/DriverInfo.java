@@ -8,62 +8,59 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Drivers_InfoTable")
+@Table(name = "drivers_info")
 @Data
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DriverInfo {
 
     @Id
-    @Column(length = 10, nullable = false)
-    @Pattern(regexp = "\\d{10}", message = "EGN трябва да е точно 10 цифри")
-    private String egn;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnoreProperties({"driverInfo", "mechanicInfo", "documents", "hibernateLazyInitializer", "handler"})
+    private Long id;
 
-    @Column(length = 100, nullable = false)
-    @NotBlank(message = "Името е задължително")
-    private String name;
+    // Връзка към Employee (имейл взимаме от него)
+    @OneToOne
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
-    @Column(length = 20, nullable = false)
-    @NotBlank(message = "Телефонът е задължителен")
-    private String phone;
+    // Един шофьор кара един камион
+    @OneToOne
+    @JoinColumn(name = "vehicle_id")
+    private VehicleRecord vehicle;
 
-    @Column(length = 100, nullable = false)
-    @Email(message = "Невалиден имейл")
-    private String email;
-
-    @NotNull(message = "Дата на издаване на шофьорската книжка е задължителна")
+    // Дати на документи
     private LocalDate driverLicenseIssuedOn;
-
-    @NotNull(message = "Дата на изтичане на шофьорската книжка е задължителна")
     private LocalDate driverLicenseExpiresOn;
 
-    @NotNull(message = "Дата на издаване на квалификационната карта е задължителна")
     private LocalDate qualificationCardIssuedOn;
-
-    @NotNull(message = "Дата на изтичане на квалификационната карта е задължителна")
     private LocalDate qualificationCardExpiresOn;
+
+    private LocalDate medicalExamIssuedOn;
+    private LocalDate medicalExamExpiresOn;
 
     private LocalDate psychologicalExamIssuedOn;
     private LocalDate psychologicalExamExpiresOn;
+
     private LocalDate digitalCardIssuedOn;
     private LocalDate digitalCardExpiresOn;
 
-    // Предварителна проверка на дати
+    private LocalDate adrIssuedOn;
+    private LocalDate adrExpiresOn;
+
     @PrePersist
     @PreUpdate
     private void validateDates() {
-        if (driverLicenseExpiresOn.isBefore(driverLicenseIssuedOn)) {
-            throw new IllegalArgumentException("Дата на изтичане на шофьорската книжка не може да е преди издаването");
-        }
-        if (qualificationCardExpiresOn.isBefore(qualificationCardIssuedOn)) {
-            throw new IllegalArgumentException("Дата на изтичане на квалификационната карта не може да е преди издаването");
-        }
-        if (psychologicalExamIssuedOn != null && psychologicalExamExpiresOn != null &&
-                psychologicalExamExpiresOn.isBefore(psychologicalExamIssuedOn)) {
-            throw new IllegalArgumentException("Психологическият преглед не може да изтече преди издаването");
-        }
-        if (digitalCardIssuedOn != null && digitalCardExpiresOn != null &&
-                digitalCardExpiresOn.isBefore(digitalCardIssuedOn)) {
-            throw new IllegalArgumentException("Дигиталната карта не може да изтече преди издаването");
+        validate(driverLicenseIssuedOn, driverLicenseExpiresOn);
+        validate(qualificationCardIssuedOn, qualificationCardExpiresOn);
+        validate(medicalExamIssuedOn, medicalExamExpiresOn);
+
+        validate(psychologicalExamIssuedOn, psychologicalExamExpiresOn);
+        validate(digitalCardIssuedOn, digitalCardExpiresOn);
+        validate(adrIssuedOn, adrExpiresOn);
+    }
+
+    private void validate(LocalDate issued, LocalDate expires) {
+        if (issued != null && expires != null && expires.isBefore(issued)) {
+            throw new IllegalArgumentException("Дата на изтичане не може да предхожда дата на издаване.");
         }
     }
 }

@@ -2,99 +2,111 @@ package com.example.transportfirm.Controller;
 
 import com.example.transportfirm.Entity.DriverDocument;
 import com.example.transportfirm.Entity.DriverInfo;
+import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.Enum.DriverDocumentType;
+import com.example.transportfirm.Enum.JobTitle;
 import com.example.transportfirm.Service.DriverService;
-import jakarta.validation.Valid;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import com.example.transportfirm.Service.EmployeeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/drivers")
-@CrossOrigin(origins = "http://localhost:4200")
 public class DriverController {
 
-    private final DriverService service;
+    private final DriverService driverService;
 
-    public DriverController(DriverService service) {
-        this.service = service;
+    private final EmployeeService employeeService;
+
+    public DriverController(DriverService driverService, EmployeeService employeeService) {
+        this.driverService = driverService;
+        this.employeeService = employeeService;
+
     }
 
-    // =============================
-    // DRIVER CRUD
-    // =============================
+    // ---------------- DRIVER CRUD ----------------
 
     @GetMapping
-    public List<DriverInfo> getAll() {
-        return service.getAll();
+    public List<DriverInfo> getAllDrivers() {
+        return driverService.getAllDrivers();
     }
 
-    @GetMapping("/{egn}")
-    public DriverInfo getByEgn(@PathVariable String egn) {
-        return service.getByEgn(egn);
-    }
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<?> getDriver(@PathVariable Long employeeId) {
+        DriverInfo info = driverService.getDriver(employeeId);
 
-    @PostMapping
-    public DriverInfo create(@Valid @RequestBody DriverInfo driver) {
-        return service.save(driver);
-    }
-
-    @PutMapping("/{egn}")
-    public ResponseEntity<DriverInfo> update(@PathVariable String egn,
-                                             @Valid @RequestBody DriverInfo driver) {
-        DriverInfo updated = service.update(egn, driver);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/{egn}")
-    public void delete(@PathVariable String egn) {
-        service.delete(egn);
-    }
-
-    // =============================
-    // DRIVER DOCUMENTS CRUD
-    // =============================
-
-    @GetMapping("/{egn}/documents")
-    public List<DriverDocument> getAllDocuments(@PathVariable String egn) {
-        return service.getDocumentsByDriver(egn);
-    }
-
-    @PostMapping(value = "/{egn}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public DriverDocument uploadDocument(@PathVariable String egn,
-                                         @RequestParam("file") MultipartFile file) throws IOException {
-        return service.addDocument(egn, file);
-    }
-
-    @GetMapping("/{egn}/documents/{id}")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable String egn, @PathVariable Long id) throws IOException {
-        DriverDocument doc = service.getDocumentById(id);
-
-        Path path = service.getDocumentPath(doc.getFilePath());
-        Resource resource = new UrlResource(path.toUri());
-
-        if (!resource.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        if (info == null) {
+            return ResponseEntity.ok("NO_INFO");
         }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(resource);
+        return ResponseEntity.ok(info);
     }
 
-    @DeleteMapping("/{egn}/documents/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable String egn, @PathVariable Long id) {
-        service.deleteDocument(id);
-        return ResponseEntity.noContent().build();
+
+
+    @GetMapping("/job/{jobTitle}")
+    public ResponseEntity<List<Employee>> getAllDriversFromEmployee(@PathVariable JobTitle jobTitle) {
+        return ResponseEntity.ok(employeeService.getByJobTitle(jobTitle));
+    }
+
+
+    @PostMapping
+    public DriverInfo createDriver(@RequestBody DriverInfo driver) {
+        return driverService.saveDriver(driver);
+    }
+
+    @PutMapping("/{id}")
+    public DriverInfo updateDriver(@PathVariable Long id, @RequestBody DriverInfo driver) {
+        return driverService.updateDriver(id, driver);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDriver(@PathVariable Long id) {
+        driverService.deleteDriver(id);
+    }
+
+    // ---------------- DOCUMENTS ----------------
+
+    @GetMapping("/{id}/documents")
+    public List<DriverDocument> getDocuments(@PathVariable Long id) {
+        return driverService.getDriverDocuments(id);
+    }
+
+    @PostMapping("/{id}/documents")
+    public DriverDocument upload(
+            @PathVariable Long id,
+            @RequestParam("type") DriverDocumentType type,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        return driverService.addDocument(id, type, file);
+    }
+
+    @GetMapping("/documents/{docId}")
+    public DriverDocument getDoc(@PathVariable Long docId) {
+        return driverService.getDocument(docId);
+    }
+
+    @GetMapping("/documents/{docId}/download")
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long docId) throws IOException {
+
+        DriverDocument doc = driverService.getDocument(docId);
+
+        java.nio.file.Path path = java.nio.file.Paths.get(doc.getFilePath());
+        byte[] fileBytes = java.nio.file.Files.readAllBytes(path);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + doc.getFileName() + "\"")
+                .header("Content-Type", "application/pdf")
+                .body(fileBytes);
+    }
+
+
+    @DeleteMapping("/documents/{docId}")
+    public void deleteDoc(@PathVariable Long docId) {
+        driverService.deleteDocument(docId);
     }
 }

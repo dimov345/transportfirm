@@ -1,0 +1,84 @@
+.employee-list {
+  padding: 20px;
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+
+    input {
+      width: 300px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+
+      &:focus {
+        border-color: #4677f5;
+      }
+    }
+
+    .create-btn {
+      background: #4caf50;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+
+      &:hover {
+        background: #43a047;
+      }
+    }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+    th {
+      background: #f0f0f0;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #fafafa;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+
+      button {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+
+        &.details { background: #03a9f4; color: white; }
+        &.edit { background: #ffc107; color: black; }
+        &.docs { background: #673ab7; color: white; }
+        &.delete { background: #f44336; color: white; }
+
+        &:hover {
+          opacity: 0.85;
+        }
+      }
+    }
+  }
+}

@@ -60,19 +60,26 @@
             <label>Име</label>
             <div class="info-value">{{ driver.employee?.name || '—' }}</div>
           </div>
-          <div class="info-item">
+         <div class="info-item">
             <label>Телефон</label>
             <div class="info-value">
-              <a [href]="'tel:' + driver.employee?.phone" class="contact-link">
-                {{ driver.employee?.phone || '—' }}
-              </a>
+              @if (driver.employee?.phone) {
+                <a [href]="'https://wa.me/' + driver.employee?.phone" target="_blank" class="contact-link">
+                  {{ driver.employee?.phone }}
+                </a>
+              } @else {
+                <span class="no-data">—</span>
+              }
             </div>
           </div>
+
           <div class="info-item">
             <label>Email</label>
             <div class="info-value">
               @if (driver.employee?.email) {
-                <a [href]="'mailto:' + driver.employee?.email" class="contact-link">
+                <a [href]="'https://mail.google.com/mail/?view=cm&to=' + driver.employee?.email" 
+                  target="_blank"
+                  class="contact-link">
                   {{ driver.employee?.email }}
                 </a>
               } @else {
@@ -80,6 +87,7 @@
               }
             </div>
           </div>
+
         </div>
       </div>
 

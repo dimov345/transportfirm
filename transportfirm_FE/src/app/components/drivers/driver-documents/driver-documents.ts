@@ -39,11 +39,11 @@ export class DriverDocumentsComponent implements OnInit {
       next: docs => {
         this.documents = docs;
         this.isLoading = false;
-        this.forceUpdate();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
-        this.forceUpdate();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -73,20 +73,20 @@ export class DriverDocumentsComponent implements OnInit {
   }
 
   this.isUploading = true;
-  this.forceUpdate();
+  this.cdr.detectChanges();
 
   this.driverService.uploadDocument(this.id, this.selectedType, file).subscribe({
     next: (doc: any) => {
       this.documents.push(doc);
       this.isUploading = false;
       input.value = '';
-      this.forceUpdate();
+      this.cdr.detectChanges();
     },
     error: () => {
       alert('Грешка при качване!');
       this.isUploading = false;
       input.value = '';
-      this.forceUpdate();
+      this.cdr.detectChanges();
     }
   });
 }

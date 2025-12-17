@@ -5,14 +5,20 @@ import com.example.transportfirm.Entity.DriverInfo;
 import com.example.transportfirm.Entity.Employee;
 import com.example.transportfirm.Enum.DriverDocumentType;
 import com.example.transportfirm.Enum.JobTitle;
+import com.example.transportfirm.Repository.DriverDocumentRepository;
+import com.example.transportfirm.Repository.DriverRepository;
 import com.example.transportfirm.Service.DriverService;
 import com.example.transportfirm.Service.EmployeeService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -22,10 +28,17 @@ public class DriverController {
 
     private final EmployeeService employeeService;
 
-    public DriverController(DriverService driverService, EmployeeService employeeService) {
+    private final DriverRepository driverRepository;
+
+
+    private final DriverDocumentRepository documentRepository;
+
+    public DriverController(DriverService driverService, EmployeeService employeeService,
+                            DriverRepository driverRepository, DriverDocumentRepository documentRepository) {
         this.driverService = driverService;
         this.employeeService = employeeService;
-
+        this.driverRepository = driverRepository;
+        this.documentRepository = documentRepository;
     }
 
     // ---------------- DRIVER CRUD ----------------
@@ -70,6 +83,24 @@ public class DriverController {
     }
 
     // ---------------- DOCUMENTS ----------------
+
+    @GetMapping("/{employeeId}/full-info")
+    public ResponseEntity<DriverInfo> getDriverFullInfo(@PathVariable Long employeeId) {
+        DriverInfo info = driverRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
+
+        // Зареждаме документите
+        List<DriverDocument> docs = documentRepository.findByEmployee_Id(info.getEmployee().getId());
+        // Ако имаш поле documents в DriverInfo, добави ги. Ако не – може да добавиш в DTO или Map.
+        // За простота – използвай Map:
+        // Map<String, Object> response = Map.of("driverInfo", info, "documents", docs);
+
+        return ResponseEntity.ok(info);
+    }
+
+
+
+
 
     @GetMapping("/{id}/documents")
     public List<DriverDocument> getDocuments(@PathVariable Long id) {

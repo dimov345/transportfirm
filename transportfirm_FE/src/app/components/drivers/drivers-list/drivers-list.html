@@ -9,15 +9,48 @@
   </div>
 
   <!-- Search Bar -->
-  <div class="search-bar-container">
-    <input 
-      type="text"
-      placeholder="Търси по име или ЕГН..."
-      class="search-input"
-      [(ngModel)]="searchText"
-      (input)="applyFilter()"
-    />
-  </div>
+  <div class="search-bar-container filters-bar">
+
+  <!-- Search -->
+  <input 
+    type="text"
+    placeholder="Търси по име или ЕГН..."
+    class="search-input"
+    [(ngModel)]="filters.search"
+    (input)="applyFilters()"
+  />
+
+  <!-- Status -->
+  <select [(ngModel)]="filters.status" (change)="applyFilters()">
+    <option value="">Всички документи</option>
+    <option value="expired">Изтекли</option>
+    <option value="expiring">Изтичащи</option>
+    <option value="valid">Валидни</option>
+    <option value="missing">Без документи</option>
+  </select>
+
+  <!-- Expiring days -->
+  <select [(ngModel)]="filters.expiringIn" (change)="applyFilters()">
+    <option value="">Без срок</option>
+    <option value="7">До 7 дни</option>
+    <option value="30">До 30 дни</option>
+    <option value="90">До 90 дни</option>
+  </select>
+
+  <!-- Email -->
+  <select [(ngModel)]="filters.email" (change)="applyFilters()">
+    <option value="">Всички имейли</option>
+    <option value="yes">С имейл</option>
+    <option value="no">Без имейл</option>
+  </select>
+
+  <!-- CSV -->
+  <button class="btn-export" (click)="exportCsv()">
+    Export CSV
+  </button>
+
+</div>
+
 
   <div class="table-container">
 
@@ -41,20 +74,20 @@
           [title]="d.statusTooltip">
 
           <td class="egn-cell">
-            <div class="egn-value">{{ d.egn }}</div>
+            <div class="egn-value">{{ d.employee?.egn }}</div>
           </td>
 
           <td class="name-cell">
-            <div class="driver-name">{{ d.name }}</div>
+            <div class="driver-name">{{ d.employee?.name }}</div>
           </td>
 
           <td class="phone-cell">
-            <div class="phone-value">{{ d.phone }}</div>
+            <div class="phone-value">{{ d.employee?.phone }}</div>
           </td>
 
           <td class="email-cell">
-            <div class="email-value" [class.no-email]="!d.email">
-              {{ d.email || 'Няма имейл' }}
+            <div class="email-value" [class.no-email]="!d.employee?.email">
+              {{ d.employee?.email || 'Няма имейл' }}
             </div>
           </td>
 

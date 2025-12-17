@@ -11,9 +11,7 @@ public enum DriverDocumentType {
     DRIVER_LICENSE,                // Шофьорска книжка
     QUALIFICATION_CARD,            // Квалификационна карта за професионална компетентност (ККТ)
     DIGITAL_TACHO_CARD,            // Дигитална тахо-карта
-    ADR_CERTIFICATE,               // ADR – ако има
     PSYCHOLOGICAL_EXAM,            // Психологическа годност
-    MEDICAL_EXAM,                  // Медицинско свидетелство
 
     // 🟩 Фирмени документи
     EMPLOYMENT_CONTRACT,           // Трудов договор

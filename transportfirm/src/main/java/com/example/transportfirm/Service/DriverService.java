@@ -59,14 +59,10 @@ public class DriverService {
         existing.setDriverLicenseExpiresOn(updated.getDriverLicenseExpiresOn());
         existing.setQualificationCardIssuedOn(updated.getQualificationCardIssuedOn());
         existing.setQualificationCardExpiresOn(updated.getQualificationCardExpiresOn());
-        existing.setMedicalExamIssuedOn(updated.getMedicalExamIssuedOn());
-        existing.setMedicalExamExpiresOn(updated.getMedicalExamExpiresOn());
         existing.setPsychologicalExamIssuedOn(updated.getPsychologicalExamIssuedOn());
         existing.setPsychologicalExamExpiresOn(updated.getPsychologicalExamExpiresOn());
         existing.setDigitalCardIssuedOn(updated.getDigitalCardIssuedOn());
         existing.setDigitalCardExpiresOn(updated.getDigitalCardExpiresOn());
-        existing.setAdrIssuedOn(updated.getAdrIssuedOn());
-        existing.setAdrExpiresOn(updated.getAdrExpiresOn());
 
         // ❗ НЕ пипай ID, НЕ замествай employee, НЕ прави save(updated)
         return driverRepository.save(existing);

@@ -34,28 +34,21 @@ public class DriverInfo {
     private LocalDate qualificationCardIssuedOn;
     private LocalDate qualificationCardExpiresOn;
 
-    private LocalDate medicalExamIssuedOn;
-    private LocalDate medicalExamExpiresOn;
-
     private LocalDate psychologicalExamIssuedOn;
     private LocalDate psychologicalExamExpiresOn;
 
     private LocalDate digitalCardIssuedOn;
     private LocalDate digitalCardExpiresOn;
 
-    private LocalDate adrIssuedOn;
-    private LocalDate adrExpiresOn;
 
     @PrePersist
     @PreUpdate
     private void validateDates() {
         validate(driverLicenseIssuedOn, driverLicenseExpiresOn);
         validate(qualificationCardIssuedOn, qualificationCardExpiresOn);
-        validate(medicalExamIssuedOn, medicalExamExpiresOn);
 
         validate(psychologicalExamIssuedOn, psychologicalExamExpiresOn);
         validate(digitalCardIssuedOn, digitalCardExpiresOn);
-        validate(adrIssuedOn, adrExpiresOn);
     }
 
     private void validate(LocalDate issued, LocalDate expires) {

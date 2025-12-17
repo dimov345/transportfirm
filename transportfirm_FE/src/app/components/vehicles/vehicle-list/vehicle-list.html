@@ -59,7 +59,7 @@
   <div class="vehicles-grid" *ngIf="filteredVehicles.length > 0">
     <div
       class="vehicle-card"
-      *ngFor="let vehicle of filteredVehicles"
+      *ngFor="let vehicle of filteredVehicles; trackBy: trackByPlate"
       [class.card-expired]="isAnyExpired(vehicle)"
       [class.card-expiring]="isAnyExpiring(vehicle)">
       <div class="card-body">

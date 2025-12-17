@@ -2,43 +2,27 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
-export interface DriverInfo {
-  id: number; // DriverInfo id
-
-  employee?: Employee | null;
-
-  vehicle?: {
-    id: number;
-    plateNumber: string;
-    brand: string;
-    model: string;
-    vin: string;
-    certificateExpiresOn?: string;
-  };
-
-  // Документни валидности
-  driverLicenseIssuedOn: string;
-  driverLicenseExpiresOn: string;
-
-  qualificationCardIssuedOn: string;
-  qualificationCardExpiresOn: string;
-
-  medicalExamIssuedOn: string;
-  medicalExamExpiresOn: string;
-
-  psychologicalExamIssuedOn: string;
-  psychologicalExamExpiresOn: string;
-
-  digitalCardIssuedOn: string;
-  digitalCardExpiresOn: string;
-
-  adrIssuedOn: string;
-  adrExpiresOn: string;
-
-  statusClass?: string;    // 'expired-row' | 'expiring-row' | ''
-  statusTooltip?: string;  // Tooltip text for status
+export interface Employee {
+  id: number;
+  egn: string;
+  name: string;
+  phone: string;
+  email: string;
+  jobTitle?: string;
 }
 
+export interface DriverInfo {
+  id: number;
+  employee?: Employee | null;
+
+  driverLicenseExpiresOn: string;
+  qualificationCardExpiresOn: string;
+  psychologicalExamExpiresOn: string;
+  digitalCardExpiresOn: string;
+
+  statusClass: string;
+  statusTooltip: string;
+}
 
 export interface DriverDocument {
   id: number;
@@ -48,60 +32,6 @@ export interface DriverDocument {
     id: number;
   };
   selectedType: string;
-}
-
-export interface DriverListItem {
-  id: number;
-  driverInfoId: number; 
-  egn: string;
-  name: string;
-  phone: string;
-  email: string;
-  jobTitle: string;
-
-  statusClass?: string;   
-  statusTooltip?: string; 
-
-  
-  driverLicenseIssuedOn: string;
-  driverLicenseExpiresOn: string;
-
-  qualificationCardIssuedOn: string;
-  qualificationCardExpiresOn: string;
-
-  medicalExamIssuedOn: string;
-  medicalExamExpiresOn: string;
-
-  psychologicalExamIssuedOn: string;
-  psychologicalExamExpiresOn: string;
-
-  digitalCardIssuedOn: string;
-  digitalCardExpiresOn: string;
-
-  adrIssuedOn: string;
-  adrExpiresOn: string;
-}
-
-export interface Employee {
-  id: number;
-  egn: string;
-  name: string;
-  phone: string;
-  email: string;
-  addressPermanent?: string;
-  addressCurrent?: string;
-  jobTitle?: string;
-  hiredDate?: string;
-  employmentStatus?: string;
-  contractType?: string;
-  salary?: number;
-  salaryNeto?: number;
-  salaryCurrency?: string;
-  workingHours?: string;
-  bankName?: string;
-  iban?: string;
-  username?: string;
-  role?: string;
 }
 
 
@@ -115,6 +45,10 @@ export class DriverService {
   // 1. Взимаме ВСИЧКИ шофьори от Employee (дори без DriverInfo)
   getAllDriversFromEmployee(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/job/DRIVER`);
+  }
+
+  getDriverFullInfo(employeeId: number): Observable<DriverInfo> {
+    return this.http.get<DriverInfo>(`${this.apiUrl}/${employeeId}/full-info`);
   }
 
   // 2. Взимаме DriverInfo само ако съществува
@@ -159,4 +93,12 @@ export class DriverService {
   deleteDocument(docId: number) {
     return this.http.delete(`${this.apiUrl}/documents/${docId}`);
   }
+
+  exportDriversCsv(params: any) {
+  return this.http.get<{ fileName: string, count: number }>(
+    `${this.apiUrl}/export`,
+    { params }
+  );
+}
+
 }

@@ -162,4 +162,9 @@ isAnyExpiring(vehicle: any): boolean {
   );
 }
 
+trackByPlate(index: number, v: VehicleInfo) {
+  return v.plateNumber;
+}
+
+
 }

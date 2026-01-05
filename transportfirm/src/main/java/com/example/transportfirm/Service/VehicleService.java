@@ -1,10 +1,10 @@
-package com.example.transportfirm.Service;
+package com.example.transportfirm.service;
 
-import com.example.transportfirm.Entity.VehicleRecord;
-import com.example.transportfirm.Entity.VehicleDocument;
+import com.example.transportfirm.entity.VehicleRecord;
+import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.Enum.VehicleDocumentType;
-import com.example.transportfirm.Repository.VehicleRepository;
-import com.example.transportfirm.Repository.VehicleDocumentRepository;
+import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.repository.VehicleDocumentRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

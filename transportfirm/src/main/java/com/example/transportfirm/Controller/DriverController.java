@@ -1,14 +1,14 @@
-package com.example.transportfirm.Controller;
+package com.example.transportfirm.controller;
 
-import com.example.transportfirm.Entity.DriverDocument;
-import com.example.transportfirm.Entity.DriverInfo;
-import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.entity.DriverDocument;
+import com.example.transportfirm.entity.DriverInfo;
+import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.DriverDocumentType;
 import com.example.transportfirm.Enum.JobTitle;
-import com.example.transportfirm.Repository.DriverDocumentRepository;
-import com.example.transportfirm.Repository.DriverRepository;
-import com.example.transportfirm.Service.DriverService;
-import com.example.transportfirm.Service.EmployeeService;
+import com.example.transportfirm.repository.DriverDocumentRepository;
+import com.example.transportfirm.repository.DriverRepository;
+import com.example.transportfirm.service.DriverService;
+import com.example.transportfirm.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

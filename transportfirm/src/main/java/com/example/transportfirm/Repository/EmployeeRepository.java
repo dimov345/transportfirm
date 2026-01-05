@@ -1,6 +1,6 @@
-package com.example.transportfirm.Repository;
+package com.example.transportfirm.repository;
 
-import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.JobTitle;
 import org.springframework.data.jpa.repository.JpaRepository;
 

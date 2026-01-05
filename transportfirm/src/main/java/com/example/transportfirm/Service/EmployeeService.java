@@ -1,10 +1,10 @@
-package com.example.transportfirm.Service;
+package com.example.transportfirm.service;
 
-import com.example.transportfirm.Entity.DriverInfo;
-import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.entity.DriverInfo;
+import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.JobTitle;
-import com.example.transportfirm.Repository.DriverRepository;
-import com.example.transportfirm.Repository.EmployeeRepository;
+import com.example.transportfirm.repository.DriverRepository;
+import com.example.transportfirm.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

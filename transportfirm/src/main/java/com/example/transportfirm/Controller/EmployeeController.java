@@ -1,8 +1,8 @@
-package com.example.transportfirm.Controller;
+package com.example.transportfirm.controller;
 
-import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.JobTitle;
-import com.example.transportfirm.Service.EmployeeService;
+import com.example.transportfirm.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

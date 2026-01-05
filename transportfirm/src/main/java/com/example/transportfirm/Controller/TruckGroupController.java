@@ -1,7 +1,7 @@
-package com.example.transportfirm.Controller;
+package com.example.transportfirm.controller;
 
-import com.example.transportfirm.Entity.TruckGroup;
-import com.example.transportfirm.Service.TruckGroupService;
+import com.example.transportfirm.entity.TruckGroup;
+import com.example.transportfirm.service.TruckGroupService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

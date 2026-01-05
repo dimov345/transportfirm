@@ -1,12 +1,12 @@
-package com.example.transportfirm.Service;
+package com.example.transportfirm.service;
 
-import com.example.transportfirm.Entity.DriverDocument;
-import com.example.transportfirm.Entity.DriverInfo;
-import com.example.transportfirm.Entity.Employee;
+import com.example.transportfirm.entity.DriverDocument;
+import com.example.transportfirm.entity.DriverInfo;
+import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.DriverDocumentType;
-import com.example.transportfirm.Repository.DriverDocumentRepository;
-import com.example.transportfirm.Repository.DriverRepository;
-import com.example.transportfirm.Repository.EmployeeRepository;
+import com.example.transportfirm.repository.DriverDocumentRepository;
+import com.example.transportfirm.repository.DriverRepository;
+import com.example.transportfirm.repository.EmployeeRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

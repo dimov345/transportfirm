@@ -1,4 +1,4 @@
-package com.example.transportfirm.Entity;
+package com.example.transportfirm.entity;
 
 import com.example.transportfirm.Enum.EmployeeDocumentType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

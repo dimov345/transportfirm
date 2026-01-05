@@ -1,6 +1,6 @@
-package com.example.transportfirm.Repository;
+package com.example.transportfirm.repository;
 
-import com.example.transportfirm.Entity.DriverInfo;
+import com.example.transportfirm.entity.DriverInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

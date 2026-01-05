@@ -1,8 +1,8 @@
-package com.example.transportfirm.Controller;
+package com.example.transportfirm.controller;
 
-import com.example.transportfirm.Entity.EmployeeDocument;
+import com.example.transportfirm.entity.EmployeeDocument;
 import com.example.transportfirm.Enum.EmployeeDocumentType;
-import com.example.transportfirm.Service.EmployeeDocumentService;
+import com.example.transportfirm.service.EmployeeDocumentService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

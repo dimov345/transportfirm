@@ -1,9 +1,9 @@
-package com.example.transportfirm.Controller;
+package com.example.transportfirm.controller;
 
-import com.example.transportfirm.Entity.VehicleRecord;
-import com.example.transportfirm.Entity.VehicleDocument;
+import com.example.transportfirm.entity.VehicleRecord;
+import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.Enum.VehicleDocumentType;
-import com.example.transportfirm.Service.VehicleService;
+import com.example.transportfirm.service.VehicleService;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;

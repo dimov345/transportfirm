@@ -1,6 +1,6 @@
-package com.example.transportfirm.Repository;
+package com.example.transportfirm.repository;
 
-import com.example.transportfirm.Entity.DriverDocument;
+import com.example.transportfirm.entity.DriverDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

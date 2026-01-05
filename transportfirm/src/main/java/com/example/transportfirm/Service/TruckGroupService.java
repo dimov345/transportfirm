@@ -1,11 +1,11 @@
-package com.example.transportfirm.Service;
+package com.example.transportfirm.service;
 
-import com.example.transportfirm.Entity.MechanicInfo;
-import com.example.transportfirm.Entity.TruckGroup;
-import com.example.transportfirm.Entity.VehicleRecord;
-import com.example.transportfirm.Repository.MechanicRepository;
-import com.example.transportfirm.Repository.TruckGroupRepository;
-import com.example.transportfirm.Repository.VehicleRepository;
+import com.example.transportfirm.entity.MechanicInfo;
+import com.example.transportfirm.entity.TruckGroup;
+import com.example.transportfirm.entity.VehicleRecord;
+import com.example.transportfirm.repository.MechanicRepository;
+import com.example.transportfirm.repository.TruckGroupRepository;
+import com.example.transportfirm.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

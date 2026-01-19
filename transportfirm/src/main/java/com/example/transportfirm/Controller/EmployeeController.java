@@ -10,16 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/employees")
 @RequiredArgsConstructor
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-
-    @PostMapping
-    public ResponseEntity<Employee> create(@RequestBody Employee employee) {
-        return ResponseEntity.ok(employeeService.create(employee));
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Employee> update(

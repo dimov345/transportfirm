@@ -21,6 +21,10 @@ public class TruckGroup {
     @JoinColumn(name = "mechanic_id")
     private MechanicInfo mechanic;
 
+    @ManyToOne
+    @JoinColumn(name = "dispatcher_id")
+    private DispatcherInfo dispatcher;
+
     @OneToMany(mappedBy = "truckGroup")
     private List<VehicleRecord> vehicles = new ArrayList<>();
 }

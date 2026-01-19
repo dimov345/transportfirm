@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @RestController
-@RequestMapping("/api/employee-documents")
+@RequestMapping("/employee-documents")
 public class EmployeeDocumentController {
 
     private final EmployeeDocumentService service;

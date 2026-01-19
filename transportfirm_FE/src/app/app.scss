@@ -6,8 +6,13 @@
   margin-left: 80px; /* базово — за тясната версия на sidebar-а */
 }
 
-.app-content.overlay-active {
-  /* когато sidebar е отворен — не местим съдържанието, оставяме го отзад */
+/* ако в collapsed режим sidebar-а е по-тесен/по-широк, смени стойността */
+.app-content.collapsed {
   margin-left: 80px;
-  filter: brightness(0.9); /* по избор, лек ефект при overlay */
+}
+
+/* когато sidebar е overlay (по твоя template) */
+.app-content.overlay {
+  margin-left: 80px;
+  filter: brightness(0.9);
 }

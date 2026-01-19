@@ -1,5 +1,5 @@
 <div class="employee-form">
-  <h2>{{ isEdit ? 'Редакция на служител' : 'Нов служител' }}</h2>
+  <h2>Нов служител</h2>
 
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <div class="grid">
@@ -7,6 +7,7 @@
       <!-- PERSONAL -->
       <div class="card">
         <h3>Лични данни</h3>
+
         <label>ЕГН *</label>
         <input formControlName="egn" type="text" placeholder="10 цифри" />
         <div class="error" *ngIf="field('egn')?.touched && field('egn')?.invalid">
@@ -20,15 +21,16 @@
           <small>Името е задължително.</small>
         </div>
 
-      
-
-        <label>Дата на раждане</label>
+        <label>Дата на раждане *</label>
         <input formControlName="dateOfBirth" type="date" />
+        <div class="error" *ngIf="field('dateOfBirth')?.touched && field('dateOfBirth')?.invalid">
+          <small>Дата на раждане е задължителна.</small>
+        </div>
 
         <label>Телефон *</label>
         <input formControlName="phone" type="text" />
         <div class="error" *ngIf="field('phone')?.touched && field('phone')?.invalid">
-          <small>Телефон е задължителен.</small>
+          <small>Телефонът е задължителен.</small>
         </div>
 
         <label>Email *</label>
@@ -49,9 +51,17 @@
           <option *ngFor="let j of jobTitleOptions" [value]="j">{{ j }}</option>
         </select>
         <div class="error" *ngIf="field('jobTitle')?.touched && field('jobTitle')?.invalid">
-          <small>Длъжност е задължителна.</small>
+          <small>Длъжността е задължителна.</small>
         </div>
 
+        <label>Роля *</label>
+        <select formControlName="role">
+          <option value="">-- избери --</option>
+          <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+        </select>
+        <div class="error" *ngIf="field('role')?.touched && field('role')?.invalid">
+          <small>Ролята е задължителна.</small>
+        </div>
 
         <label>Дата на назначаване *</label>
         <input formControlName="hiredDate" type="date" />
@@ -59,60 +69,67 @@
           <small>Дата на назначаване е задължителна.</small>
         </div>
 
-        <label>Статус</label>
-        <select formControlName="employmentStatus">
-          <option *ngFor="let s of employmentStatusOptions" [value]="s">{{ s }}</option>
-        </select>
-
-        <label>Дата на уволнение</label>
-        <input formControlName="firedDate" type="date" />
-
-        <label>Вид договор</label>
+        <label>Вид договор *</label>
         <select formControlName="contractType">
-          <option value="">--</option>
+          <option value="">-- избери --</option>
           <option *ngFor="let c of contractTypeOptions" [value]="c">{{ c }}</option>
         </select>
+        <div class="error" *ngIf="field('contractType')?.touched && field('contractType')?.invalid">
+          <small>Вид договор е задължителен.</small>
+        </div>
 
-        <label>Заплата</label>
+        <label>Брутна заплата *</label>
         <input formControlName="salary" type="number" step="0.01" />
+        <div class="error" *ngIf="field('salary')?.touched && field('salary')?.invalid">
+          <small>Заплатата е задължителна.</small>
+        </div>
 
         <label>Нетна заплата</label>
         <input formControlName="salaryNeto" type="number" step="0.01" />
 
-        <label>Валута на заплатата</label>
-        <input formControlName="salaryCurrency" type="text" />
+        <label>Валута *</label>
+        <input formControlName="salaryCurrency" type="text" placeholder="BGN, EUR" />
+        <div class="error" *ngIf="field('salaryCurrency')?.touched && field('salaryCurrency')?.invalid">
+          <small>Валутата е задължителна.</small>
+        </div>
 
-        <label>Работно време</label>
-        <input formControlName="workingHours" type="text" />
+        <label>Работно време *</label>
+        <input formControlName="workingHours" type="text" placeholder="8h / 09:00-17:00" />
+        <div class="error" *ngIf="field('workingHours')?.touched && field('workingHours')?.invalid">
+          <small>Работното време е задължително.</small>
+        </div>
       </div>
 
-      <!-- ADDITIONAL -->
+      <!-- BANK & AUTH -->
       <div class="card">
         <h3>Банкови и достъп</h3>
 
-        <label>Банка</label>
+        <label>Банка *</label>
         <input formControlName="bankName" type="text" />
+        <div class="error" *ngIf="field('bankName')?.touched && field('bankName')?.invalid">
+          <small>Банката е задължителна.</small>
+        </div>
 
-        <label>IBAN</label>
+        <label>IBAN *</label>
         <input formControlName="iban" type="text" />
+        <div class="error" *ngIf="field('iban')?.touched && field('iban')?.invalid">
+          <small>IBAN е задължителен.</small>
+        </div>
 
-        <label>Потребителско име</label>
+        <label>Потребителско име *</label>
         <input formControlName="username" type="text" />
-
-        <label>Парола <small>(оставете празно ако не сменяте)</small></label>
-        <input formControlName="password" type="password" />
-
-        <label>Роля</label>
-        <select formControlName="role">
-          <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
-        </select>
+        <div class="error" *ngIf="field('username')?.touched && field('username')?.invalid">
+          <small>Потребителското име е задължително.</small>
+        </div>
       </div>
 
-      <!-- ADDRESSES (separate card) -->
+      <!-- ADDRESSES -->
       <div class="card wide">
         <h3>Адреси</h3>
+
         <label>Постоянен адрес</label>
         <input formControlName="addressPermanent" type="text" />
+
         <label>Текущ адрес</label>
         <input formControlName="addressCurrent" type="text" />
       </div>
@@ -122,10 +139,12 @@
     <div class="actions">
       <button type="button" class="btn cancel" (click)="cancel()">Отказ</button>
       <button type="submit" class="btn save" [disabled]="saving">
-        {{ saving ? 'Записвам...' : (isEdit ? 'Запази промените' : 'Добави служител') }}
+        {{ saving ? 'Записвам...' : 'Добави служител' }}
       </button>
     </div>
 
-    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
   </form>
 </div>

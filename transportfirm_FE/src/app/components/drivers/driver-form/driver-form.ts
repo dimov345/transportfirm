@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DriverService } from '../../../core/services/driver';
-import { DriverInfo } from '../../../core/services/driver';
+import { DriverService } from '../../../core/services/driver.service';
+import { DriverInfo } from '../../../core/services/driver.service';
 import { RouterModule } from '@angular/router';
 
 @Component({

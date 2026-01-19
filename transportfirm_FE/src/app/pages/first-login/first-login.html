@@ -1,0 +1,98 @@
+<div class="auth">
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="noise"></div>
+    <div class="grid"></div>
+  </div>
+
+  <div class="shell">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">TF</div>
+      <div>
+        <div class="brand-title">TransportFirm</div>
+        <div class="brand-subtitle">First login setup</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1 class="title">Първо влизане</h1>
+      <p class="desc">Смени временната парола, за да активираш акаунта си.</p>
+
+      <div class="alert info" *ngIf="infoMsg">{{ infoMsg }}</div>
+      <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label>Email</label>
+          <div class="control">
+            <input type="email" formControlName="email" placeholder="example@mail.com" autocomplete="username" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>OTP код</label>
+          <div class="control">
+            <input
+              type="text"
+              formControlName="otp"
+              placeholder="6 цифри"
+              maxlength="6"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+            />
+          </div>
+
+          <div class="otp-row">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="resendOtp()"
+              [disabled]="resendLoading || resendCooldown > 0"
+            >
+              {{
+                resendLoading
+                  ? 'Изпращам...'
+                  : (resendCooldown > 0
+                      ? ('Изпрати нов OTP (' + resendCooldown + 's)')
+                      : 'Изпрати нов OTP')
+              }}
+            </button>
+          </div>
+
+          <div class="alert info" *ngIf="resendInfo">{{ resendInfo }}</div>
+          <div class="alert error" *ngIf="resendError">{{ resendError }}</div>
+        </div>
+
+        <div class="field">
+          <label>Нова парола</label>
+          <div class="control">
+            <input type="password" formControlName="newPassword" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Повтори парола</label>
+          <div class="control">
+            <input type="password" formControlName="confirmPassword" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="alert error"
+             *ngIf="form.value.newPassword && form.value.confirmPassword && form.value.newPassword !== form.value.confirmPassword">
+          Паролите не съвпадат.
+        </div>
+
+        <button class="btn" type="submit" [disabled]="loading">
+          <span class="btn-text">{{ loading ? 'Записвам...' : 'Смени паролата' }}</span>
+          <span class="btn-shine" aria-hidden="true"></span>
+        </button>
+
+        <div class="footer">
+          <a routerLink="/login">Обратно към вход</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DriverService, DriverInfo, DriverDocument, Employee } from '../../../core/services/driver';
+import { DriverService, DriverInfo, DriverDocument, Employee } from '../../../core/services/driver.service';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 

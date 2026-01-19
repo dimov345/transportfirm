@@ -21,7 +21,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/drivers")
+@RequestMapping("/drivers")
 public class DriverController {
 
     private final DriverService driverService;

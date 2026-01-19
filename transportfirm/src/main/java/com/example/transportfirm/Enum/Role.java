@@ -6,7 +6,5 @@ public enum Role {
     DISPATCHER,
     ACCOUNTANT,
     DRIVER,
-    MECHANIC,
-    HR,
-    USER
+    MECHANIC
 }

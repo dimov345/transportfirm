@@ -1,10 +1,14 @@
 package com.example.transportfirm.service;
 
+import com.example.transportfirm.entity.DispatcherInfo;
 import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.JobTitle;
+import com.example.transportfirm.entity.MechanicInfo;
+import com.example.transportfirm.repository.DispatcherRepository;
 import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
+import com.example.transportfirm.repository.MechanicRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +20,28 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DriverRepository driverInfoRepository;
+    private final MechanicRepository  mechanicRepository;
+    private final DispatcherRepository dispatcherRepository;
 
-    public Employee create(Employee employee) {
-
+    public Employee createEmployee(Employee employee) {
         Employee saved = employeeRepository.save(employee);
 
-        if(saved.getJobTitle() == JobTitle.DRIVER){
-            DriverInfo info = new DriverInfo();
-            info.setEmployee(saved);
-            driverInfoRepository.save(info);
+        switch (saved.getJobTitle()) {
+            case DRIVER -> {
+                DriverInfo info = new DriverInfo();
+                info.setEmployee(saved);
+                driverInfoRepository.save(info);
+            }
+            case MECHANIC -> {
+                MechanicInfo info = new MechanicInfo();
+                info.setEmployee(saved);
+                mechanicRepository.save(info);
+            }
+            case DISPATCHER -> {
+                DispatcherInfo info = new DispatcherInfo();
+                info.setEmployee(saved);
+                dispatcherRepository.save(info);
+            }
         }
 
         return saved;
@@ -59,8 +76,6 @@ public class EmployeeService {
         existing.setIban(updated.getIban());
 
         // Достъп
-        existing.setUsername(updated.getUsername());
-        existing.setPassword(updated.getPassword());
         existing.setRole(updated.getRole());
 
         return employeeRepository.save(existing);

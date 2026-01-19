@@ -1,0 +1,145 @@
+// ===== Colors =====
+$sidebar-bg: #2d3748;
+$sidebar-border: #4a5568;
+$text-primary: #f7fafc;
+$text-secondary: #e2e8f0;
+$accent-blue: #3182ce;
+$accent-light: #63b3ed;
+
+// ===== Sidebar =====
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 80px;
+  background: $sidebar-bg;
+  color: $text-primary;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid $sidebar-border;
+  transition: width 0.2s ease;
+  z-index: 1000;
+}
+
+.sidebar.expanded {
+  width: 250px;
+}
+
+// ===== Logo =====
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid $sidebar-border;
+}
+
+.logo-img {
+  width: 36px;
+  height: 36px;
+}
+
+.app-name {
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar:not(.expanded) .app-name {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+// ===== Menu =====
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menu li.active {
+  background: rgba(49, 130, 206, 0.2);
+}
+
+// ===== Icons & Text =====
+.icon {
+  width: 20px;
+  text-align: center;
+  font-size: 18px;
+  color: $text-secondary;
+}
+
+.menu-text {
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar:not(.expanded) .menu-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+// ===== Submenu =====
+.submenu {
+  list-style: none;
+  padding-left: 32px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar:not(.expanded) .submenu {
+  display: none;
+}
+
+.submenu li {
+  padding: 10px 0;
+  font-size: 14px;
+  color: $text-secondary;
+}
+
+.submenu li:hover {
+  color: $text-primary;
+}
+
+// ===== Submenu Arrow =====
+.submenu-arrow {
+  margin-left: auto;
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.has-submenu.active .submenu-arrow {
+  transform: rotate(180deg);
+}
+
+.sidebar:not(.expanded) .submenu-arrow {
+  display: none;
+}
+
+// ===== Mobile =====
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar.expanded {
+    width: 220px;
+  }
+}

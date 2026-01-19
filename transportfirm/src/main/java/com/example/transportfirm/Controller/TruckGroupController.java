@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/truck-groups")
+@RequestMapping("/truck-groups")
 @RequiredArgsConstructor
 public class TruckGroupController {
 

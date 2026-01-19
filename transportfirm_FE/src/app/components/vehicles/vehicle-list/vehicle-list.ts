@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { VehicleService, VehicleInfo } from '../../../core/services/vehicle';
+import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-list',

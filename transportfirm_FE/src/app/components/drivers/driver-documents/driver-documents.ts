@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DriverService, DriverDocument } from '../../../core/services/driver';
+import { DriverService, DriverDocument } from '../../../core/services/driver.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({

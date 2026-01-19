@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { VehicleService, VehicleDocument } from '../../../core/services/vehicle';
+import { VehicleService, VehicleDocument } from '../../../core/services/vehicle.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({

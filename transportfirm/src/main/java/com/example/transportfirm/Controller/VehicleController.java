@@ -17,8 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicles")
-@CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("/vehicles")
 public class VehicleController {
 
     private final VehicleService vehicleService;

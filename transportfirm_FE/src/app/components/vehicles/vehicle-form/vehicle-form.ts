@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { VehicleService} from '../../../core/services/vehicle';
+import { VehicleService} from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-form',

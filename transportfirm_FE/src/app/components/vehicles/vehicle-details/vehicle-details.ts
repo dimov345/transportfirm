@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { VehicleService, VehicleInfo } from '../../../core/services/vehicle';
+import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-details',

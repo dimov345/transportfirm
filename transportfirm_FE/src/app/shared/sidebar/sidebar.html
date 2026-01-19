@@ -1,0 +1,44 @@
+<nav class="sidebar"
+     [class.expanded]="isExpanded"
+     [class.collapsed]="!isExpanded"
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="onMouseLeave()">
+
+  <!-- Logo -->
+  <div class="logo">
+    <img src="logo (1).ico" class="logo-img">
+    <span class="app-name">TransTrack</span>
+  </div>
+
+  <ul class="menu">
+    <ng-container *ngFor="let item of items; let i = index">
+
+      <!-- Single link -->
+      <li *ngIf="!item.children"
+          [routerLink]="item.route"
+          routerLinkActive="active">
+        <span class="icon">{{ item.icon }}</span>
+        <span class="menu-text">{{ item.label }}</span>
+      </li>
+
+      <!-- Submenu -->
+      <li *ngIf="item.children"
+          class="has-submenu"
+          (click)="toggleMenu(i)">
+        <span class="icon">{{ item.icon }}</span>
+        <span class="menu-text">{{ item.label }}</span>
+        <span class="submenu-arrow">▼</span>
+      </li>
+
+      <ul class="submenu" *ngIf="activeMenu === i">
+        <li *ngFor="let child of item.children"
+            [routerLink]="child.route"
+            routerLinkActive="active">
+          <div class="submenu-line"></div>
+          {{ child.label }}
+        </li>
+      </ul>
+
+    </ng-container>
+  </ul>
+</nav>

@@ -1,1 +1,68 @@
-<p>login works!</p>
+<div class="auth">
+  <!-- Animated background -->
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="noise"></div>
+    <div class="grid"></div>
+  </div>
+
+  <div class="shell">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">TF</div>
+      <div>
+        <div class="brand-title">TransportFirm</div>
+        <div class="brand-subtitle">Sign in to continue</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1 class="title">Вход</h1>
+      <p class="desc">Въведи email и парола.</p>
+
+      <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label>Email</label>
+          <div class="control">
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="example@mail.com"
+              autocomplete="username"
+            />
+          </div>
+          <small class="hint error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+            Въведи валиден email.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Парола</label>
+          <div class="control">
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          <small class="hint error" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+            Паролата е задължителна.
+          </small>
+        </div>
+
+        <button class="btn" type="submit" [disabled]="loading">
+          <span class="btn-text">{{ loading ? 'Влизам...' : 'Вход' }}</span>
+          <span class="btn-shine" aria-hidden="true"></span>
+        </button>
+
+        <div class="footer">
+          <a routerLink="/forgot-password">Забравена парола?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +17,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "Employees_Table")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Employee {
 
@@ -42,7 +46,7 @@ public class Employee {
     private String phone;
 
     @Email
-    @Column(length = 100, nullable = false)
+    @Column(length = 100, nullable = false, unique = true)
     private String email;
 
     // Адреси
@@ -79,17 +83,18 @@ public class Employee {
     @Column(length = 34)
     private String iban;
 
-    // Достъп видими само за admin
-    private String username;
-    private String password;
-
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private User user;
 
     // Универсален списък документи за ВСЕКИ служител
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmployeeDocument> documents = new ArrayList<>();
-
 
     @OneToOne(mappedBy = "employee")
     @JsonIgnore
@@ -98,4 +103,6 @@ public class Employee {
     @OneToOne(mappedBy = "employee")
     private MechanicInfo mechanicInfo;
 
+    @OneToOne(mappedBy = "employee")
+    private DispatcherInfo dispatcherInfo;
 }

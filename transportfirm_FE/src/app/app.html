@@ -1,7 +1,17 @@
-<app-sidebar (toggleWidth)="onSidebarToggle($event)"></app-sidebar>
+<app-sidebar
+  *ngIf="showSidebar"
+  (toggleWidth)="onSidebarToggle($event)">
+</app-sidebar>
 
-<main class="app-content" 
-      [class.collapsed]="isSidebarCollapsed" 
-      [class.overlay]="!isSidebarCollapsed">
+<ng-container *ngIf="!isAuthRoute; else authLayout">
+  <main class="app-content"
+        [class.collapsed]="isSidebarCollapsed"
+        [class.overlay]="!isSidebarCollapsed">
+    <router-outlet></router-outlet>
+  </main>
+</ng-container>
+
+<ng-template #authLayout>
+  <!-- ✅ fullscreen auth pages (no padding/margin/white bg) -->
   <router-outlet></router-outlet>
-</main>
+</ng-template>

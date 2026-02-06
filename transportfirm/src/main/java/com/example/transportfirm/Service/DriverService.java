@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DriverService {
@@ -36,25 +37,12 @@ public class DriverService {
     // =========================
     // DRIVER CRUD
     // =========================
-    public List<DriverInfo> getAllDrivers() {
-        return driverRepository.findAll();
-    }
 
-    public DriverInfo getDriver(Long employeeId) {
-        return driverRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "No driverInfo for this employee"));
-    }
 
-    public DriverInfo saveDriver(DriverInfo driver) {
-        return driverRepository.save(driver);
-    }
-
-    public DriverInfo updateDriver(Long employeeId, DriverInfo updated) {
-        DriverInfo existing = driverRepository.findByEmployeeId(employeeId)
+    public DriverInfo updateDriver(UUID driverInfoId, DriverInfo updated) {
+        DriverInfo existing = driverRepository.findById(driverInfoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
 
-        // ❗ Променяй директно съществуващия обект
         existing.setDriverLicenseIssuedOn(updated.getDriverLicenseIssuedOn());
         existing.setDriverLicenseExpiresOn(updated.getDriverLicenseExpiresOn());
         existing.setQualificationCardIssuedOn(updated.getQualificationCardIssuedOn());
@@ -64,11 +52,14 @@ public class DriverService {
         existing.setDigitalCardIssuedOn(updated.getDigitalCardIssuedOn());
         existing.setDigitalCardExpiresOn(updated.getDigitalCardExpiresOn());
 
-        // ❗ НЕ пипай ID, НЕ замествай employee, НЕ прави save(updated)
+        // по желание: ако искаш да позволиш assignment на vehicle
+        // existing.setVehicle(updated.getVehicle());
+
         return driverRepository.save(existing);
     }
 
-    public void deleteDriver(Long id) {
+
+    public void deleteDriver(UUID id) {
         driverRepository.deleteById(id);
     }
 
@@ -76,11 +67,16 @@ public class DriverService {
     // =========================
     // DOCUMENTS
     // =========================
-    public List<DriverDocument> getDriverDocuments(Long Id) {
-        return documentRepository.findByEmployee_Id(Id);
+    public List<DriverDocument> getDriverDocumentsByEmployee(UUID employeeId) {
+        return documentRepository.findByEmployee_Id(employeeId);
     }
 
-    public DriverDocument addDocument(Long employeeId,
+    public DriverDocument getDocument(UUID docId) {
+        return documentRepository.findById(docId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+    }
+
+    public DriverDocument addDocument(UUID employeeId,
                                       DriverDocumentType type,
                                       MultipartFile file) throws IOException {
 
@@ -108,13 +104,7 @@ public class DriverService {
         return documentRepository.save(doc);
     }
 
-
-    public DriverDocument getDocument(Long id) {
-        return documentRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-    }
-
-    public void deleteDocument(Long id) {
+    public void deleteDocument(UUID id) {
         documentRepository.deleteById(id);
     }
 }

@@ -1,13 +1,14 @@
-<div class="vehicle-docs-container">
+<div class="docs-page">
   <div class="docs-header">
     <div class="header-content">
       <button class="back-btn" routerLink="/vehicles">
         <i class="material-icons">arrow_back_ios</i>
         Назад
       </button>
+
       <div class="header-info">
         <h1>Документи на ППС</h1>
-        <div class="plate-number">{{ plateNumber }}</div>
+        <div class="info-badge">{{ plateNumber || '—' }}</div>
       </div>
     </div>
   </div>
@@ -18,16 +19,31 @@
       <div class="upload-card">
         <h3>Добавяне на документ</h3>
         <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
-        
+
+        <div class="type-select">
+          <label>Тип документ:</label>
+          <select [(ngModel)]="selectedType" [disabled]="isUploading">
+            <option value="">Изберете тип</option>
+            <option value="REGISTRATION">Регистрационен документ</option>
+            <option value="TECH_INSPECTION">Технически преглед</option>
+            <option value="INSURANCE_CASCO">Каско</option>
+            <option value="INSURANCE_CIVIL">Цивилна отговорност</option>
+            <option value="TAHO_CALIBRATION">Тахографско удостоверение</option>
+            <option value="ECO_CATEGORY">Еко категория</option>
+            <option value="VIGNETTE">Винетка</option>
+            <option value="ADR_CERTIFICATE">ADR сертификат</option>
+            <option value="SERVICE_PROTOCOL">Протокол за сервис</option>
+          </select>
+        </div>
+
         <label class="file-input-wrapper">
           <input
             type="file"
-            #fileInput
             (change)="onFileSelected($event)"
             accept="application/pdf"
             [disabled]="isUploading"
           />
-          <span class="file-input-button" [class.uploading]="isUploading">
+          <span class="file-input-button" [class.is-loading]="isUploading">
             <span *ngIf="!isUploading">Качи документ</span>
             <span *ngIf="isUploading">Качване...</span>
           </span>
@@ -45,14 +61,17 @@
       <div class="documents-list" *ngIf="documents.length > 0">
         <div class="document-item" *ngFor="let doc of documents">
           <div class="doc-icon">📄</div>
+
           <div class="doc-info">
             <span class="doc-name">{{ doc.fileName }}</span>
           </div>
+
           <div class="doc-actions">
-            <button class="btn-download" (click)="download(doc.id, doc.fileName)">
+            <button class="icon-btn icon-btn--download" (click)="download(doc.id, doc.fileName)">
               <i class="material-icons">download</i>
             </button>
-            <button class="btn-delete" (click)="delete(doc.id)">
+
+            <button class="icon-btn icon-btn--delete" (click)="delete(doc.id)">
               <i class="material-icons">delete</i>
             </button>
           </div>

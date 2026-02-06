@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,9 +48,14 @@ public class EmployeeService {
         return saved;
     }
 
-    public Employee update(Long id, Employee updated) {
+    public Employee update(UUID id, Employee updated) {
         Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        // Забрана за промяна на jobTitle
+        if (updated.getJobTitle() != null && existing.getJobTitle() != updated.getJobTitle()) {
+            throw new RuntimeException("Job title cannot be changed after creation");
+        }
 
         // Лични данни
         existing.setEgn(updated.getEgn());
@@ -62,13 +68,14 @@ public class EmployeeService {
         existing.setAddressPermanent(updated.getAddressPermanent());
         existing.setAddressCurrent(updated.getAddressCurrent());
 
-        // Фирмени данни
-        existing.setJobTitle(updated.getJobTitle());
+        // Фирмени данни (БЕЗ jobTitle)
         existing.setHiredDate(updated.getHiredDate());
         existing.setEmploymentStatus(updated.getEmploymentStatus());
         existing.setFiredDate(updated.getFiredDate());
         existing.setContractType(updated.getContractType());
         existing.setSalary(updated.getSalary());
+        existing.setSalaryNeto(updated.getSalaryNeto());        // каза, че си го оправил, но го оставям тук
+        existing.setSalaryCurrency(updated.getSalaryCurrency()); // и това
         existing.setWorkingHours(updated.getWorkingHours());
 
         // Банкови данни
@@ -82,11 +89,12 @@ public class EmployeeService {
     }
 
 
-    public void delete(Long id) {
+
+    public void delete(UUID id) {
         employeeRepository.deleteById(id);
     }
 
-    public Employee getById(Long id) {
+    public Employee getById(UUID id) {
         return employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
     }

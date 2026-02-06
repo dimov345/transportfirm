@@ -8,6 +8,7 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "vehicle_records")
@@ -16,8 +17,12 @@ import java.util.List;
 public class VehicleRecord {
 
     @Id
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
+
     @NotBlank(message = "Plate number е задължителен")
-    @Column(length = 20)
+    @Column(length = 20, unique = true)
     private String plateNumber;
 
     @NotBlank(message = "Моделът е задължителен")

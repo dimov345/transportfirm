@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_table")
@@ -19,8 +20,9 @@ import java.sql.Timestamp;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String username;

@@ -1,1 +1,92 @@
-<p>employee-documents works!</p>
+<div class="docs-page">
+  <div class="docs-header">
+    <div class="header-content">
+      <button class="back-btn" routerLink="/employees">
+        <i class="material-icons">arrow_back_ios</i>
+        Назад
+      </button>
+
+      <div class="header-info">
+        <h1>Документи на служител</h1>
+        <div class="info-badge">ID: {{ employeeId }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="docs-content">
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <div class="upload-card">
+        <h3>Добавяне на документ</h3>
+        <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
+
+        <div class="type-select">
+          <label>Тип документ:</label>
+          <select [(ngModel)]="selectedType">
+            <option value="">Изберете тип</option>
+
+            <!-- IMPORTANT: стойностите трябва да са 1:1 с EmployeeDocumentType enum -->
+            <option value="ID_CARD">Лична карта</option>
+            <option value="PASSPORT">Паспорт</option>
+            <option value="CONTRACT">Договор</option>
+            <option value="MEDICAL_CERTIFICATE">Медицинско</option>
+            <option value="OTHER">Друго</option>
+          </select>
+        </div>
+
+        <label class="file-input-wrapper">
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="application/pdf"
+            [disabled]="isUploading"
+          />
+          <span class="file-input-button" [class.is-loading]="isUploading">
+            <span *ngIf="!isUploading">Качи документ</span>
+            <span *ngIf="isUploading">Качване...</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="documents-section">
+      <div class="section-header">
+        <h2>Прикачени документи</h2>
+        <span class="doc-count">{{ documents.length }} файла</span>
+      </div>
+
+      <div class="documents-list" *ngIf="documents.length > 0">
+        <div class="document-item" *ngFor="let doc of documents">
+          <div class="doc-icon">📄</div>
+
+          <div class="doc-info">
+            <span class="doc-name">{{ doc.fileName }}</span>
+          </div>
+
+          <div class="doc-actions">
+            <button class="icon-btn icon-btn--download" (click)="download(doc)">
+              <i class="material-icons">download</i>
+            </button>
+            <button class="icon-btn icon-btn--delete" (click)="Delete(doc.id)">
+              <i class="material-icons">delete</i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="documents.length === 0 && !isLoading">
+        <div class="empty-icon">📂</div>
+        <h3>Няма прикачени документи</h3>
+        <p>Качете първия PDF документ</p>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="loading-spinner"></div>
+        <p>Зареждане на документи...</p>
+      </div>
+    </div>
+  </div>
+</div>

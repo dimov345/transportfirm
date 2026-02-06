@@ -6,14 +6,15 @@ import com.example.transportfirm.Enum.JobTitle;
 import com.example.transportfirm.Enum.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Employees_Table")
@@ -26,8 +27,9 @@ import java.util.List;
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     // Лични данни
     @Column(length = 10, nullable = false, unique = true)
@@ -94,15 +96,19 @@ public class Employee {
 
     // Универсален списък документи за ВСЕКИ служител
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("employee-docs")
     private List<EmployeeDocument> documents = new ArrayList<>();
 
     @OneToOne(mappedBy = "employee")
-    @JsonIgnore
+    @JsonManagedReference("employee-driver")
     private DriverInfo driverInfo;
 
     @OneToOne(mappedBy = "employee")
+    @JsonManagedReference("employee-mechanic")
     private MechanicInfo mechanicInfo;
 
     @OneToOne(mappedBy = "employee")
+    @JsonManagedReference("employee-dispatcher")
     private DispatcherInfo dispatcherInfo;
+
 }

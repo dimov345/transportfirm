@@ -1,217 +1,265 @@
-<div class="form-container">
-  <!-- Page Header -->
-  <div class="form-header">
-    <div class="header-left">
-      <button class="back-btn" routerLink="/vehicles">
-        <i class="material-icons">arrow_back_ios</i>
-        Назад
-      </button>
-      <div class="page-title">
+<!-- vehicle-form.html -->
+<div class="tf-form">
+  <!-- Header -->
+  <div class="tf-header">
+    <div class="tf-header-main">
+      <!-- Icon (like other forms) -->
+      <div class="tf-icon" aria-hidden="true">
+        <!-- car icon (outline) -->
+        <svg class="tf-svg" viewBox="0 0 24 24">
+          <path d="M5 16l-1 3"></path>
+          <path d="M19 16l1 3"></path>
+          <path d="M4 13h16"></path>
+          <path d="M6 13l1.5-5h9L18 13"></path>
+          <circle cx="7.5" cy="16.5" r="1.5"></circle>
+          <circle cx="16.5" cy="16.5" r="1.5"></circle>
+        </svg>
+      </div>
+
+      <!-- Title + subtitle -->
+      <div style="min-width: 0;">
         <h1>{{ isEdit ? 'Редактиране на ППС' : 'Добавяне на ново ППС' }}</h1>
+
+        <p class="tf-subtitle" *ngIf="isEdit">
+          Рег. номер: {{ vehicleForm.get('plateNumber')?.value || '—' }}
+        </p>
+
+        <p class="tf-subtitle" *ngIf="!isEdit">
+          Въведете данните за новото превозно средство
+        </p>
       </div>
     </div>
-    <div class="plate-badge" *ngIf="isEdit">{{ vehicleForm.get('plateNumber')?.value }}</div>
   </div>
 
-  <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()" class="vehicle-form">
-    <!-- Basic Information Card -->
-    <div class="form-card">
-      <div class="card-header">
-        <i class="material-icons">info</i>
-        <h2>Основни данни</h2>
-      </div>
-      <div class="card-body">
-        <div class="form-grid">
-          <div class="form-group" [class.error]="isFieldInvalid('plateNumber')">
-            <label>Номер на ППС</label>
-            <input 
-              type="text" 
+
+
+  <div class="tf-body">
+    <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()">
+
+      <!-- Основни данни -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">
+            <svg class="tf-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 8v8"></path>
+              <path d="M8 12h8"></path>
+            </svg>
+          </div>
+          <h2>Основни данни</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Номер на ППС</label>
+            <input
+              class="tf-input"
+              type="text"
               formControlName="plateNumber"
               placeholder="Въведете номер на ППС"
               [readonly]="isEdit"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('plateNumber')">
-              {{ getFieldError('plateNumber') }}
+            />
+            <div class="tf-error" *ngIf="isFieldInvalid('plateNumber')">
+              <small>{{ getFieldError('plateNumber') }}</small>
             </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('model')">
-            <label>Модел</label>
-            <input 
-              type="text" 
+          <div class="tf-group">
+            <label class="tf-label">Модел</label>
+            <input
+              class="tf-input"
+              type="text"
               formControlName="model"
               placeholder="Въведете модел"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('model')">
-              {{ getFieldError('model') }}
+            />
+            <div class="tf-error" *ngIf="isFieldInvalid('model')">
+              <small>{{ getFieldError('model') }}</small>
             </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('yearOfManufacture')">
-            <label>Година на производство</label>
-            <input 
-              type="number" 
+          <div class="tf-group">
+            <label class="tf-label">Година на производство</label>
+            <input
+              class="tf-input"
+              type="number"
               formControlName="yearOfManufacture"
-              placeholder="Година"
               min="1900"
               max="2100"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('yearOfManufacture')">
-              {{ getFieldError('yearOfManufacture') }}
+            />
+            <div class="tf-error" *ngIf="isFieldInvalid('yearOfManufacture')">
+              <small>{{ getFieldError('yearOfManufacture') }}</small>
             </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('owner')">
-            <label>Собственик</label>
-            <input 
-              type="text" 
+          <div class="tf-group">
+            <label class="tf-label">Собственик</label>
+            <input
+              class="tf-input"
+              type="text"
               formControlName="owner"
               placeholder="Въведете собственик"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('owner')">
-              {{ getFieldError('owner') }}
+            />
+            <div class="tf-error" *ngIf="isFieldInvalid('owner')">
+              <small>{{ getFieldError('owner') }}</small>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Technical Information Card -->
-    <div class="form-card">
-      <div class="card-header">
-        <i class="material-icons">build</i>
-        <h2>Технически данни</h2>
-      </div>
-      <div class="card-body">
-        <div class="form-grid">
-          <div class="form-group" [class.error]="isFieldInvalid('engineNumber')">
-            <label>Номер на двигател</label>
-            <input 
-              type="text" 
-              formControlName="engineNumber"
-              placeholder="Въведете номер на двигател"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('engineNumber')">
-              {{ getFieldError('engineNumber') }}
+      <!-- Технически данни -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">
+            <svg class="tf-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 7l3 3"></path>
+              <path d="M9 7H5l-2 2 5 5 2-2V7z"></path>
+              <path d="M16 9l5 5-3 3-5-5"></path>
+              <path d="M9 15l-3 3"></path>
+            </svg>
+          </div>
+          <h2>Технически данни</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Номер на двигател</label>
+            <input class="tf-input" type="text" formControlName="engineNumber" />
+            <div class="tf-error" *ngIf="isFieldInvalid('engineNumber')">
+              <small>{{ getFieldError('engineNumber') }}</small>
             </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('chassisNumber')">
-            <label>Шаси номер</label>
-            <input 
-              type="text" 
-              formControlName="chassisNumber"
-              placeholder="Въведете шаси номер"
-            >
-            <div class="error-message" *ngIf="isFieldInvalid('chassisNumber')">
-              {{ getFieldError('chassisNumber') }}
+          <div class="tf-group">
+            <label class="tf-label">Шаси номер</label>
+            <input class="tf-input" type="text" formControlName="chassisNumber" />
+            <div class="tf-error" *ngIf="isFieldInvalid('chassisNumber')">
+              <small>{{ getFieldError('chassisNumber') }}</small>
             </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('typePps')">
-            <label>Тип ППС</label>
-            <select formControlName="typePps">
+          <div class="tf-group">
+            <label class="tf-label">Тип ППС</label>
+            <select class="tf-input" formControlName="typePps">
               <option value="">Изберете тип ППС</option>
               <option *ngFor="let type of vehicleTypes" [value]="type">{{ type }}</option>
             </select>
-            <div class="error-message" *ngIf="isFieldInvalid('typePps')">
-              {{ getFieldError('typePps') }}
-            </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('technicalCondition')">
-            <label>Техническо състояние</label>
-            <select formControlName="technicalCondition">
+          <div class="tf-group">
+            <label class="tf-label">Техническо състояние</label>
+            <select class="tf-input" formControlName="technicalCondition">
               <option value="">Изберете състояние</option>
-              <option *ngFor="let condition of technicalConditions" [value]="condition">{{ condition }}</option>
+              <option *ngFor="let c of technicalConditions" [value]="c">{{ c }}</option>
             </select>
-            <div class="error-message" *ngIf="isFieldInvalid('technicalCondition')">
-              {{ getFieldError('technicalCondition') }}
-            </div>
           </div>
 
-          <div class="form-group" [class.error]="isFieldInvalid('standardEmissions')">
-            <label>Стандарт на емисии</label>
-            <select formControlName="standardEmissions">
+          <div class="tf-group">
+            <label class="tf-label">Стандарт на емисии</label>
+            <select class="tf-input" formControlName="standardEmissions">
               <option value="">Изберете стандарт</option>
-              <option *ngFor="let standard of emissionStandards" [value]="standard">{{ standard }}</option>
+              <option *ngFor="let s of emissionStandards" [value]="s">{{ s }}</option>
             </select>
-            <div class="error-message" *ngIf="isFieldInvalid('standardEmissions')">
-              {{ getFieldError('standardEmissions') }}
-            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Documents Card -->
-    <div class="form-card">
-      <div class="card-header">
-        <i class="material-icons">description</i>
-        <h2>Документи и застраховки</h2>
-      </div>
-      <div class="card-body">
-        <div class="documents-grid">
+      <!-- Документи и застраховки -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">
+            <svg class="tf-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path d="M14 2v6h6"></path>
+            </svg>
+          </div>
+          <h2>Документи и застраховки</h2>
+        </div>
+
+        <div class="tf-grid">
           <!-- Kasko -->
-          <div class="date-group">
-            <label>Каско</label>
-            <div class="date-range">
-              <input type="date" formControlName="kaskoOt" placeholder="От дата">
-              <span>до</span>
-              <input type="date" formControlName="kaskoDo" placeholder="До дата">
+          <div class="tf-card">
+            <div class="tf-card-header">
+              <h3 class="tf-card-title">Каско</h3>
+            </div>
+            <div class="tf-grid">
+              <div class="tf-group">
+                <label class="tf-label">От</label>
+                <input class="tf-input" type="date" formControlName="kaskoOt" />
+              </div>
+              <div class="tf-group">
+                <label class="tf-label">До</label>
+                <input class="tf-input" type="date" formControlName="kaskoDo" />
+              </div>
             </div>
           </div>
 
-          <!-- Grazhdanska Otgovornost -->
-          <div class="date-group">
-            <label>Гражданска отговорност</label>
-            <div class="date-range">
-              <input type="date" formControlName="grazhdanskaOtgovornostOt" placeholder="От дата">
-              <span>до</span>
-              <input type="date" formControlName="grazhdanskaOtgovornostDo" placeholder="До дата">
+          <!-- ГО -->
+          <div class="tf-card">
+            <div class="tf-card-header">
+              <h3 class="tf-card-title">Гражданска отговорност</h3>
+            </div>
+            <div class="tf-grid">
+              <div class="tf-group">
+                <label class="tf-label">От</label>
+                <input class="tf-input" type="date" formControlName="grazhdanskaOtgovornostOt" />
+              </div>
+              <div class="tf-group">
+                <label class="tf-label">До</label>
+                <input class="tf-input" type="date" formControlName="grazhdanskaOtgovornostDo" />
+              </div>
             </div>
           </div>
 
-          <!-- GTP -->
-          <div class="date-group">
-            <label>ГТП</label>
-            <div class="date-range">
-              <input type="date" formControlName="gtpOt" placeholder="От дата">
-              <span>до</span>
-              <input type="date" formControlName="gtpDo" placeholder="До дата">
+          <!-- ГТП -->
+          <div class="tf-card">
+            <div class="tf-card-header">
+              <h3 class="tf-card-title">ГТП</h3>
+            </div>
+            <div class="tf-grid">
+              <div class="tf-group">
+                <label class="tf-label">От</label>
+                <input class="tf-input" type="date" formControlName="gtpOt" />
+              </div>
+              <div class="tf-group">
+                <label class="tf-label">До</label>
+                <input class="tf-input" type="date" formControlName="gtpDo" />
+              </div>
             </div>
           </div>
 
-          <!-- Vinetka -->
-          <div class="date-group">
-            <label>Винетка</label>
-            <div class="date-range">
-              <input type="date" formControlName="vinetkaOt" placeholder="От дата">
-              <span>до</span>
-              <input type="date" formControlName="vinetkaDo" placeholder="До дата">
+          <!-- Винетка -->
+          <div class="tf-card">
+            <div class="tf-card-header">
+              <h3 class="tf-card-title">Винетка</h3>
+            </div>
+            <div class="tf-grid">
+              <div class="tf-group">
+                <label class="tf-label">От</label>
+                <input class="tf-input" type="date" formControlName="vinetkaOt" />
+              </div>
+              <div class="tf-group">
+                <label class="tf-label">До</label>
+                <input class="tf-input" type="date" formControlName="vinetkaDo" />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Form Actions -->
-    <div class="form-actions">
-      <button 
-        type="button" 
-        class="btn-secondary" 
-        routerLink="/vehicles"
-      >
-        Отказ
-      </button>
-      <button 
-        type="submit" 
-        class="btn-primary"
-        [disabled]="vehicleForm.invalid || isSubmitting"
-      >
-        <div class="spinner" *ngIf="isSubmitting"></div>
-        <span>{{ isSubmitting ? 'Запазване...' : (isEdit ? 'Запази промените' : 'Добави ППС') }}</span>
-      </button>
-    </div>
-  </form>
+      <!-- Actions -->
+      <div class="tf-actions">
+        <button type="button" class="btn btn-secondary" routerLink="/vehicles">
+          Отказ
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="vehicleForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? 'Запазване...' : (isEdit ? 'Запази промените' : 'Добави ППС') }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

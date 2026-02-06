@@ -1,4 +1,4 @@
-// ===== Colors =====
+// ===== Base Palette (твоята) =====
 $sidebar-bg: #2d3748;
 $sidebar-border: #4a5568;
 $text-primary: #f7fafc;
@@ -6,140 +6,409 @@ $text-secondary: #e2e8f0;
 $accent-blue: #3182ce;
 $accent-light: #63b3ed;
 
-// ===== Sidebar =====
+// ===== Extensions =====
+$bg-deeper: #1f2937;
+$shadow: rgba(0, 0, 0, 0.35);
+
+$radius-outer: 18px;
+$radius-inner: 14px;
+
+// spring-like easing
+$ease-spring: cubic-bezier(.2, .9, .2, 1.1);
+
+/* =========================
+   Sidebar
+   ========================= */
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 80px;
-  background: $sidebar-bg;
-  color: $text-primary;
+
+  width: 84px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid $sidebar-border;
-  transition: width 0.2s ease;
   z-index: 1000;
+
+  background:
+    radial-gradient(800px 420px at 10% 0%, rgba(49, 130, 206, 0.22), transparent 55%),
+    radial-gradient(700px 420px at 110% 20%, rgba(99, 179, 237, 0.16), transparent 55%),
+    linear-gradient(180deg, $sidebar-bg, $bg-deeper);
+
+  border-right: 1px solid $sidebar-border;
+  box-shadow: 0 20px 60px $shadow;
+
+  transition: width 260ms $ease-spring, box-shadow 220ms ease;
 }
 
 .sidebar.expanded {
-  width: 250px;
+  width: 272px;
 }
 
-// ===== Logo =====
-.logo {
+.sidebar.collapsed {
+  width: 84px;
+}
+
+/* =========================
+   Brand / Logo
+   ========================= */
+.brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px;
-  border-bottom: 1px solid $sidebar-border;
-}
-
-.logo-img {
-  width: 36px;
-  height: 36px;
-}
-
-.app-name {
-  font-weight: 600;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-
-.sidebar:not(.expanded) .app-name {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-// ===== Menu =====
-.menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-}
-
-.menu li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.menu li:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.menu li.active {
-  background: rgba(49, 130, 206, 0.2);
-}
-
-// ===== Icons & Text =====
-.icon {
-  width: 20px;
-  text-align: center;
-  font-size: 18px;
-  color: $text-secondary;
-}
-
-.menu-text {
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-
-.sidebar:not(.expanded) .menu-text {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-// ===== Submenu =====
-.submenu {
-  list-style: none;
-  padding-left: 32px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.sidebar:not(.expanded) .submenu {
-  display: none;
-}
-
-.submenu li {
-  padding: 10px 0;
-  font-size: 14px;
-  color: $text-secondary;
-}
-
-.submenu li:hover {
+  padding: 18px 16px;
+  text-decoration: none;
   color: $text-primary;
 }
 
-// ===== Submenu Arrow =====
-.submenu-arrow {
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  box-shadow: 0 12px 26px rgba(49, 130, 206, 0.22);
+}
+
+.brand-text {
+  display: grid;
+  gap: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.brand-title {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  font-size: 14px;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.sidebar.collapsed .brand-text {
+  opacity: 0;
+  transform: translateX(-6px);
+  width: 0;
+}
+
+/* =========================
+   Divider
+   ========================= */
+.divider {
+  height: 1px;
+  margin: 0 12px 10px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(226, 232, 240, 0.18),
+    transparent
+  );
+}
+
+/* =========================
+   Menu
+   ========================= */
+.menu {
+  list-style: none;
+  padding: 10px 8px 12px;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* =========================
+   Menu Item
+   ========================= */
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 12px 12px 10px;
+  margin: 6px 6px;
+  border-radius: $radius-outer;
+
+  cursor: pointer;
+  user-select: none;
+
+  color: rgba(226, 232, 240, 0.8);
+  border: 1px solid transparent;
+
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(226, 232, 240, 0.1);
+}
+
+.item:active {
+  transform: translateY(1px);
+}
+
+/* =========================
+   Indicator (ONLY for expanded)
+   ========================= */
+.indicator {
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 999px;
+
+  background: linear-gradient(180deg, $accent-light, $accent-blue);
+
+  opacity: 0;
+  transform: scaleY(0.85);
+  transition: opacity 160ms ease, transform 180ms ease, filter 180ms ease;
+}
+
+/* hover: subtle ghost */
+.item:hover .indicator {
+  opacity: 0.22;
+  transform: scaleY(1);
+  filter: none;
+}
+
+/* active: strong */
+.item.active .indicator {
+  opacity: 1;
+  transform: scaleY(1);
+  filter: drop-shadow(0 0 6px rgba(49, 130, 206, 0.35));
+}
+
+/* Active (expanded look) */
+.item.active {
+  background: linear-gradient(
+    135deg,
+    rgba(49, 130, 206, 0.2),
+    rgba(99, 179, 237, 0.12)
+  );
+  border-color: rgba(99, 179, 237, 0.22);
+  color: $text-primary;
+}
+
+/* =========================
+   Icons (outline stroke)
+   ========================= */
+.ico {
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-inner;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  transition: transform 140ms ease, background 160ms ease,
+    border-color 160ms ease;
+}
+
+.item:hover .ico {
+  transform: translateY(-1px);
+  border-color: rgba(99, 179, 237, 0.22);
+}
+
+.item.active .ico {
+  background: rgba(49, 130, 206, 0.18);
+  border-color: rgba(99, 179, 237, 0.26);
+}
+
+.svg {
+  width: 20px;
+  height: 20px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.item.active .svg {
+  color: $text-primary;
+}
+
+/* =========================
+   Label
+   ========================= */
+.label {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.sidebar.collapsed .label {
+  opacity: 0;
+  transform: translateX(-6px);
+  width: 0;
+}
+
+/* =========================
+   Chevron
+   ========================= */
+.chev {
   margin-left: auto;
-  font-size: 10px;
-  transition: transform 0.2s ease;
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(226, 232, 240, 0.12);
+
+  transition: transform 180ms ease, background 160ms ease, opacity 160ms ease;
 }
 
-.has-submenu.active .submenu-arrow {
+.chev-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.has-sub.open .chev {
   transform: rotate(180deg);
+  background: rgba(49, 130, 206, 0.14);
 }
 
-.sidebar:not(.expanded) .submenu-arrow {
+.sidebar.collapsed .chev {
   display: none;
 }
 
-// ===== Mobile =====
+/* =========================
+   Submenu (aligned with items)
+   ========================= */
+.sub {
+  list-style: none;
+  margin: 0 6px 10px 6px;
+  padding: 6px;
+
+  border-radius: $radius-outer;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(226, 232, 240, 0.1);
+
+  animation: subIn 160ms ease;
+}
+
+@keyframes subIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar.collapsed .sub {
+  display: none;
+}
+
+.sub-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 12px 12px 10px;
+  margin: 6px 6px;
+
+  border-radius: $radius-outer;
+
+  color: rgba(226, 232, 240, 0.78);
+  cursor: pointer;
+
+  border: 1px solid transparent;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease,
+    border-color 160ms ease;
+}
+
+.sub-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: $text-primary;
+  border-color: rgba(226, 232, 240, 0.1);
+}
+
+.sub-item:active {
+  transform: translateY(1px);
+}
+
+.sub-item.active {
+  background: rgba(99, 179, 237, 0.18);
+  border-color: rgba(99, 179, 237, 0.2);
+  color: $text-primary;
+}
+
+.sub-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.55);
+}
+
+.sub-item.active .sub-dot {
+  background: $accent-light;
+}
+
+.sidebar.collapsed .indicator {
+  display: none !important;
+}
+
+.sidebar.collapsed .item.active {
+  background: rgba(99, 179, 237, 0.18) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.sidebar.collapsed .item.active .ico {
+  background: rgba(0, 0, 0, 0.16) !important;
+  border-color: rgba(226, 232, 240, 0.12) !important;
+}
+
+.sidebar.collapsed .item.active .svg {
+  color: rgba(226, 232, 240, 0.9) !important;
+}
+
+/* ✅ Center icons perfectly in collapsed mode */
+.sidebar.collapsed .item {
+  justify-content: center;
+  padding: 10px 8px;   /* без излишен left padding */
+  gap: 0;
+}
+
+.sidebar.collapsed .ico {
+  margin: 0;
+}
+
+.sidebar.collapsed .indicator {
+  display: none !important; /* вече го имаш, но да е сигурно */
+}
+
+
+/* =========================
+   Mobile
+   ========================= */
 @media (max-width: 768px) {
   .sidebar {
-    width: 80px;
+    width: 84px;
   }
-
   .sidebar.expanded {
-    width: 220px;
+    width: 240px;
   }
 }

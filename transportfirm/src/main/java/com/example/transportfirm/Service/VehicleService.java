@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class VehicleService {
@@ -38,8 +39,8 @@ public class VehicleService {
         return vehicleRepository.findAll();
     }
 
-    public VehicleRecord getByPlate(String plateNumber) {
-        return vehicleRepository.findById(plateNumber)
+    public VehicleRecord getByPlate(UUID id) {
+        return vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
     }
@@ -48,8 +49,8 @@ public class VehicleService {
         return vehicleRepository.save(vehicle);
     }
 
-    public VehicleRecord update(String plateNumber, VehicleRecord updated) {
-        VehicleRecord existing = vehicleRepository.findById(plateNumber)
+    public VehicleRecord update(UUID id, VehicleRecord updated) {
+        VehicleRecord existing = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
 
@@ -57,13 +58,13 @@ public class VehicleService {
         return vehicleRepository.save(updated);
     }
 
-    public void delete(String plateNumber) {
-        VehicleRecord v = vehicleRepository.findById(plateNumber)
+    public void delete(UUID id) {
+        VehicleRecord v = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
 
         // изтриваме документи на камиона
-        List<VehicleDocument> docs = documentRepository.findByVehicle_PlateNumber(plateNumber);
+        List<VehicleDocument> docs = documentRepository.findByVehicle_Id(id);
         docs.forEach(doc -> {
             try {
                 Files.deleteIfExists(Path.of(doc.getFilePath()));
@@ -79,14 +80,14 @@ public class VehicleService {
     // DOCUMENTS LOGIC
     // ===========================================================
 
-    public List<VehicleDocument> getDocumentsByVehicle(String plateNumber) {
-        if (!vehicleRepository.existsById(plateNumber)) {
+    public List<VehicleDocument> getDocumentsByVehicle(UUID id) {
+        if (!vehicleRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found");
         }
-        return documentRepository.findByVehicle_PlateNumber(plateNumber);
+        return documentRepository.findByVehicle_Id(id);
     }
 
-    public VehicleDocument getDocumentById(Long id) {
+    public VehicleDocument getDocumentById(UUID id) {
         return documentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
@@ -101,7 +102,7 @@ public class VehicleService {
     // UPLOAD PDF DOCUMENT
     // ===========================================================
 
-    public VehicleDocument addDocument(String plateNumber,
+    public VehicleDocument addDocument(UUID id,
                                        VehicleDocumentType type,
                                        MultipartFile file) throws IOException {
 
@@ -113,13 +114,12 @@ public class VehicleService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF is allowed");
         }
 
-        VehicleRecord vehicle = vehicleRepository.findById(plateNumber)
+        VehicleRecord vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
 
 
-        // Директория на конкретния камион
-        Path vehicleFolder = Paths.get(uploadDir, plateNumber)
+        Path vehicleFolder = Paths.get(uploadDir, String.valueOf(id))
                 .toAbsolutePath()
                 .normalize();
 
@@ -131,7 +131,6 @@ public class VehicleService {
 
         Files.copy(file.getInputStream(), storedPath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Създаваме документ entity
         VehicleDocument doc = new VehicleDocument();
         doc.setVehicle(vehicle);
         doc.setType(type);
@@ -146,7 +145,7 @@ public class VehicleService {
     // DELETE DOCUMENT
     // ===========================================================
 
-    public void deleteDocument(Long id) {
+    public void deleteDocument(UUID id) {
         VehicleDocument doc = documentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));

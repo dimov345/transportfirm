@@ -1,20 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { VehicleService, VehicleDocument } from '../../../core/services/vehicle.service';
-import { ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { VehicleService, VehicleDocument, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-documents',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './vehicle-documents.html',
   styleUrls: ['./vehicle-documents.scss']
 })
 export class VehicleDocumentsComponent implements OnInit {
-  plateNumber!: string;
+  id = '';                 // UUID от route
+  plateNumber = '';        // само за показване в UI
+
   documents: VehicleDocument[] = [];
-  
+  selectedType: string = '';
+
   isLoading = true;
   isUploading = false;
 
@@ -25,15 +28,37 @@ export class VehicleDocumentsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.plateNumber = this.route.snapshot.paramMap.get('plateNumber')!;
+    this.id = this.route.snapshot.paramMap.get('id') || '';
+
+    if (!this.id) {
+      this.isLoading = false;
+      return;
+    }
+
+    this.loadVehicleHeader(); // за да покажем номер (по желание)
     this.loadDocuments();
   }
 
-  /** Зарежда всички документи за дадено ППС */
+  /** Зарежда данните за ППС (само за header: plateNumber) */
+  loadVehicleHeader() {
+    this.vehicleService.getById(this.id).subscribe({
+      next: (vehicle: VehicleInfo) => {
+        this.plateNumber = vehicle.plateNumber || '';
+        this.forceUpdate();
+      },
+      error: () => {
+        // не е фатално – документите пак може да се покажат
+        this.plateNumber = '';
+        this.forceUpdate();
+      }
+    });
+  }
+
+  /** Зарежда всички документи за дадено ППС (по UUID) */
   loadDocuments() {
     this.isLoading = true;
 
-    this.vehicleService.getDocuments(this.plateNumber).subscribe({
+    this.vehicleService.getDocuments(this.id).subscribe({
       next: (docs) => {
         this.documents = [...docs];
         this.isLoading = false;
@@ -50,7 +75,15 @@ export class VehicleDocumentsComponent implements OnInit {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    const type = (this.selectedType || '').trim();
+
     if (!file) return;
+
+    if (!type) {
+      alert('Моля, изберете тип документ!');
+      input.value = '';
+      return;
+    }
 
     if (file.type !== 'application/pdf') {
       alert('Моля, качете само PDF файл!');
@@ -67,7 +100,7 @@ export class VehicleDocumentsComponent implements OnInit {
     this.isUploading = true;
     this.forceUpdate();
 
-    this.vehicleService.uploadDocument(this.plateNumber, file).subscribe({
+    this.vehicleService.uploadDocument(this.id, this.selectedType, file).subscribe({
       next: (newDocument) => {
         this.documents = [...this.documents, newDocument];
         this.isUploading = false;
@@ -84,8 +117,8 @@ export class VehicleDocumentsComponent implements OnInit {
   }
 
   /** Изтегляне на документ */
-  download(id: number, fileName: string) {
-    this.vehicleService.downloadDocument(this.plateNumber, id).subscribe(blob => {
+  download(id: string, fileName: string) {
+    this.vehicleService.downloadDocument(id).subscribe(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -96,16 +129,17 @@ export class VehicleDocumentsComponent implements OnInit {
   }
 
   /** Изтриване на документ */
-  delete(id: number) {
+  delete(id: string) {
     if (!confirm('Наистина ли искате да изтриете този документ?')) return;
 
-    this.vehicleService.deleteDocument(this.plateNumber, id).subscribe({
+    this.vehicleService.deleteDocument(id).subscribe({
       next: () => {
-        this.documents = this.documents.filter(doc => doc.id !== id);
+        this.documents = this.documents.filter(d => d.id !== id);
         this.forceUpdate();
       },
       error: () => {
         alert('Грешка при изтриване на документа!');
+        this.forceUpdate();
       }
     });
   }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class MechanicService {
     private final MechanicRepository mechanicRepository;
     private final EmployeeRepository employeeRepository;
 
-    public MechanicInfo createMechanic(Long employeeId) {
+    public MechanicInfo createMechanic(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
@@ -28,7 +29,7 @@ public class MechanicService {
         return mechanicRepository.save(info);
     }
 
-    public MechanicInfo getById(Long id) {
+    public MechanicInfo getById(UUID id) {
         return mechanicRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mechanic not found"));
     }
@@ -37,7 +38,7 @@ public class MechanicService {
         return mechanicRepository.findAll();
     }
 
-    public void deleteMechanic(Long id) {
+    public void deleteMechanic(UUID id) {
         mechanicRepository.deleteById(id);
     }
 }

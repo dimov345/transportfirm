@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EmployeeDocumentService {
@@ -31,14 +32,14 @@ public class EmployeeDocumentService {
         this.documentRepository = documentRepository;
     }
 
-    public List<EmployeeDocument> getDocuments(Long employeeId) {
+    public List<EmployeeDocument> getDocuments(UUID employeeId) {
         if (!employeeRepository.existsById(employeeId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
         }
         return documentRepository.findByEmployee_Id(employeeId);
     }
 
-    public EmployeeDocument uploadDocument(Long employeeId,
+    public EmployeeDocument uploadDocument(UUID employeeId,
                                            EmployeeDocumentType type,
                                            MultipartFile file) throws IOException {
 
@@ -74,13 +75,13 @@ public class EmployeeDocumentService {
         return documentRepository.save(doc);
     }
 
-    public EmployeeDocument getDocument(Long id) {
+    public EmployeeDocument getDocument(UUID id) {
         return documentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found"));
     }
 
-    public void deleteDocument(Long id) {
+    public void deleteDocument(UUID id) {
         if (!documentRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
         }

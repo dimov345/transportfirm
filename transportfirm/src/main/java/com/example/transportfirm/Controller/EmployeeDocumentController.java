@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee-documents")
@@ -23,13 +24,13 @@ public class EmployeeDocumentController {
     }
 
     @GetMapping("/{employeeId}")
-    public ResponseEntity<?> getDocuments(@PathVariable Long employeeId) {
+    public ResponseEntity<?> getDocuments(@PathVariable UUID employeeId) {
         return ResponseEntity.ok(service.getDocuments(employeeId));
     }
 
     @PostMapping(value = "/upload/{employeeId}/{type}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadDocument(
-            @PathVariable Long employeeId,
+            @PathVariable UUID employeeId,
             @PathVariable EmployeeDocumentType type,
             @RequestPart("file") MultipartFile file) throws IOException {
 
@@ -37,18 +38,20 @@ public class EmployeeDocumentController {
     }
 
     @GetMapping("/download/{documentId}")
-    public ResponseEntity<?> download(@PathVariable Long documentId) throws IOException {
+    public ResponseEntity<byte[]> download(@PathVariable UUID documentId) throws IOException {
         EmployeeDocument doc = service.getDocument(documentId);
 
         byte[] fileBytes = Files.readAllBytes(Path.of(doc.getFilePath()));
 
         return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + doc.getFileName() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(fileBytes);
     }
 
+
     @DeleteMapping("/delete/{documentId}")
-    public ResponseEntity<?> delete(@PathVariable Long documentId) {
+    public ResponseEntity<?> delete(@PathVariable UUID documentId) {
         service.deleteDocument(documentId);
         return ResponseEntity.ok("Document deleted");
     }

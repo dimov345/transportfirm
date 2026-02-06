@@ -13,6 +13,8 @@ import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.serv
 export class VehicleDetails implements OnInit {
   vehicle!: VehicleInfo;
 
+  private id = ''; // UUID
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -21,27 +23,28 @@ export class VehicleDetails implements OnInit {
   ) {}
 
   ngOnInit() {
-    const plateNumber = this.route.snapshot.paramMap.get('plateNumber');
-    
-    if (!plateNumber) {
-      console.error('Не е предоставен номер на ППС');
+    this.id = this.route.snapshot.paramMap.get('id') || '';
+
+    if (!this.id) {
+      console.error('Не е предоставен id на ППС');
       this.router.navigate(['/vehicles']);
       return;
     }
 
-    this.loadVehicle(plateNumber);
+    this.loadVehicle(this.id);
   }
 
-  loadVehicle(plateNumber: string) {
-    this.vehicleService.getByPlateNumber(plateNumber).subscribe({
+  loadVehicle(id: string) {
+    this.vehicleService.getById(id).subscribe({
       next: (vehicle) => {
         this.vehicle = vehicle;
-         this.cdr.detectChanges();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Грешка при зареждане на данните за превозното средство!', error);
         if (error.status === 404) {
           console.error('Превозното средство не е намерено');
+          this.router.navigate(['/vehicles']);
         }
       }
     });

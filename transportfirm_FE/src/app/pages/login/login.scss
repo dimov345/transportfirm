@@ -2,19 +2,50 @@
   display: block;
 }
 
+/* ===== Palette (match sidebar) ===== */
+$sidebar-bg: #2d3748;
+$sidebar-border: #4a5568;
+$text-primary: #f7fafc;
+$text-secondary: #e2e8f0;
+$accent-blue: #3182ce;
+$accent-light: #63b3ed;
+
+$bg-deeper: #1f2937;
+$shadow: rgba(0, 0, 0, 0.35);
+
+$radius-outer: 18px;
+$radius-inner: 14px;
+
+$ease-spring: cubic-bezier(.2, .9, .2, 1.1);
+
 /* --------- Auth Layout --------- */
 .auth {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 28px 18px;
   position: fixed;
-  overflow: hidden;
-  background: #070a12;
-  color: #e5e7eb;
   inset: 0;
   width: 100vw;
   height: 100vh;
+
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+  overflow: hidden;
+
+  color: $text-primary;
+
+  /* ✅ animated base background */
+  background:
+    radial-gradient(900px 520px at 10% 0%, rgba(49, 130, 206, 0.30), transparent 55%),
+    radial-gradient(800px 520px at 110% 20%, rgba(99, 179, 237, 0.22), transparent 58%),
+    linear-gradient(180deg, $sidebar-bg, $bg-deeper);
+
+  background-size: 140% 140%;
+  animation: bgShift 18s ease-in-out infinite;
+}
+
+@keyframes bgShift {
+  0%   { background-position: 0% 40%; }
+  50%  { background-position: 100% 55%; }
+  100% { background-position: 0% 40%; }
 }
 
 .shell {
@@ -30,6 +61,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
+
   opacity: 0;
   transform: translateY(6px);
   animation: enter 520ms ease forwards;
@@ -43,9 +75,10 @@
   place-items: center;
   font-weight: 900;
   letter-spacing: 0.5px;
+
   color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(236, 72, 153, 0.8));
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.22);
+  background: linear-gradient(135deg, $accent-blue, $accent-light);
+  box-shadow: 0 12px 30px rgba(49, 130, 206, 0.26);
 }
 
 .brand-title {
@@ -55,19 +88,23 @@
 
 .brand-subtitle {
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgba(226, 232, 240, 0.72);
 }
 
 /* --------- Card (glass) --------- */
 .card {
   padding: 18px 18px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: radial-gradient(1200px 500px at 0% 0%, rgba(99, 102, 241, 0.18), transparent 45%),
-              radial-gradient(900px 420px at 100% 20%, rgba(236, 72, 153, 0.14), transparent 40%),
-              rgba(255, 255, 255, 0.06);
+  border-radius: $radius-outer;
+
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  background:
+    radial-gradient(1200px 520px at 0% 0%, rgba(49, 130, 206, 0.22), transparent 50%),
+    radial-gradient(900px 420px at 100% 20%, rgba(99, 179, 237, 0.16), transparent 45%),
+    rgba(0, 0, 0, 0.18);
+
   backdrop-filter: blur(14px);
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
+
   opacity: 0;
   transform: translateY(10px) scale(0.99);
   animation: enter 560ms ease 80ms forwards;
@@ -81,7 +118,7 @@
 
 .desc {
   margin: 6px 0 14px;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgba(226, 232, 240, 0.72);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -95,8 +132,8 @@
 
 label {
   font-size: 12px;
-  font-weight: 700;
-  color: rgba(229, 231, 235, 0.82);
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.86);
 }
 
 .control {
@@ -107,22 +144,29 @@ input {
   width: 100%;
   padding: 11px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  border: 1px solid rgba(226, 232, 240, 0.14);
   background: rgba(0, 0, 0, 0.18);
+
   color: rgba(255, 255, 255, 0.92);
   outline: none;
   font-size: 14px;
-  transition: transform 120ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+
+  transition:
+    transform 120ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
 }
 
 input::placeholder {
-  color: rgba(229, 231, 235, 0.45);
+  color: rgba(226, 232, 240, 0.48);
 }
 
 input:focus {
-  border-color: rgba(99, 102, 241, 0.65);
+  border-color: rgba(99, 179, 237, 0.72);
   box-shadow:
-    0 0 0 4px rgba(99, 102, 241, 0.18),
+    0 0 0 4px rgba(99, 179, 237, 0.18),
     0 10px 30px rgba(0, 0, 0, 0.35);
   background: rgba(0, 0, 0, 0.26);
   transform: translateY(-1px);
@@ -130,8 +174,9 @@ input:focus {
 
 .hint {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.60);
+  color: rgba(226, 232, 240, 0.60);
 }
+
 .hint.error {
   color: rgba(248, 113, 113, 0.95);
 }
@@ -152,21 +197,31 @@ input:focus {
   color: rgba(254, 226, 226, 0.92);
 }
 
-/* --------- Button --------- */
+.alert.info {
+  background: rgba(99, 179, 237, 0.10);
+  border-color: rgba(99, 179, 237, 0.20);
+  color: rgba(240, 249, 255, 0.92);
+}
+
+/* --------- Buttons --------- */
 .btn {
   width: 100%;
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(236, 72, 153, 0.88));
+
+  border: 1px solid rgba(226, 232, 240, 0.14);
+  background: linear-gradient(135deg, $accent-blue, $accent-light);
+
   color: rgba(255, 255, 255, 0.96);
   font-weight: 900;
   letter-spacing: 0.2px;
   cursor: pointer;
+
   position: relative;
   overflow: hidden;
-  box-shadow: 0 14px 38px rgba(99, 102, 241, 0.22);
+
+  box-shadow: 0 14px 38px rgba(49, 130, 206, 0.22);
   transition: transform 90ms ease, filter 120ms ease;
 }
 
@@ -188,15 +243,25 @@ input:focus {
   50% { transform: translateX(20%); opacity: 0.62; }
 }
 
+.otp-row { margin-top: 10px; }
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(226, 232, 240, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.14);
+  box-shadow: none;
+}
+.btn.secondary:hover { filter: brightness(1.05); }
+
 /* --------- Footer --------- */
 .footer {
   margin-top: 14px;
   text-align: center;
 
   a {
-    color: rgba(229, 231, 235, 0.72);
+    color: rgba(226, 232, 240, 0.76);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 13px;
   }
   a:hover { text-decoration: underline; }
@@ -206,12 +271,13 @@ input:focus {
   margin-top: 14px;
   text-align: center;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.52);
+  color: rgba(226, 232, 240, 0.52);
+
   opacity: 0;
   animation: enter 560ms ease 140ms forwards;
 }
 
-/* --------- Animated background --------- */
+/* --------- Animated background layers --------- */
 .bg {
   position: absolute;
   inset: 0;
@@ -224,27 +290,30 @@ input:focus {
   height: 520px;
   border-radius: 50%;
   filter: blur(60px);
-  opacity: 0.50;
-  transform: translate3d(0,0,0);
+  opacity: 0.52;
+
+  transform: translate3d(0, 0, 0);
   animation: floaty 12s ease-in-out infinite;
 }
 
 .b1 {
   left: -180px;
   top: -200px;
-  background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.95), transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(49, 130, 206, 0.95), transparent 60%);
   animation-duration: 13s;
 }
+
 .b2 {
   right: -200px;
   top: 10%;
-  background: radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.85), transparent 62%);
+  background: radial-gradient(circle at 40% 40%, rgba(99, 179, 237, 0.85), transparent 62%);
   animation-duration: 15s;
 }
+
 .b3 {
   left: 10%;
   bottom: -240px;
-  background: radial-gradient(circle at 40% 40%, rgba(34, 211, 238, 0.65), transparent 62%);
+  background: radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.65), transparent 62%);
   animation-duration: 16s;
 }
 
@@ -253,14 +322,16 @@ input:focus {
   50% { transform: translate(26px, -18px) scale(1.06); }
 }
 
+/* subtle noise */
 .noise {
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
-  opacity: 0.14;
+  opacity: 0.12;
   mix-blend-mode: overlay;
 }
 
+/* grid */
 .grid {
   position: absolute;
   inset: 0;
@@ -280,6 +351,7 @@ input:focus {
 
 /* --------- Reduced motion --------- */
 @media (prefers-reduced-motion: reduce) {
+  .auth { animation: none !important; }
   .blob, .btn-shine, .brand, .card, .meta { animation: none !important; }
   input { transition: none; }
 }

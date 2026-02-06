@@ -33,9 +33,9 @@ export const routes: Routes = [
 
   { path: 'vehicles', component: VehicleListComponent, canActivate: [authGuard] },
   { path: 'vehicles/new', component: VehicleFormComponent, canActivate: [authGuard] },
-  { path: 'vehicles/edit/:plateNumber', component: VehicleFormComponent, canActivate: [authGuard] },
-  { path: 'vehicles/:plateNumber', component: VehicleDetails, canActivate: [authGuard] },
-  { path: 'vehicles-documents/:plateNumber', component: VehicleDocumentsComponent, canActivate: [authGuard] },
+  { path: 'vehicles/edit/:id', component: VehicleFormComponent, canActivate: [authGuard] },
+  { path: 'vehicles/:id', component: VehicleDetails, canActivate: [authGuard] },
+  { path: 'vehicles-documents/:id', component: VehicleDocumentsComponent, canActivate: [authGuard] },
 
   { path: 'employees', component: EmployeeList, canActivate: [authGuard] },
   { path: 'employees/new', component: EmployeeForm, canActivate: [authGuard] },

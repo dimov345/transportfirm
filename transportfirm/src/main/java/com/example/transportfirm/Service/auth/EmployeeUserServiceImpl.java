@@ -47,7 +47,7 @@ public class EmployeeUserServiceImpl implements EmployeeUserService {
         employee.setBankName(request.getBankName());
         employee.setIban(request.getIban());
         employee.setJobTitle(request.getJobTitle());
-        employee.setHiredDate(LocalDate.now());
+        employee.setHiredDate(request.getHiredDate());
         employee.setRole(request.getRole());
 
         employee = employeeService.createEmployee(employee);

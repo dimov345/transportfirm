@@ -1,23 +1,25 @@
-<div class="vehicles-container">
+<div class="list-container">
   <!-- Page Header -->
-  <div class="page-header">
-    <div class="page-title">
-      <h1>Управление на Превозни средства</h1>
-      <div class="breadcrumb">Списък на всички превозни средства</div>
-    </div>
-    <div class="header-actions">
-      <button class="btn-primary" routerLink="/vehicles/new">
-        <i class="material-icons">add</i>
-        Добави ново ППС
-      </button>
+  <div class="list-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Управление на Превозни средства</h1>
+        <p class="subtitle">Списък на всички превозни средства</p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn-primary" routerLink="/vehicles/new">
+          <i class="material-icons">add</i>
+          Добави ново ППС
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Filters Card -->
+  <!-- Filters -->
   <div class="filters-card">
     <div class="card-body">
       <div class="filters-row">
-
         <!-- Search -->
         <div class="filter-group search-group">
           <div class="search-box">
@@ -50,61 +52,101 @@
             <option value="Тежкотоварен камион">Тежкотоварен камион</option>
           </select>
         </div>
-
       </div>
     </div>
   </div>
 
   <!-- Vehicles Grid -->
-  <div class="vehicles-grid" *ngIf="filteredVehicles.length > 0">
-    <div
-      class="vehicle-card"
-      *ngFor="let vehicle of filteredVehicles; trackBy: trackByPlate"
-      [class.card-expired]="isAnyExpired(vehicle)"
-      [class.card-expiring]="isAnyExpiring(vehicle)">
-      <div class="card-body">
+  <div class="cards-container" *ngIf="filteredVehicles.length > 0">
+    <div class="cards-grid">
+      <div
+        class="card-item"
+        *ngFor="let vehicle of filteredVehicles; trackBy: trackById"
+        [class.card-expired]="isAnyExpired(vehicle)"
+        [class.card-expiring]="isAnyExpiring(vehicle)"
+      >
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-title">{{ vehicle.plateNumber }}</div>
+            <div class="status-badge" [class]="getStatusClass(vehicle.technicalCondition)">
+              {{ vehicle.technicalCondition }}
+            </div>
+          </div>
 
-        <div class="vehicle-header">
-          <div class="vehicle-plate">{{ vehicle.plateNumber }}</div>
-          <div class="vehicle-status" [class]="getStatusClass(vehicle.technicalCondition)">
-            {{ vehicle.technicalCondition }}
+          <div class="card-content">
+            <div class="info-item">
+              <i class="material-icons">directions_car</i>
+              <span class="text-truncate">{{ vehicle.model }}</span>
+            </div>
+
+            <div class="info-item">
+              <i class="material-icons">person</i>
+              <span class="text-truncate">{{ vehicle.owner }}</span>
+            </div>
+
+            <div class="info-item">
+              <i class="material-icons">category</i>
+              <span>{{ vehicle.typePps }}</span>
+            </div>
+
+            <div class="info-item">
+              <i class="material-icons">calendar_today</i>
+              <span>{{ vehicle.yearOfManufacture }} г.</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="actions-group">
+              <!-- DETAILS -->
+              <button
+                type="button"
+                class="btn-action btn-edit"
+                [routerLink]="['/vehicles', vehicle.id]"
+                title="Детайли"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 10c-1.93 0-3.5-1.57-3.5-3.5S10.07 8 12 8s3.5 1.57 3.5 3.5S13.93 15 12 15z"/>
+                </svg>
+              </button>
+
+              <!-- EDIT -->
+              <button
+                type="button"
+                class="btn-action btn-edit"
+                [routerLink]="['/vehicles/edit', vehicle.id]"
+                title="Редакция"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                </svg>
+              </button>
+
+              <!-- DOCUMENTS -->
+              <button
+                type="button"
+                class="btn-action btn-docs"
+                [routerLink]="['/vehicles-documents', vehicle.id]"
+                title="Документи"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+              </button>
+
+              <!-- DELETE -->
+              <button
+                type="button"
+                class="btn-action btn-danger"
+                (click)="deleteVehicle(vehicle.id)"
+                title="Изтрий"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div class="vehicle-info">
-          <div class="info-item">
-            <i class="material-icons">directions_car</i>
-            <span class="text-truncate">{{ vehicle.model }}</span>
-          </div>
-          <div class="info-item">
-            <i class="material-icons">person</i>
-            <span class="text-truncate">{{ vehicle.owner }}</span>
-          </div>
-          <div class="info-item">
-            <i class="material-icons">category</i>
-            <span>{{ vehicle.typePps }}</span>
-          </div>
-          <div class="info-item">
-            <i class="material-icons">calendar_today</i>
-            <span>{{ vehicle.yearOfManufacture }} г.</span>
-          </div>
-        </div>
-
-        <div class="vehicle-actions">
-          <div class="actions-group">
-            <button class="btn-action" [routerLink]="['/vehicles', vehicle.plateNumber]">
-              <i class="material-icons">edit</i>
-            </button>
-            <button class="btn-action"
-                    [routerLink]="['/vehicles-documents', vehicle.plateNumber]">
-              <i class="material-icons">folder</i>
-            </button>
-            <button class="btn-action btn-danger" (click)="deleteVehicle(vehicle.plateNumber)">
-              <i class="material-icons">delete</i>
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -116,7 +158,7 @@
     </div>
     <h3>Няма намерени превозни средства</h3>
     <p>Добавете първото превозно средство към системата</p>
-    <button class="btn-primary" routerLink="/vehicles/new">
+    <button type="button" class="btn-primary" routerLink="/vehicles/new">
       <i class="material-icons">add</i>
       Добави ППС
     </button>

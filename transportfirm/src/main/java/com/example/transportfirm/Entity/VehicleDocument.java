@@ -1,10 +1,11 @@
 package com.example.transportfirm.entity;
 
 import com.example.transportfirm.Enum.VehicleDocumentType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "vehicle_documents")
@@ -12,11 +13,13 @@ import java.time.LocalDate;
 public class VehicleDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "plateNumber", nullable = false)
+    @JoinColumn(name = "vehicle_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnore
     private VehicleRecord vehicle;
 
     @Enumerated(EnumType.STRING)

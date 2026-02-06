@@ -1,11 +1,13 @@
 package com.example.transportfirm.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "drivers_info")
@@ -13,16 +15,16 @@ import java.time.LocalDate;
 public class DriverInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     @JsonIgnoreProperties({"driverInfo", "mechanicInfo", "documents", "hibernateLazyInitializer", "handler"})
-    private Long id;
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
-    // Връзка към Employee (имейл взимаме от него)
     @OneToOne
     @JoinColumn(name = "employee_id", nullable = false)
+    @JsonBackReference("employee-driver")
     private Employee employee;
 
-    // Един шофьор кара един камион
     @OneToOne
     @JoinColumn(name = "vehicle_id")
     private VehicleRecord vehicle;

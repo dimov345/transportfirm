@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+
 import { DriverService } from '../../../core/services/driver.service';
-import { DriverInfo } from '../../../core/services/driver.service';
-import { RouterModule } from '@angular/router';
+import { Employee } from '../../../core/models/employee/employee.model';
+import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 
 @Component({
   selector: 'app-driver-form',
@@ -15,8 +16,16 @@ import { RouterModule } from '@angular/router';
 })
 export class DriverFormComponent implements OnInit {
   form!: FormGroup;
-  isEdit = false;
-  id!: number;
+
+  employeeId!: string;
+  driverInfoId: string | null = null;
+
+  isEdit = true;     // ✅ за твоя HTML (няма create в този бекенд)
+  loading = true;
+  saving = false;
+
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(
     private fb: FormBuilder,
@@ -27,7 +36,6 @@ export class DriverFormComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      employeeId: [null, Validators.required],
       driverLicenseIssuedOn: ['', Validators.required],
       driverLicenseExpiresOn: ['', Validators.required],
       qualificationCardIssuedOn: ['', Validators.required],
@@ -38,39 +46,80 @@ export class DriverFormComponent implements OnInit {
       digitalCardExpiresOn: ['', Validators.required],
     });
 
-    // ВЗИМАМЕ id от URL
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.id = Number(idParam);
-      this.isEdit = true;
+    if (!this.isBrowser) return;
 
-      // Зареждаме данните
-      this.driverService.getDriverById(this.id).subscribe(driver => {
-         this.form.patchValue({
-            employeeId: driver.employee?.id ?? null,  // 🔥 важен ред
-            ...driver
-        });
-      });
+    const employeeIdParam = this.route.snapshot.paramMap.get('id');
+    if (!employeeIdParam) {
+      this.router.navigate(['/drivers']);
+      return;
     }
+
+    this.employeeId = employeeIdParam;
+
+    // ✅ GET employee/{employeeId}
+    this.driverService.getEmployee(this.employeeId).subscribe({
+      next: (employee: Employee) => {
+        const di: DriverInfo | null | undefined = employee.driverInfo;
+
+        // ако DriverInfo трябва винаги да има — това е реален проблем в данните
+        if (!di) {
+          this.loading = false;
+          alert('Няма DriverInfo за този служител. (Трябва да се създава при createEmployee.)');
+          this.router.navigate(['/drivers']);
+          return;
+        }
+
+        this.driverInfoId = di.id;
+        this.loading = false;
+
+        this.form.patchValue({
+          driverLicenseIssuedOn: di.driverLicenseIssuedOn ?? '',
+          driverLicenseExpiresOn: di.driverLicenseExpiresOn ?? '',
+          qualificationCardIssuedOn: di.qualificationCardIssuedOn ?? '',
+          qualificationCardExpiresOn: di.qualificationCardExpiresOn ?? '',
+          psychologicalExamIssuedOn: di.psychologicalExamIssuedOn ?? '',
+          psychologicalExamExpiresOn: di.psychologicalExamExpiresOn ?? '',
+          digitalCardIssuedOn: di.digitalCardIssuedOn ?? '',
+          digitalCardExpiresOn: di.digitalCardExpiresOn ?? '',
+        });
+      },
+      error: (err: unknown) => {
+        console.error('Failed to load employee:', err);
+        this.loading = false;
+        this.router.navigate(['/drivers']);
+      }
+    });
   }
 
   onSubmit() {
-    const raw = this.form.getRawValue();
-     const payload: any = {
-      ...raw,
-      employee: { id: raw.employeeId }  // 🔥 задължително
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    if (!this.isBrowser) return;
+
+    if (!this.driverInfoId) {
+      alert('Липсва driverInfoId – няма как да се запише.');
+      return;
+    }
+
+    this.saving = true;
+
+    const payload: Partial<DriverInfo> = {
+      ...this.form.getRawValue(),
+      id: this.driverInfoId
     };
 
-    delete payload.employeeId;
-
-    if (this.isEdit) {
-      this.driverService.update(this.id, payload).subscribe(() => {
+    this.driverService.updateDriverInfo(this.driverInfoId, payload).subscribe({
+      next: () => {
+        this.saving = false;
         this.router.navigate(['/drivers']);
-      });
-    } else {
-      this.driverService.create(payload).subscribe(() => {
-        this.router.navigate(['/drivers']);
-      });
-    }
+      },
+      error: (err: unknown) => {
+        this.saving = false;
+        console.error('Update failed:', err);
+        alert('Грешка при запис!');
+      }
+    });
   }
 }

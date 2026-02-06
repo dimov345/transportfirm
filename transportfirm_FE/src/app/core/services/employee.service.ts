@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 // --- МИНИМАЛНИ ДАННИ ЗА ЛИСТА ---
 export interface EmployeeListItem {
-  id: number;
+  id: string;
   egn: string;
   name: string;
   jobTitle: string;
@@ -14,7 +14,7 @@ export interface EmployeeListItem {
 
 // --- ПЪЛЕН EMPLOYEE ОТ BACKEND ---
 export interface Employee {
-  id: number;
+  id: string;
   egn: string;
   name: string;
   dateOfBirth?: string;
@@ -78,7 +78,7 @@ export interface EmployeePayload {
 
 // --- DOCUMENTS ---
 export interface EmployeeDocument {
-  id: number;
+  id: string;
   type: string;
   fileName: string;
   filePath: string;
@@ -98,7 +98,7 @@ export class EmployeeService {
     return this.http.get<any[]>(`${this.apiUrl}/job/DRIVER`);
   }
 
-  getById(id: number): Observable<Employee> {
+  getById(id: string): Observable<Employee> {
     return this.http.get<Employee>(`${this.apiUrl}/${id}`);
   }
 
@@ -106,26 +106,11 @@ export class EmployeeService {
     return this.http.post<Employee>(this.apiUrl, payload);
   }
 
-  update(id: number, payload: EmployeePayload): Observable<Employee> {
-    return this.http.put<Employee>(`${this.apiUrl}/${id}`, payload);
+  update(id: string, payload: EmployeePayload): Observable<Employee> {
+    return this.http.put<Employee>(`${this.apiUrl}/update/${id}`, payload);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  // DOCUMENTS
-  getDocuments(employeeId: number): Observable<EmployeeDocument[]> {
-    return this.http.get<EmployeeDocument[]>(`${this.apiUrl}/${employeeId}/documents`);
-  }
-
-  uploadDocument(employeeId: number, file: File): Observable<EmployeeDocument> {
-    const form = new FormData();
-    form.append('file', file);
-    return this.http.post<EmployeeDocument>(`${this.apiUrl}/${employeeId}/documents`, form);
-  }
-
-  deleteDocument(employeeId: number, documentId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${employeeId}/documents/${documentId}`);
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/mechanics")
@@ -15,7 +16,7 @@ public class MechanicController {
     private final MechanicService mechanicService;
 
     @PostMapping("/create/{employeeId}")
-    public MechanicInfo create(@PathVariable Long employeeId) {
+    public MechanicInfo create(@PathVariable UUID employeeId) {
         return mechanicService.createMechanic(employeeId);
     }
 
@@ -25,12 +26,12 @@ public class MechanicController {
     }
 
     @GetMapping("/{id}")
-    public MechanicInfo get(@PathVariable Long id) {
+    public MechanicInfo get(@PathVariable UUID id) {
         return mechanicService.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         mechanicService.deleteMechanic(id);
     }
 }

@@ -3,28 +3,28 @@ import { SidebarItem } from "./sidebar.model";
 export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     label: 'Начало',
-    icon: '🏠',
+    icon: 'home',
     route: '/',
   },
   {
     label: 'Работници',
-    icon: '👷‍♂️',
+    icon: 'users',
     route: '/employees',
     roles: ['ADMIN', 'MANAGER']
   },
   {
     label: 'Документи',
-    icon: '📂',
+    icon: 'folder',
     children: [
       {
         label: 'Шофьори',
-        icon: '🚚',
+        icon: 'truck',
         route: '/drivers',
         roles: ['ADMIN', 'MANAGER', 'DISPATCHER']
       },
       {
         label: 'ППС',
-        icon: '🚛',
+        icon: 'lorry',
         route: '/vehicles',
         roles: ['ADMIN', 'MANAGER', 'MECHANIC']
       }
@@ -32,13 +32,13 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   },
   {
     label: 'Отчети',
-    icon: '📊',
+    icon: 'chart',
     route: '/reports',
     roles: ['ADMIN', 'ACCOUNTANT', 'MANAGER']
   },
   {
     label: 'Админ',
-    icon: '⚙️',
+    icon: 'settings',
     route: '/admin',
     roles: ['ADMIN']
   }

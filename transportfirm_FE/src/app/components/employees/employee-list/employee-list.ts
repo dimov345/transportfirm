@@ -1,6 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { EmployeeService, Employee, EmployeeListItem } from '../../../core/services/employee.service';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { EmployeeService, EmployeeListItem } from '../../../core/services/employee.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -12,58 +12,93 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./employee-list.scss']
 })
 export class EmployeeList implements OnInit {
-
   employees: EmployeeListItem[] = [];
   filtered: EmployeeListItem[] = [];
+  searchText = '';
+  loading = true;
 
-  searchText: string = '';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
-  constructor(private employeeService: EmployeeService, private router: Router,  private cdr: ChangeDetectorRef) {}
+  constructor(
+    private employeeService: EmployeeService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    if (!this.isBrowser) return; // SSR-safe
     this.loadEmployees();
   }
 
+  private setLoading(v: boolean) {
+    this.loading = v;
+    this.cdr.detectChanges();
+  }
+
   loadEmployees() {
-    this.employeeService.getAll().subscribe(data => {
-      this.employees = data;
-      this.filtered = data;
-      this.cdr.detectChanges();
+    this.setLoading(true);
+
+    this.employeeService.getAll().subscribe({
+      next: (data) => {
+        this.employees = data || [];
+        this.filtered = this.employees;
+        this.setLoading(false);
+      },
+      error: (err) => {
+        console.error('Error loading employees:', err);
+        this.setLoading(false);
+      }
     });
   }
 
   search() {
     const text = this.searchText.toLowerCase().trim();
 
+    if (!text) {
+      this.filtered = this.employees;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.filtered = this.employees.filter(e =>
-      e.name.toLowerCase().includes(text) ||
-      e.egn.includes(text) ||
-      (e.jobTitle && e.jobTitle.toLowerCase().includes(text))
+      (e.name || '').toLowerCase().includes(text) ||
+      (e.egn || '').includes(text) ||
+      (e.jobTitle || '').toLowerCase().includes(text)
     );
+
+    this.cdr.detectChanges();
   }
 
   createEmployee() {
     this.router.navigate(['/employees/new']);
   }
 
-  editEmployee(id: number) {
-    this.router.navigate([`/employees/form/${id}`]);
+  editEmployee(id: string) {
+    this.router.navigate([`/employees/edit/${id}`]);
   }
 
-  viewDetails(id: number) {
+  viewDetails(id: string) {
     this.router.navigate([`/employees/details/${id}`]);
   }
 
-  viewDocuments(id: number) {
-    this.router.navigate([`/employees/documents/${id}`]);
+  viewDocuments(id: string) {
+    this.router.navigate([`/employees-documents/${id}`]);
   }
 
-  deleteEmployee(id: number) {
+  deleteEmployee(id: string) {
     if (!confirm('Сигурен ли си, че искаш да изтриеш този служител?')) return;
 
-    this.employeeService.delete(id).subscribe(() => {
-      this.employees = this.employees.filter(e => e.id !== id);
-      this.search();
+    this.employeeService.delete(id).subscribe({
+      next: () => {
+        this.employees = this.employees.filter(e => e.id !== id);
+        this.search();
+      },
+      error: (err) => console.error('Error deleting employee:', err)
     });
   }
+
+  trackByEmployeeId(index: number, emp: any) {
+  return emp.id;
+}
 }

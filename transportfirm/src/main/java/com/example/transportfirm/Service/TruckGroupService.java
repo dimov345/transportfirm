@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class TruckGroupService {
     private final MechanicRepository mechanicRepository;
     private final VehicleRepository vehicleRepository;
 
-    public TruckGroup createGroup(Long mechanicId, String groupName) {
+    public TruckGroup createGroup(UUID mechanicId, String groupName) {
 
         MechanicInfo mechanic = mechanicRepository.findById(mechanicId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mechanic not found"));
@@ -37,15 +38,15 @@ public class TruckGroupService {
         return truckGroupRepository.findAll();
     }
 
-    public TruckGroup getGroup(Long id) {
+    public TruckGroup getGroup(UUID id) {
         return truckGroupRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
     }
 
-    public TruckGroup assignTruck(Long groupId, String plateNumber) {
+    public TruckGroup assignTruck(UUID groupId, UUID id) {
         TruckGroup group = getGroup(groupId);
 
-        VehicleRecord truck = vehicleRepository.findById(plateNumber)
+        VehicleRecord truck = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Truck not found"));
 
         truck.setTruckGroup(group);
@@ -54,7 +55,7 @@ public class TruckGroupService {
         return group;
     }
 
-    public void deleteGroup(Long id) {
+    public void deleteGroup(UUID id) {
         truckGroupRepository.deleteById(id);
     }
 }

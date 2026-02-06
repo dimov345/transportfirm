@@ -1,4 +1,8 @@
 @use '@angular/material' as mat;
+@use './styles/forms';
+@use './styles/details';
+@use './styles/documents';
+@use './styles/list';
 
 *,
 *::before,
@@ -15,6 +19,7 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
   height: 100%;
 }
 
@@ -29,4 +34,10 @@ body {
   font: var(--mat-sys-body-medium);
 
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* полезно за full screen layouts (особено при Angular) */
+app-root {
+  display: block;
+  min-height: 100vh;
 }

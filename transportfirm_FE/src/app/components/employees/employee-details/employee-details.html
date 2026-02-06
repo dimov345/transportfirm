@@ -1,51 +1,173 @@
-@if (employee) {
-<div class="details-container">
+@if (employee; as e) {
+  <div class="details-container">
+    <!-- Header -->
+    <div class="details-header">
+      
 
-  <h2>Детайли за служител</h2>
+      <div class="header-content">
+        <div class="title-section">
+          <h1>Детайли за служител</h1>
+          <div class="plate-number">{{ e.name }}</div>
+        </div>
 
-  <section>
-    <h3>Лични данни</h3>
-    <div class="row">
-      <div><strong>Име:</strong> {{ employee.name }}</div>
-      <div><strong>ЕГН:</strong> {{ employee.egn }}</div>
-      <div><strong>Дата на раждане:</strong> {{ employee.dateOfBirth }}</div>
-      <div><strong>Телефон:</strong> {{ employee.phone }}</div>
-      <div><strong>Имейл:</strong> {{ employee.email }}</div>
+
+         <div class="header-actions">
+          <button 
+            type="button" 
+            class="btn-secondary" 
+            routerLink="/employees" 
+            aria-label="Назад към списъка">
+            <i class="material-icons">arrow_back_ios</i>
+            Назад
+          </button>
+
+          <button
+            type="button"
+            class="btn-secondary"
+            [routerLink]="['/employees/edit', e.id]"
+            aria-label="Редактирай служител"
+          >
+            <i class="material-icons">edit</i>
+            Редактирай
+          </button>
+
+          <button
+            type="button"
+            class="btn-primary"
+            [routerLink]="['/employees-documents', e.id]"
+            aria-label="Документи на служител"
+          >
+            <i class="material-icons">folder</i>
+            Документи
+          </button>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <section>
-    <h3>Адреси</h3>
-    <div class="row">
-      <div><strong>Постоянен адрес:</strong> {{ employee.addressPermanent }}</div>
-      <div><strong>Настоящ адрес:</strong> {{ employee.addressCurrent }}</div>
+    <!-- Content -->
+    <div class="details-content">
+      <div class="details-grid">
+        <!-- Лични данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">person</i>
+            <h2>Лични данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Име</label>
+              <span class="value">{{ e.name || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>ЕГН</label>
+              <span class="value">{{ e.egn || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Дата на раждане</label>
+              <span class="value">{{ e.dateOfBirth || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Телефон</label>
+              <span class="value">{{ e.phone || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Имейл</label>
+              <span class="value">{{ e.email || '—' }}</span>
+            </div>
+
+            <!-- Адреси (преместени тук) -->
+            <div class="info-item">
+              <label>Постоянен адрес</label>
+              <span class="value">{{ e.addressPermanent || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Настоящ адрес</label>
+              <span class="value">{{ e.addressCurrent || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Фирмени данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">business</i>
+            <h2>Фирмени данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Длъжност</label>
+              <span class="value">{{ e.jobTitle || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Назначен на</label>
+              <span class="value">{{ e.hiredDate || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Статус</label>
+              <span class="value">{{ e.employmentStatus || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Освободен на</label>
+              <span class="value">{{ e.firedDate || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Тип договор</label>
+              <span class="value">{{ e.contractType || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Работно време</label>
+              <span class="value">{{ e.workingHours || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Банкови данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">account_balance</i>
+            <h2>Банкови данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Банка</label>
+              <span class="value">{{ e.bankName || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>IBAN</label>
+              <span class="value">{{ e.iban || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Заплата</label>
+              <span class="value">{{ e.salary || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Заплата нето</label>
+              <span class="value">{{ e.salaryNeto || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Валута</label>
+              <span class="value">{{ e.salaryCurrency || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </section>
-
-  <section>
-    <h3>Фирмени данни</h3>
-    <div class="row">
-      <div><strong>Длъжност:</strong> {{ employee.jobTitle }}</div>
-      <div><strong>Назначен на:</strong> {{ employee.hiredDate }}</div>
-      <div><strong>Статус:</strong> {{ employee.employmentStatus }}</div>
-      <div><strong>Освободен на:</strong> {{ employee.firedDate || '-' }}</div>
-      <div><strong>Тип договор:</strong> {{ employee.contractType }}</div>
-      <div><strong>Заплата:</strong> {{ employee.salary }} </div>
-      <div><strong>Заплата Нето:</strong> {{ employee.salaryNeto }} </div>
-      <div><strong>Валута на заплата:</strong> {{ employee.salaryCurrency }}</div>
-      <div><strong>Работно време:</strong> {{ employee.workingHours }}</div>
-    </div>
-  </section>
-
-  <section>
-    <h3>Банкови данни</h3>
-    <div class="row">
-      <div><strong>Банка:</strong> {{ employee.bankName }}</div>
-      <div><strong>IBAN:</strong> {{ employee.iban }}</div>
-    </div>
-  </section>
-
-  <a routerLink="/employees" class="back-btn">⬅ Назад</a>
-
-</div>
+  </div>
 }

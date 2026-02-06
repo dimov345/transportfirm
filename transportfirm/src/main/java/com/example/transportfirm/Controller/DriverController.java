@@ -5,19 +5,18 @@ import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.DriverDocumentType;
 import com.example.transportfirm.Enum.JobTitle;
-import com.example.transportfirm.repository.DriverDocumentRepository;
-import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.service.DriverService;
 import com.example.transportfirm.service.EmployeeService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -25,105 +24,50 @@ import java.util.List;
 public class DriverController {
 
     private final DriverService driverService;
-
     private final EmployeeService employeeService;
 
-    private final DriverRepository driverRepository;
-
-
-    private final DriverDocumentRepository documentRepository;
-
-    public DriverController(DriverService driverService, EmployeeService employeeService,
-                            DriverRepository driverRepository, DriverDocumentRepository documentRepository) {
+    public DriverController(DriverService driverService, EmployeeService employeeService) {
         this.driverService = driverService;
         this.employeeService = employeeService;
-        this.driverRepository = driverRepository;
-        this.documentRepository = documentRepository;
     }
 
-    // ---------------- DRIVER CRUD ----------------
-
-    @GetMapping
-    public List<DriverInfo> getAllDrivers() {
-        return driverService.getAllDrivers();
+    // 🔹 ВРЪЩА EMPLOYEE С ВЪТРЕШЕН driverInfo / mechanicInfo / dispatcherInfo
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<Employee> getEmployee(@PathVariable UUID employeeId) {
+        return ResponseEntity.ok(employeeService.getById(employeeId));
     }
 
-    @GetMapping("/{employeeId}")
-    public ResponseEntity<?> getDriver(@PathVariable Long employeeId) {
-        DriverInfo info = driverService.getDriver(employeeId);
-
-        if (info == null) {
-            return ResponseEntity.ok("NO_INFO");
-        }
-
-        return ResponseEntity.ok(info);
-    }
-
-
-
+    // 🔹 ВСИЧКИ СЛУЖИТЕЛИ С jobTitle=DRIVER
     @GetMapping("/job/{jobTitle}")
     public ResponseEntity<List<Employee>> getAllDriversFromEmployee(@PathVariable JobTitle jobTitle) {
         return ResponseEntity.ok(employeeService.getByJobTitle(jobTitle));
     }
 
-
-    @PostMapping
-    public DriverInfo createDriver(@RequestBody DriverInfo driver) {
-        return driverService.saveDriver(driver);
+    // 🔹 UPDATE DriverInfo
+    @PutMapping(value = "/{driverInfoId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public DriverInfo updateDriver(
+            @PathVariable UUID driverInfoId,
+            @Valid @RequestBody DriverInfo driver
+    ) {
+        return driverService.updateDriver(driverInfoId, driver);
     }
 
-    @PutMapping("/{id}")
-    public DriverInfo updateDriver(@PathVariable Long id, @RequestBody DriverInfo driver) {
-        return driverService.updateDriver(id, driver);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteDriver(@PathVariable Long id) {
-        driverService.deleteDriver(id);
+    // 🔹 DELETE DriverInfo
+    @DeleteMapping("/{driverInfoId}")
+    public void deleteDriver(@PathVariable UUID driverInfoId) {
+        driverService.deleteDriver(driverInfoId);
     }
 
     // ---------------- DOCUMENTS ----------------
 
-    @GetMapping("/{employeeId}/full-info")
-    public ResponseEntity<DriverInfo> getDriverFullInfo(@PathVariable Long employeeId) {
-        DriverInfo info = driverRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
-
-        // Зареждаме документите
-        List<DriverDocument> docs = documentRepository.findByEmployee_Id(info.getEmployee().getId());
-        // Ако имаш поле documents в DriverInfo, добави ги. Ако не – може да добавиш в DTO или Map.
-        // За простота – използвай Map:
-        // Map<String, Object> response = Map.of("driverInfo", info, "documents", docs);
-
-        return ResponseEntity.ok(info);
-    }
-
-
-
-
-
-    @GetMapping("/{id}/documents")
-    public List<DriverDocument> getDocuments(@PathVariable Long id) {
-        return driverService.getDriverDocuments(id);
-    }
-
-    @PostMapping("/{id}/documents")
-    public DriverDocument upload(
-            @PathVariable Long id,
-            @RequestParam("type") DriverDocumentType type,
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
-        return driverService.addDocument(id, type, file);
-    }
-
-    @GetMapping("/documents/{docId}")
-    public DriverDocument getDoc(@PathVariable Long docId) {
-        return driverService.getDocument(docId);
+    // ✅ employeeId вместо driverInfoId
+    @GetMapping("/employee/{employeeId}/documents")
+    public List<DriverDocument> getDocuments(@PathVariable UUID employeeId) {
+        return driverService.getDriverDocumentsByEmployee(employeeId);
     }
 
     @GetMapping("/documents/{docId}/download")
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long docId) throws IOException {
-
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID docId) throws IOException {
         DriverDocument doc = driverService.getDocument(docId);
 
         java.nio.file.Path path = java.nio.file.Paths.get(doc.getFilePath());
@@ -135,9 +79,20 @@ public class DriverController {
                 .body(fileBytes);
     }
 
+    // ✅ employeeId вместо driverInfoId
+    @PostMapping("/employee/{employeeId}/documents")
+    public DriverDocument upload(
+            @PathVariable UUID employeeId,
+            @RequestParam("type") DriverDocumentType type,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        return driverService.addDocument(employeeId, type, file);
+    }
 
     @DeleteMapping("/documents/{docId}")
-    public void deleteDoc(@PathVariable Long docId) {
+    public void deleteDoc(@PathVariable UUID docId) {
         driverService.deleteDocument(docId);
     }
+
 }
+

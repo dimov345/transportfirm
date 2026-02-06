@@ -4,41 +4,116 @@
      (mouseenter)="onMouseEnter()"
      (mouseleave)="onMouseLeave()">
 
-  <!-- Logo -->
-  <div class="logo">
-    <img src="logo (1).ico" class="logo-img">
-    <span class="app-name">TransTrack</span>
-  </div>
+  <!-- Logo (запазваме) -->
+  <a class="brand" routerLink="/">
+    <img src="logo (1).ico" class="brand-logo" alt="Logo">
+    <div class="brand-text">
+      <div class="brand-title">TransTrack</div>
+      <div class="brand-subtitle">TransportFirm</div>
+    </div>
+  </a>
+
+  <div class="divider"></div>
 
   <ul class="menu">
-    <ng-container *ngFor="let item of items; let i = index">
+    <ng-container *ngFor="let item of items; let i = index; trackBy: trackByIndex">
 
       <!-- Single link -->
-      <li *ngIf="!item.children"
+      <li class="item"
+          *ngIf="!item.children"
           [routerLink]="item.route"
-          routerLinkActive="active">
-        <span class="icon">{{ item.icon }}</span>
-        <span class="menu-text">{{ item.label }}</span>
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+
+        <span class="indicator" aria-hidden="true"></span>
+
+        <span class="ico" aria-hidden="true">
+          <ng-container [ngSwitch]="iconName(item.icon)">
+            <svg *ngSwitchCase="'home'" viewBox="0 0 24 24" class="svg">
+              <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/>
+            </svg>
+
+            <svg *ngSwitchCase="'users'" viewBox="0 0 24 24" class="svg">
+              <path d="M16 11c1.7 0 3-1.6 3-3.5S17.7 4 16 4s-3 1.6-3 3.5S14.3 11 16 11Z"/>
+              <path d="M8 11c1.7 0 3-1.6 3-3.5S9.7 4 8 4 5 5.6 5 7.5 6.3 11 8 11Z"/>
+              <path d="M8 13c-2.7 0-8 1.3-8 4v3h10v-3c0-1.1.5-2.1 1.3-2.9C10.4 13.4 9.2 13 8 13Z"/>
+              <path d="M16 13c-1 0-2.1.1-3.1.4C14.1 14.3 15 15.5 15 17v3h9v-3c0-2.7-5.3-4-8-4Z"/>
+            </svg>
+
+            <svg *ngSwitchCase="'folder'" viewBox="0 0 24 24" class="svg">
+              <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/>
+            </svg>
+
+            <svg *ngSwitchCase="'truck'" viewBox="0 0 24 24" class="svg">
+              <path d="M3 6h12v10H3V6Z"/>
+              <path d="M15 10h4l2 2v4h-6v-6Z"/>
+              <path d="M7 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M17 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+            </svg>
+
+            <svg *ngSwitchCase="'lorry'" viewBox="0 0 24 24" class="svg">
+              <path d="M4 7h12l2 5v7H4V7Z"/>
+              <path d="M6.5 17.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M15.5 17.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+            </svg>
+
+            <svg *ngSwitchCase="'chart'" viewBox="0 0 24 24" class="svg">
+              <path d="M4 19V5"/>
+              <path d="M4 19h16"/>
+              <path d="M8 17v-6"/>
+              <path d="M12 17V9"/>
+              <path d="M16 17v-3"/>
+            </svg>
+
+            <svg *ngSwitchCase="'settings'" viewBox="0 0 24 24" class="svg">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"/>
+              <path d="M19.1 12.9a7.8 7.8 0 0 0 0-1.8l2-1.6-1.9-3.3-2.4 1a7.6 7.6 0 0 0-1.6-.9l-.4-2.6H10l-.4 2.6c-.6.2-1.1.5-1.6.9l-2.4-1-1.9 3.3 2 1.6a7.8 7.8 0 0 0 0 1.8l-2 1.6 1.9 3.3 2.4-1c.5.4 1 .7 1.6.9l.4 2.6h3.8l.4-2.6c.6-.2 1.1-.5 1.6-.9l2.4 1 1.9-3.3-2-1.6Z"/>
+            </svg>
+          </ng-container>
+        </span>
+
+        <span class="label">{{ item.label }}</span>
       </li>
 
-      <!-- Submenu -->
-      <li *ngIf="item.children"
-          class="has-submenu"
+      <!-- Submenu trigger -->
+      <li class="item has-sub"
+          *ngIf="item.children"
+          [class.open]="activeMenu === i"
           (click)="toggleMenu(i)">
-        <span class="icon">{{ item.icon }}</span>
-        <span class="menu-text">{{ item.label }}</span>
-        <span class="submenu-arrow">▼</span>
+
+        <span class="indicator" aria-hidden="true"></span>
+
+        <span class="ico" aria-hidden="true">
+          <ng-container [ngSwitch]="iconName(item.icon)">
+            <svg *ngSwitchCase="'folder'" viewBox="0 0 24 24" class="svg">
+              <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/>
+            </svg>
+            <svg *ngSwitchDefault viewBox="0 0 24 24" class="svg">
+              <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/>
+            </svg>
+          </ng-container>
+        </span>
+
+        <span class="label">{{ item.label }}</span>
+
+        <span class="chev" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="svg chev-svg">
+            <path d="M7.5 9.5 12 14l4.5-4.5"/>
+          </svg>
+        </span>
       </li>
 
-      <ul class="submenu" *ngIf="activeMenu === i">
-        <li *ngFor="let child of item.children"
+      <ul class="sub" *ngIf="item.children && activeMenu === i">
+        <li class="sub-item"
+            *ngFor="let child of item.children"
             [routerLink]="child.route"
             routerLinkActive="active">
-          <div class="submenu-line"></div>
-          {{ child.label }}
+          <span class="sub-dot" aria-hidden="true"></span>
+          <span class="sub-label">{{ child.label }}</span>
         </li>
       </ul>
 
     </ng-container>
   </ul>
+
 </nav>

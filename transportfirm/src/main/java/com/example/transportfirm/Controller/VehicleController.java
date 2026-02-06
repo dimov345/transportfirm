@@ -5,6 +5,7 @@ import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.Enum.VehicleDocumentType;
 import com.example.transportfirm.service.VehicleService;
 
+import jakarta.validation.Valid;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -36,27 +38,32 @@ public class VehicleController {
         return vehicleService.getAll();
     }
 
-    @GetMapping("/{plateNumber}")
-    public VehicleRecord getVehicle(@PathVariable String plateNumber) {
-        return vehicleService.getByPlate(plateNumber);
+    @GetMapping("/{id}")
+    public VehicleRecord getVehicle(@PathVariable UUID id) {
+        return vehicleService.getByPlate(id);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public VehicleRecord createVehicle(@RequestBody VehicleRecord vehicle) {
         return vehicleService.save(vehicle);
     }
 
-    @PutMapping("/{plateNumber}")
+
+    @PutMapping(
+            value = "/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public VehicleRecord updateVehicle(
-            @PathVariable String plateNumber,
-            @RequestBody VehicleRecord vehicle
+            @PathVariable UUID id,
+            @Valid @RequestBody VehicleRecord vehicle
     ) {
-        return vehicleService.update(plateNumber, vehicle);
+        return vehicleService.update(id, vehicle);
     }
 
-    @DeleteMapping("/{plateNumber}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable String plateNumber) {
-        vehicleService.delete(plateNumber);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVehicle(@PathVariable UUID id) {
+        vehicleService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -65,24 +72,24 @@ public class VehicleController {
     // DOCUMENT LOGIC
     // ===========================================================
 
-    @GetMapping("/{plateNumber}/documents")
-    public List<VehicleDocument> getVehicleDocuments(@PathVariable String plateNumber) {
-        return vehicleService.getDocumentsByVehicle(plateNumber);
+    @GetMapping("/{id}/documents")
+    public List<VehicleDocument> getVehicleDocuments(@PathVariable UUID id) {
+        return vehicleService.getDocumentsByVehicle(id);
     }
 
 
-    @PostMapping("/{plateNumber}/documents")
+    @PostMapping("/{id}/documents")
     public VehicleDocument uploadDocument(
-            @PathVariable String plateNumber,
+            @PathVariable UUID id,
             @RequestParam("type") VehicleDocumentType type,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
-        return vehicleService.addDocument(plateNumber, type, file);
+        return vehicleService.addDocument(id, type, file);
     }
 
 
     @GetMapping("/documents/{id}/download")
-    public ResponseEntity<Resource> downloadVehicleDocument(@PathVariable Long id) {
+    public ResponseEntity<Resource> downloadVehicleDocument(@PathVariable UUID id) {
 
         VehicleDocument doc = vehicleService.getDocumentById(id);
         Path filePath = vehicleService.getDocumentPath(doc.getFilePath());
@@ -103,7 +110,7 @@ public class VehicleController {
 
 
     @DeleteMapping("/documents/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDocument(@PathVariable UUID id) {
         vehicleService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }

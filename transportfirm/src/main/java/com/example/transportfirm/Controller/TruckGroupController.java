@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/truck-groups")
@@ -16,7 +17,7 @@ public class TruckGroupController {
     private final TruckGroupService truckGroupService;
 
     @PostMapping("/create/{mechanicId}")
-    public TruckGroup createGroup(@PathVariable Long mechanicId, @RequestBody CreateGroupRequest req) {
+    public TruckGroup createGroup(@PathVariable UUID mechanicId, @RequestBody CreateGroupRequest req) {
         return truckGroupService.createGroup(mechanicId, req.getGroupName());
     }
 
@@ -26,17 +27,17 @@ public class TruckGroupController {
     }
 
     @GetMapping("/{id}")
-    public TruckGroup get(@PathVariable Long id) {
+    public TruckGroup get(@PathVariable UUID id) {
         return truckGroupService.getGroup(id);
     }
 
-    @PostMapping("/{groupId}/assign/{plateNumber}")
-    public TruckGroup assignTruck(@PathVariable Long groupId, @PathVariable String plateNumber) {
-        return truckGroupService.assignTruck(groupId, plateNumber);
+    @PostMapping("/{groupId}/assign/{vehicleId}")
+    public TruckGroup assignTruck(@PathVariable UUID groupId, @PathVariable UUID id) {
+        return truckGroupService.assignTruck(groupId, id);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         truckGroupService.deleteGroup(id);
     }
 

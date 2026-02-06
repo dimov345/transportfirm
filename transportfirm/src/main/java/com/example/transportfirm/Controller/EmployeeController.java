@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/employees")
@@ -16,15 +17,15 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Employee> update(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Employee employee) {
         return ResponseEntity.ok(employeeService.update(id, employee));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Employee> getById(@PathVariable Long id) {
+    public ResponseEntity<Employee> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(employeeService.getById(id));
     }
 
@@ -43,8 +44,8 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getByEgn(egn));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         employeeService.delete(id);
         return ResponseEntity.noContent().build();
     }

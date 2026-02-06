@@ -4,10 +4,10 @@ import com.example.transportfirm.entity.DriverInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface DriverRepository extends JpaRepository<DriverInfo, Long> {
-    Optional<DriverInfo> findById(Long id);
+public interface DriverRepository extends JpaRepository<DriverInfo, UUID> {
 
-    Optional<DriverInfo> findByEmployeeId(Long employeeId);
+    Optional<DriverInfo> findByEmployeeId(UUID employeeId);
 
 }

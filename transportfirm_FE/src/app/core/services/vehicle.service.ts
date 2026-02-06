@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface VehicleInfo {
+  id: string;
   plateNumber: string;
   model: string;
   engineNumber: string;
@@ -23,9 +24,10 @@ export interface VehicleInfo {
 }
 
 export interface VehicleDocument {
-  id: number;
+  id: string;
+  type: string;            
   fileName: string;
-  filepath: string;
+  filePath: string;
   vehicle: {
     plateNumber: string;
   };
@@ -42,38 +44,40 @@ export class VehicleService {
     return this.http.get<VehicleInfo[]>(this.apiUrl);
   }
 
-  getByPlateNumber(plateNumber: string): Observable<VehicleInfo> {
-    return this.http.get<VehicleInfo>(`${this.apiUrl}/${plateNumber}`);
+  getById(id: string): Observable<VehicleInfo> {
+    return this.http.get<VehicleInfo>(`${this.apiUrl}/${id}`);
   }
 
   create(vehicle: VehicleInfo): Observable<VehicleInfo> {
     return this.http.post<VehicleInfo>(this.apiUrl, vehicle);
   }
 
-  update(plateNumber: string, vehicle: VehicleInfo): Observable<VehicleInfo> {
-    return this.http.put<VehicleInfo>(`${this.apiUrl}/${plateNumber}`, vehicle);
+  update(id: string, vehicle: VehicleInfo): Observable<VehicleInfo> {
+    return this.http.put<VehicleInfo>(`${this.apiUrl}/${id}`, vehicle);
   }
 
-  delete(plateNumber: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${plateNumber}`);
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   // ===== Documents =====
-  getDocuments(plateNumber: string): Observable<VehicleDocument[]> {
-    return this.http.get<VehicleDocument[]>(`${this.apiUrl}/${plateNumber}/documents`);
+  getDocuments(id: string): Observable<VehicleDocument[]> {
+    return this.http.get<VehicleDocument[]>(`${this.apiUrl}/${id}/documents`);
   }
 
-  uploadDocument(plateNumber: string, file: File): Observable<VehicleDocument> {
-    const formData = new FormData();
+  uploadDocument(id: string, type: string, file: File): Observable<VehicleDocument> {
+    const formData = new FormData(); 
+    formData.append('type', type);
     formData.append('file', file);
-    return this.http.post<VehicleDocument>(`${this.apiUrl}/${plateNumber}/documents`, formData);
+    return this.http.post<VehicleDocument>(`${this.apiUrl}/${id}/documents`, formData);
   }
 
-  downloadDocument(plateNumber: string, id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${plateNumber}/documents/${id}`, { responseType: 'blob' });
+  downloadDocument(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/documents/${id}/download`, { responseType: 'blob' });
   }
 
-  deleteDocument(plateNumber: string, id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${plateNumber}/documents/${id}`);
+  deleteDocument(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
   }
+
 }

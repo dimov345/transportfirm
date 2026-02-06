@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { VehicleService} from '../../../core/services/vehicle.service';
+import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -15,7 +15,8 @@ export class VehicleFormComponent implements OnInit {
   vehicleForm: FormGroup;
   isEdit = false;
   isSubmitting = false;
-  plateNumber = '';
+
+  id = ''; // UUID от route
 
   vehicleTypes = [
     'Лек автомобил',
@@ -53,16 +54,21 @@ export class VehicleFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.plateNumber = this.route.snapshot.paramMap.get('plateNumber') || '';
-    
-    if (this.plateNumber) {
+    this.id = this.route.snapshot.paramMap.get('id') || '';
+
+    if (this.id) {
       this.isEdit = true;
+
+      // не позволявай промяна на plateNumber при edit
+      this.vehicleForm.get('plateNumber')?.disable({ emitEvent: false });
+
       this.loadVehicle();
     }
   }
 
   createForm(): FormGroup {
     return this.fb.group({
+      id: [''], // може да стои (backend може да го игнорира при create)
       plateNumber: ['', [Validators.required, Validators.maxLength(20)]],
       model: ['', [Validators.required, Validators.maxLength(100)]],
       engineNumber: ['', [Validators.required, Validators.maxLength(50)]],
@@ -84,12 +90,13 @@ export class VehicleFormComponent implements OnInit {
   }
 
   loadVehicle() {
-    this.vehicleService.getByPlateNumber(this.plateNumber).subscribe({
-      next: (vehicle) => {
+    this.vehicleService.getById(this.id).subscribe({
+      next: (vehicle: VehicleInfo) => {
         this.vehicleForm.patchValue(vehicle);
       },
       error: () => {
         alert('Грешка при зареждане на данните за превозното средство!');
+        this.router.navigate(['/vehicles']);
       }
     });
   }
@@ -101,10 +108,12 @@ export class VehicleFormComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    const formData = this.vehicleForm.value;
 
-    const request = this.isEdit 
-      ? this.vehicleService.update(this.plateNumber, formData)
+    // IMPORTANT: включва disabled полета (plateNumber) в payload-а
+    const formData = this.vehicleForm.getRawValue();
+
+    const request = this.isEdit
+      ? this.vehicleService.update(this.id, formData)
       : this.vehicleService.create(formData);
 
     request.subscribe({

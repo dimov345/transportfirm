@@ -1,9 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { catchError, of } from 'rxjs';
+
+import { DriverService } from '../../../core/services/driver.service';
+import { Employee } from '../../../core/models/employee/employee.model';
+import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 
 @Component({
   selector: 'app-driver-details',
@@ -13,99 +15,93 @@ import { of } from 'rxjs';
   styleUrls: ['./driver-details.scss']
 })
 export class DriverDetails implements OnInit {
-  driver: any = null;
+  employee: Employee | null = null;
+  driverInfo: DriverInfo | null = null;
+
   error = '';
-  noInfo = false; // 👉 НОВО - ако няма DriverInfo запис
-  id!: string | null;
+  loading = true;
+
+  employeeId!: string;
+
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient,
+    private driverService: DriverService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.id = this.route.snapshot.paramMap.get('id'); // 🔥 вече използваме id, НЕ egn
+    // SSR safe
+    if (!this.isBrowser) return;
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (!idParam) {
+      this.error = 'Не е посочен ID на шофьора';
+      this.loading = false;
+      return;
+    }
+
+    this.employeeId = idParam;
     this.loadDriverDetails();
   }
 
   loadDriverDetails() {
-    if (!this.id) {
-      this.error = 'Не е посочен ID на шофьора';
-      return;
-    }
+    this.loading = true;
+    this.error = '';
 
-    this.http.get(`http://localhost:8080/api/drivers/${this.id}`)
-      .pipe(
-        catchError(err => {
-          this.error = 'Грешка при зареждане на данните за шофьора';
-          return of(null);
-        })
-      )
-      .subscribe(data => {
+    this.driverService.getEmployee(this.employeeId).pipe(
+      catchError((err: unknown) => {
+        console.error(err);
+        this.error = 'Грешка при зареждане на данните за шофьора';
+        this.loading = false;
+        return of(null);
+      })
+    ).subscribe((emp) => {
+      if (!emp) return;
 
-        if (!data) return;
+      this.employee = emp;
+      this.driverInfo = emp.driverInfo ?? null;
 
-        // 👉 Backend връща "NO_INFO"
-        if (data === "NO_INFO") {
-          this.noInfo = true;
-          return;
-        }
+      // ако за този employee няма driverInfo -> показваме грешка/empty
+      if (!this.driverInfo) {
+        this.error = 'Този служител няма DriverInfo (няма срокове за документи).';
+      }
 
-        this.driver = data;
-
-        // 👉 гарантираме, че employee винаги съществува
-        if (!this.driver.employee) {
-          this.driver.employee = {
-            name: '',
-            egn: '',
-            phone: '',
-            email: ''
-          };
-        }
-
-        this.cdr.detectChanges();
-      });
+      this.loading = false;
+      this.cdr.detectChanges();
+    });
   }
 
   // ---------------- DOCUMENT STATUS ------------------
 
-  get hasExpiredDocuments(): boolean {
-    if (!this.driver) return false;
-    const today = new Date();
-    
+  private getExpiryDates(): (string | null)[] {
+    if (!this.driverInfo) return [];
     return [
-      this.driver.driverLicenseExpiresOn,
-      this.driver.qualificationCardExpiresOn,
-      this.driver.psychologicalExamExpiresOn,
-      this.driver.digitalCardExpiresOn
-    ].some(date => date && new Date(date) < today);
+      this.driverInfo.driverLicenseExpiresOn,
+      this.driverInfo.qualificationCardExpiresOn,
+      this.driverInfo.psychologicalExamExpiresOn,
+      this.driverInfo.digitalCardExpiresOn
+    ];
+  }
+
+  get hasExpiredDocuments(): boolean {
+    const today = new Date();
+    return this.getExpiryDates().some(d => d && new Date(d) < today);
   }
 
   get expiredDocumentsCount(): number {
-    if (!this.driver) return 0;
     const today = new Date();
-    
-    return [
-      this.driver.driverLicenseExpiresOn,
-      this.driver.qualificationCardExpiresOn,
-      this.driver.psychologicalExamExpiresOn,
-      this.driver.digitalCardExpiresOn
-    ].filter(date => date && new Date(date) < today).length;
+    return this.getExpiryDates().filter(d => d && new Date(d) < today).length;
   }
 
   get expiringDocumentsCount(): number {
-    if (!this.driver) return 0;
     const today = new Date();
     const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-    
-    return [
-      this.driver.driverLicenseExpiresOn,
-      this.driver.qualificationCardExpiresOn,
-      this.driver.psychologicalExamExpiresOn,
-      this.driver.digitalCardExpiresOn
-    ].filter(date => {
+
+    return this.getExpiryDates().filter(date => {
       if (!date) return false;
       const expiry = new Date(date);
       return expiry > today && expiry <= in30Days;
@@ -142,14 +138,13 @@ export class DriverDetails implements OnInit {
   }
 
   editDriver() {
-    if (this.driver && this.id) {
-      this.router.navigate(['/drivers/edit', this.id]); // 🔥 ID, не egn
-    }
+    // edit е по employeeId (както при list/form)
+    this.router.navigate(['/drivers/edit', this.employeeId]);
   }
 
   viewDocuments() {
-    if (this.driver && this.driver.id) {
-      this.router.navigate(['/driver-documents', this.id]);
-    }
+    // документите ти в контролера са по driverInfoId
+    if (!this.driverInfo?.id) return;
+    this.router.navigate(['/driver-documents', this.driverInfo.id]);
   }
 }

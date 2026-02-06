@@ -1,15 +1,13 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-
+import { Employee } from '../models/employee/employee.model';
 
 export interface CreateEmployeeRequest {
-
   // лични
   egn: string;
   name: string;
-  dateOfBirth: string; // ISO format: yyyy-MM-dd
+  dateOfBirth: string; // yyyy-MM-dd
   phone: string;
   email: string;
 
@@ -45,8 +43,6 @@ export enum JobTitle {
   ADMINISTRATOR = 'ADMINISTRATOR'
 }
 
-
-
 export enum Role {
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
@@ -56,9 +52,6 @@ export enum Role {
   MECHANIC = 'MECHANIC'
 }
 
-
-
-
 export enum ContractType {
   FULL_TIME = 'FULL_TIME',
   PART_TIME = 'PART_TIME',
@@ -67,21 +60,21 @@ export enum ContractType {
   CIVIL_CONTRACT = 'CIVIL_CONTRACT'
 }
 
-
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AdminService {
+  private http = inject(HttpClient);
 
-  private readonly API_URL = 'http://localhost:8080/api/auth/admin';
+  private readonly baseUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  createEmployee(payload: CreateEmployeeRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/admin/create-employee`, payload);
+  }
 
-  createEmployee(request: CreateEmployeeRequest): Observable<void> {
-    return this.http.post<void>(
-      `${this.API_URL}/create-employee`,
-      request
-    );
+  getEmployeeById(id: string): Observable<Employee> {
+    return this.http.get<Employee>(`${this.baseUrl}/employees/${id}`);
+  }
+
+  updateEmployee(id: string, employee: Employee): Observable<Employee> {
+    return this.http.put<Employee>(`${this.baseUrl}/employees/update/${id}`, employee);
   }
 }

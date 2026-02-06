@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeeService, Employee } from '../../../core/services/employee.service';
 import { RouterModule } from '@angular/router';
@@ -17,14 +17,14 @@ export class EmployeeDetails implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    const param = this.route.snapshot.paramMap.get('id');
-    const id = param ? Number(param) : 0;
+    const id = this.route.snapshot.paramMap.get('id');
 
-    if (id <= 0) {
+    if (!id || !id.trim()) {
       this.router.navigate(['/employees']);
       return;
     }
@@ -33,16 +33,18 @@ export class EmployeeDetails implements OnInit {
       next: (data) => {
         this.employee = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  editEmployee() {
+  editEmployee(employeeId: string) {
     if (!this.employee) return;
-    this.router.navigate(['/employees/edit', this.employee.id]);
+    this.router.navigate(['/employees/edit', employeeId]);
   }
 
   openDocuments() {

@@ -1,191 +1,214 @@
 <div class="details-container">
-  <!-- Page Header -->
-  <div class="details-header" *ngIf="vehicle as v">
-  <button class="back-btn" routerLink="/vehicles">
-    <i class="material-icons">arrow_back_ios</i>
-    Назад
-  </button>
-
-  <div class="header-content">
-    <div class="title-section">
-      <h1>Детайли за ППС</h1>
-      <div class="plate-number">{{ v.plateNumber }}</div>
-    </div>
-
-    <div class="header-actions">
-      <button class="btn-secondary" [routerLink]="['/vehicles/edit', v.plateNumber]">
-        <i class="material-icons">edit</i>
-        Редактирай
-      </button>
-
-      <button class="btn-primary" [routerLink]="['/vehicles-documents', v.plateNumber]">
-        <i class="material-icons">folder</i>
-        Документи
-      </button>
-    </div>
-  </div>
-</div>
-
-  <!-- Vehicle Details -->
-  <div class="details-content" *ngIf="vehicle">
-    <div class="details-grid">
-      <!-- Basic Information -->
-      <div class="info-card">
-        <div class="card-header">
-          <i class="material-icons">info</i>
-          <h2>Основни данни</h2>
+  <ng-container *ngIf="vehicle as v; else errorTpl">
+    <!-- Page Header -->
+    <div class="details-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1>Детайли за ППС</h1>
+          <div class="plate-number">{{ v.plateNumber }}</div>
         </div>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Номер на ППС</label>
-            <span class="value">{{ vehicle.plateNumber }}</span>
-          </div>
-          <div class="info-item">
-            <label>Модел</label>
-            <span class="value">{{ vehicle.model }}</span>
-          </div>
-          <div class="info-item">
-            <label>Собственик</label>
-            <span class="value">{{ vehicle.owner }}</span>
-          </div>
-          <div class="info-item">
-            <label>Година на производство</label>
-            <span class="value">{{ vehicle.yearOfManufacture }} г.</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Technical Information -->
-      <div class="info-card">
-        <div class="card-header">
-          <i class="material-icons">build</i>
-          <h2>Технически данни</h2>
-        </div>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Номер на двигател</label>
-            <span class="value">{{ vehicle.engineNumber }}</span>
-          </div>
-          <div class="info-item">
-            <label>Шаси номер</label>
-            <span class="value">{{ vehicle.chassisNumber }}</span>
-          </div>
-          <div class="info-item">
-            <label>Тип ППС</label>
-            <span class="value">{{ vehicle.typePps }}</span>
-          </div>
-          <div class="info-item">
-            <label>Техническо състояние</label>
-            <span class="value status-badge" [class]="getStatusClass(vehicle.technicalCondition)">
-              {{ vehicle.technicalCondition }}
-            </span>
-          </div>
-          <div class="info-item">
-            <label>Стандарт на емисии</label>
-            <span class="value">{{ vehicle.standardEmissions }}</span>
-          </div>
-        </div>
-      </div>
+        <div class="header-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            routerLink="/vehicles"
+            aria-label="Назад към списъка">
+            <i class="material-icons">arrow_back_ios</i>
+            Назад
+          </button>
 
-      <!-- Documents Status -->
-      <div class="info-card">
-        <div class="card-header">
-          <i class="material-icons">description</i>
-          <h2>Срокове на документи</h2>
-        </div>
-        <div class="documents-status">
-          <div class="doc-item" [class.expired]="isExpired(vehicle.kaskoDo)">
-            <div class="doc-icon">
-              <i class="material-icons">shield</i>
-            </div>
-            <div class="doc-info">
-              <span class="doc-title">Каско</span>
-              <span class="doc-dates">
-                {{ formatDate(vehicle.kaskoOt) }} - {{ formatDate(vehicle.kaskoDo) }}
-              </span>
-            </div>
-            <div class="doc-status" [class.expired]="isExpired(vehicle.kaskoDo)">
-              {{ isExpired(vehicle.kaskoDo) ? 'Изтекла' : 'Активна' }}
-            </div>
-          </div>
-
-          <div class="doc-item" [class.expired]="isExpired(vehicle.grazhdanskaOtgovornostDo)">
-            <div class="doc-icon">
-              <i class="material-icons">gavel</i>
-            </div>
-            <div class="doc-info">
-              <span class="doc-title">Гражданска отговорност</span>
-              <span class="doc-dates">
-                {{ formatDate(vehicle.grazhdanskaOtgovornostOt) }} - {{ formatDate(vehicle.grazhdanskaOtgovornostDo) }}
-              </span>
-            </div>
-            <div class="doc-status" [class.expired]="isExpired(vehicle.grazhdanskaOtgovornostDo)">
-              {{ isExpired(vehicle.grazhdanskaOtgovornostDo) ? 'Изтекла' : 'Активна' }}
-            </div>
-          </div>
-
-          <div class="doc-item" [class.expired]="isExpired(vehicle.gtpDo)">
-            <div class="doc-icon">
-              <i class="material-icons">construction</i>
-            </div>
-            <div class="doc-info">
-              <span class="doc-title">ГТП</span>
-              <span class="doc-dates">
-                {{ formatDate(vehicle.gtpOt) }} - {{ formatDate(vehicle.gtpDo) }}
-              </span>
-            </div>
-            <div class="doc-status" [class.expired]="isExpired(vehicle.gtpDo)">
-              {{ isExpired(vehicle.gtpDo) ? 'Изтекла' : 'Активна' }}
-            </div>
-          </div>
-
-          <div class="doc-item" [class.expired]="isExpired(vehicle.vinetkaDo)">
-            <div class="doc-icon">
-              <i class="material-icons">local_shipping</i>
-            </div>
-            <div class="doc-info">
-              <span class="doc-title">Винетка</span>
-              <span class="doc-dates">
-                {{ formatDate(vehicle.vinetkaOt) }} - {{ formatDate(vehicle.vinetkaDo) }}
-              </span>
-            </div>
-            <div class="doc-status" [class.expired]="isExpired(vehicle.vinetkaDo)">
-              {{ isExpired(vehicle.vinetkaDo) ? 'Изтекла' : 'Активна' }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="info-card">
-        <div class="card-header">
-          <i class="material-icons">flash_on</i>
-          <h2>Бързи действия</h2>
-        </div>
-        <div class="quick-actions">
-          <button class="action-btn" [routerLink]="['/vehicles/edit', vehicle.plateNumber]">
+          <button
+            type="button"
+            class="btn-secondary"
+            [routerLink]="['/vehicles/edit', v.id]"
+            aria-label="Редактирай ППС">
             <i class="material-icons">edit</i>
-            <span>Редактирай данни</span>
+            Редактирай
           </button>
-          <button class="action-btn" [routerLink]="['/vehicles-documents', vehicle.plateNumber]">
+
+          <button
+            type="button"
+            class="btn-primary"
+            [routerLink]="['/vehicles-documents', v.id]"
+            aria-label="Документи на ППС">
             <i class="material-icons">folder</i>
-            <span>Управление на документи</span>
+            Документи
           </button>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Vehicle Details -->
+    <div class="details-content">
+      <div class="details-grid">
+        <!-- Basic Information -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">info</i>
+            <h2>Основни данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Номер на ППС</label>
+              <span class="value">{{ v.plateNumber }}</span>
+            </div>
+            <div class="info-item">
+              <label>Модел</label>
+              <span class="value">{{ v.model }}</span>
+            </div>
+            <div class="info-item">
+              <label>Собственик</label>
+              <span class="value">{{ v.owner }}</span>
+            </div>
+            <div class="info-item">
+              <label>Година на производство</label>
+              <span class="value">{{ v.yearOfManufacture }} г.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Information -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">build</i>
+            <h2>Технически данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Номер на двигател</label>
+              <span class="value">{{ v.engineNumber }}</span>
+            </div>
+            <div class="info-item">
+              <label>Шаси номер</label>
+              <span class="value">{{ v.chassisNumber }}</span>
+            </div>
+            <div class="info-item">
+              <label>Тип ППС</label>
+              <span class="value">{{ v.typePps }}</span>
+            </div>
+            <div class="info-item">
+              <label>Техническо състояние</label>
+              <span class="value status-badge" [ngClass]="getStatusClass(v.technicalCondition)">
+                {{ v.technicalCondition }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Стандарт на емисии</label>
+              <span class="value">{{ v.standardEmissions }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents Status -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">description</i>
+            <h2>Срокове на документи</h2>
+          </div>
+
+          <div class="documents-status">
+            <div class="doc-item" [class.expired]="isExpired(v.kaskoDo)">
+              <div class="doc-icon">
+                <i class="material-icons">shield</i>
+              </div>
+              <div class="doc-info">
+                <span class="doc-title">Каско</span>
+                <span class="doc-dates">
+                  {{ formatDate(v.kaskoOt) }} - {{ formatDate(v.kaskoDo) }}
+                </span>
+              </div>
+              <div class="doc-status" [class.expired]="isExpired(v.kaskoDo)">
+                {{ isExpired(v.kaskoDo) ? 'Изтекла' : 'Активна' }}
+              </div>
+            </div>
+
+            <div class="doc-item" [class.expired]="isExpired(v.grazhdanskaOtgovornostDo)">
+              <div class="doc-icon">
+                <i class="material-icons">gavel</i>
+              </div>
+              <div class="doc-info">
+                <span class="doc-title">Гражданска отговорност</span>
+                <span class="doc-dates">
+                  {{ formatDate(v.grazhdanskaOtgovornostOt) }} - {{ formatDate(v.grazhdanskaOtgovornostDo) }}
+                </span>
+              </div>
+              <div class="doc-status" [class.expired]="isExpired(v.grazhdanskaOtgovornostDo)">
+                {{ isExpired(v.grazhdanskaOtgovornostDo) ? 'Изтекла' : 'Активна' }}
+              </div>
+            </div>
+
+            <div class="doc-item" [class.expired]="isExpired(v.gtpDo)">
+              <div class="doc-icon">
+                <i class="material-icons">construction</i>
+              </div>
+              <div class="doc-info">
+                <span class="doc-title">ГТП</span>
+                <span class="doc-dates">
+                  {{ formatDate(v.gtpOt) }} - {{ formatDate(v.gtpDo) }}
+                </span>
+              </div>
+              <div class="doc-status" [class.expired]="isExpired(v.gtpDo)">
+                {{ isExpired(v.gtpDo) ? 'Изтекла' : 'Активна' }}
+              </div>
+            </div>
+
+            <div class="doc-item" [class.expired]="isExpired(v.vinetkaDo)">
+              <div class="doc-icon">
+                <i class="material-icons">local_shipping</i>
+              </div>
+              <div class="doc-info">
+                <span class="doc-title">Винетка</span>
+                <span class="doc-dates">
+                  {{ formatDate(v.vinetkaOt) }} - {{ formatDate(v.vinetkaDo) }}
+                </span>
+              </div>
+              <div class="doc-status" [class.expired]="isExpired(v.vinetkaDo)">
+                {{ isExpired(v.vinetkaDo) ? 'Изтекла' : 'Активна' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">flash_on</i>
+            <h2>Бързи действия</h2>
+          </div>
+
+          <div class="quick-actions">
+            <button type="button" class="action-btn" [routerLink]="['/vehicles/edit', v.id]">
+              <i class="material-icons">edit</i>
+              <span>Редактирай данни</span>
+            </button>
+
+            <button type="button" class="action-btn" [routerLink]="['/vehicles-documents', v.id]">
+              <i class="material-icons">folder</i>
+              <span>Управление на документи</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="!vehicle">
-    <div class="error-icon">
-      <i class="material-icons">error_outline</i>
+  <ng-template #errorTpl>
+    <div class="error-state">
+      <div class="error-icon">
+        <i class="material-icons">error_outline</i>
+      </div>
+      <h3>Неуспешно зареждане на данни</h3>
+      <p>Не можахме да заредим информацията за това превозно средство</p>
+
+      <button type="button" class="btn-primary" routerLink="/vehicles">
+        <i class="material-icons">arrow_back</i>
+        Назад към списъка
+      </button>
     </div>
-    <h3>Неуспешно зареждане на данни</h3>
-    <p>Не можахме да заредим информацията за това превозно средство</p>
-    <button class="btn-primary" routerLink="/vehicles">
-      <i class="material-icons">arrow_back</i>
-      Назад към списъка
-    </button>
-  </div>
+  </ng-template>
 </div>

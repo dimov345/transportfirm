@@ -1,9 +1,12 @@
 package com.example.transportfirm.entity;
 
 import com.example.transportfirm.Enum.EmployeeDocumentType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "employee_documents")
@@ -11,11 +14,13 @@ import lombok.Data;
 public class EmployeeDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
+    @JsonBackReference("employee-docs")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Employee employee;
 

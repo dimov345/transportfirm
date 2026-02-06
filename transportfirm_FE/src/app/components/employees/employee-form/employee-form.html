@@ -1,150 +1,228 @@
-<div class="employee-form">
-  <h2>Нов служител</h2>
-
-  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-    <div class="grid">
-
-      <!-- PERSONAL -->
-      <div class="card">
-        <h3>Лични данни</h3>
-
-        <label>ЕГН *</label>
-        <input formControlName="egn" type="text" placeholder="10 цифри" />
-        <div class="error" *ngIf="field('egn')?.touched && field('egn')?.invalid">
-          <small *ngIf="field('egn')?.errors?.['required']">ЕГН е задължително.</small>
-          <small *ngIf="field('egn')?.errors?.['pattern']">ЕГН трябва да е 10 цифри.</small>
-        </div>
-
-        <label>Име *</label>
-        <input formControlName="name" type="text" />
-        <div class="error" *ngIf="field('name')?.touched && field('name')?.invalid">
-          <small>Името е задължително.</small>
-        </div>
-
-        <label>Дата на раждане *</label>
-        <input formControlName="dateOfBirth" type="date" />
-        <div class="error" *ngIf="field('dateOfBirth')?.touched && field('dateOfBirth')?.invalid">
-          <small>Дата на раждане е задължителна.</small>
-        </div>
-
-        <label>Телефон *</label>
-        <input formControlName="phone" type="text" />
-        <div class="error" *ngIf="field('phone')?.touched && field('phone')?.invalid">
-          <small>Телефонът е задължителен.</small>
-        </div>
-
-        <label>Email *</label>
-        <input formControlName="email" type="email" />
-        <div class="error" *ngIf="field('email')?.touched && field('email')?.invalid">
-          <small *ngIf="field('email')?.errors?.['required']">Email е задължителен.</small>
-          <small *ngIf="field('email')?.errors?.['email']">Невалиден email.</small>
-        </div>
+<div class="tf-form">
+  <div class="tf-header">
+    <div class="tf-header-main">
+      <div class="tf-icon" aria-hidden="true">
+        <!-- outline icon like sidebar -->
+        <svg class="tf-svg" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
       </div>
 
-      <!-- EMPLOYMENT -->
-      <div class="card">
-        <h3>Фирмени данни</h3>
-
-        <label>Длъжност *</label>
-        <select formControlName="jobTitle">
-          <option value="">-- избери --</option>
-          <option *ngFor="let j of jobTitleOptions" [value]="j">{{ j }}</option>
-        </select>
-        <div class="error" *ngIf="field('jobTitle')?.touched && field('jobTitle')?.invalid">
-          <small>Длъжността е задължителна.</small>
-        </div>
-
-        <label>Роля *</label>
-        <select formControlName="role">
-          <option value="">-- избери --</option>
-          <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
-        </select>
-        <div class="error" *ngIf="field('role')?.touched && field('role')?.invalid">
-          <small>Ролята е задължителна.</small>
-        </div>
-
-        <label>Дата на назначаване *</label>
-        <input formControlName="hiredDate" type="date" />
-        <div class="error" *ngIf="field('hiredDate')?.touched && field('hiredDate')?.invalid">
-          <small>Дата на назначаване е задължителна.</small>
-        </div>
-
-        <label>Вид договор *</label>
-        <select formControlName="contractType">
-          <option value="">-- избери --</option>
-          <option *ngFor="let c of contractTypeOptions" [value]="c">{{ c }}</option>
-        </select>
-        <div class="error" *ngIf="field('contractType')?.touched && field('contractType')?.invalid">
-          <small>Вид договор е задължителен.</small>
-        </div>
-
-        <label>Брутна заплата *</label>
-        <input formControlName="salary" type="number" step="0.01" />
-        <div class="error" *ngIf="field('salary')?.touched && field('salary')?.invalid">
-          <small>Заплатата е задължителна.</small>
-        </div>
-
-        <label>Нетна заплата</label>
-        <input formControlName="salaryNeto" type="number" step="0.01" />
-
-        <label>Валута *</label>
-        <input formControlName="salaryCurrency" type="text" placeholder="BGN, EUR" />
-        <div class="error" *ngIf="field('salaryCurrency')?.touched && field('salaryCurrency')?.invalid">
-          <small>Валутата е задължителна.</small>
-        </div>
-
-        <label>Работно време *</label>
-        <input formControlName="workingHours" type="text" placeholder="8h / 09:00-17:00" />
-        <div class="error" *ngIf="field('workingHours')?.touched && field('workingHours')?.invalid">
-          <small>Работното време е задължително.</small>
-        </div>
+      <div>
+        <h2>{{ isEdit ? 'Редакция на служител' : 'Нов служител' }}</h2>
+        <p class="tf-subtitle" *ngIf="!isEdit">Създаване на нов служител и достъп</p>
+        <p class="tf-subtitle" *ngIf="isEdit">ID: {{ employeeId }}</p>
       </div>
-
-      <!-- BANK & AUTH -->
-      <div class="card">
-        <h3>Банкови и достъп</h3>
-
-        <label>Банка *</label>
-        <input formControlName="bankName" type="text" />
-        <div class="error" *ngIf="field('bankName')?.touched && field('bankName')?.invalid">
-          <small>Банката е задължителна.</small>
-        </div>
-
-        <label>IBAN *</label>
-        <input formControlName="iban" type="text" />
-        <div class="error" *ngIf="field('iban')?.touched && field('iban')?.invalid">
-          <small>IBAN е задължителен.</small>
-        </div>
-
-        <label>Потребителско име *</label>
-        <input formControlName="username" type="text" />
-        <div class="error" *ngIf="field('username')?.touched && field('username')?.invalid">
-          <small>Потребителското име е задължително.</small>
-        </div>
-      </div>
-
-      <!-- ADDRESSES -->
-      <div class="card wide">
-        <h3>Адреси</h3>
-
-        <label>Постоянен адрес</label>
-        <input formControlName="addressPermanent" type="text" />
-
-        <label>Текущ адрес</label>
-        <input formControlName="addressCurrent" type="text" />
-      </div>
-
     </div>
+  </div>
 
-    <div class="actions">
-      <button type="button" class="btn cancel" (click)="cancel()">Отказ</button>
-      <button type="submit" class="btn save" [disabled]="saving">
-        {{ saving ? 'Записвам...' : 'Добави служител' }}
-      </button>
-    </div>
+  <div class="tf-banner" *ngIf="loading">Зареждам данни...</div>
 
-    <div class="error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="tf-body">
+
+      <!-- Section 1 -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">1</div>
+          <h2>Лични данни</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">ЕГН *</label>
+            <input class="tf-input" formControlName="egn" type="text" placeholder="10 цифри" />
+            <div class="tf-error" *ngIf="field('egn')?.touched && field('egn')?.invalid">
+              <small *ngIf="field('egn')?.errors?.['required']">ЕГН е задължително.</small>
+              <small *ngIf="field('egn')?.errors?.['pattern']">ЕГН трябва да е 10 цифри.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Име *</label>
+            <input class="tf-input" formControlName="name" type="text" />
+            <div class="tf-error" *ngIf="field('name')?.touched && field('name')?.invalid">
+              <small>Името е задължително.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Дата на раждане *</label>
+            <input class="tf-input" formControlName="dateOfBirth" type="date" />
+            <div class="tf-error" *ngIf="field('dateOfBirth')?.touched && field('dateOfBirth')?.invalid">
+              <small>Дата на раждане е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Телефон *</label>
+            <input class="tf-input" formControlName="phone" type="text" />
+            <div class="tf-error" *ngIf="field('phone')?.touched && field('phone')?.invalid">
+              <small>Телефонът е задължителен.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Email *</label>
+            <input class="tf-input" formControlName="email" type="email" />
+            <div class="tf-error" *ngIf="field('email')?.touched && field('email')?.invalid">
+              <small *ngIf="field('email')?.errors?.['required']">Email е задължителен.</small>
+              <small *ngIf="field('email')?.errors?.['email']">Невалиден email.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">2</div>
+          <h2>Фирмени данни</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Длъжност *</label>
+            <select class="tf-input" formControlName="jobTitle">
+              <option value="">-- избери --</option>
+              <option *ngFor="let j of jobTitleOptions" [value]="j">{{ j }}</option>
+            </select>
+            <div class="tf-error" *ngIf="field('jobTitle')?.touched && field('jobTitle')?.invalid">
+              <small>Длъжността е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Роля *</label>
+            <select class="tf-input" formControlName="role">
+              <option value="">-- избери --</option>
+              <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+            </select>
+            <div class="tf-error" *ngIf="field('role')?.touched && field('role')?.invalid">
+              <small>Ролята е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Дата на назначаване *</label>
+            <input class="tf-input" formControlName="hiredDate" type="date" />
+            <div class="tf-error" *ngIf="field('hiredDate')?.touched && field('hiredDate')?.invalid">
+              <small>Дата на назначаване е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Вид договор *</label>
+            <select class="tf-input" formControlName="contractType">
+              <option value="">-- избери --</option>
+              <option *ngFor="let c of contractTypeOptions" [value]="c">{{ c }}</option>
+            </select>
+            <div class="tf-error" *ngIf="field('contractType')?.touched && field('contractType')?.invalid">
+              <small>Вид договор е задължителен.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Брутна заплата *</label>
+            <input class="tf-input" formControlName="salary" type="number" step="0.01" />
+            <div class="tf-error" *ngIf="field('salary')?.touched && field('salary')?.invalid">
+              <small>Заплатата е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Нетна заплата</label>
+            <input class="tf-input" formControlName="salaryNeto" type="number" step="0.01" />
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Валута *</label>
+            <input class="tf-input" formControlName="salaryCurrency" type="text" placeholder="BGN, EUR" />
+            <div class="tf-error" *ngIf="field('salaryCurrency')?.touched && field('salaryCurrency')?.invalid">
+              <small>Валутата е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Работно време *</label>
+            <input class="tf-input" formControlName="workingHours" type="text" placeholder="8h / 09:00-17:00" />
+            <div class="tf-error" *ngIf="field('workingHours')?.touched && field('workingHours')?.invalid">
+              <small>Работното време е задължително.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">3</div>
+          <h2>Банкови и достъп</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Банка *</label>
+            <input class="tf-input" formControlName="bankName" type="text" />
+            <div class="tf-error" *ngIf="field('bankName')?.touched && field('bankName')?.invalid">
+              <small>Банката е задължителна.</small>
+            </div>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">IBAN *</label>
+            <input class="tf-input" formControlName="iban" type="text" />
+            <div class="tf-error" *ngIf="field('iban')?.touched && field('iban')?.invalid">
+              <small>IBAN е задължителен.</small>
+            </div>
+          </div>
+
+          <ng-container *ngIf="!isEdit">
+            <div class="tf-group">
+              <label class="tf-label">Потребителско име *</label>
+              <input class="tf-input" formControlName="username" type="text" />
+              <div class="tf-error" *ngIf="field('username')?.touched && field('username')?.invalid">
+                <small>Потребителското име е задължително.</small>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">4</div>
+          <h2>Адреси</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Постоянен адрес</label>
+            <input class="tf-input" formControlName="addressPermanent" type="text" />
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Текущ адрес</label>
+            <input class="tf-input" formControlName="addressCurrent" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tf-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="saving">
+          Отказ
+        </button>
+
+        <button type="submit" class="btn btn-primary" [disabled]="saving || loading">
+          {{ saving ? 'Записвам...' : (isEdit ? 'Запази промените' : 'Добави служител') }}
+        </button>
+      </div>
+
+      <div class="tf-banner error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
     </div>
   </form>
 </div>

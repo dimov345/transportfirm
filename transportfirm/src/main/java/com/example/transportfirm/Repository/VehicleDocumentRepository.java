@@ -3,7 +3,8 @@ package com.example.transportfirm.repository;
 import com.example.transportfirm.entity.VehicleDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import java.util.UUID;
 
-public interface VehicleDocumentRepository extends JpaRepository<VehicleDocument, Long> {
-    List<VehicleDocument> findByVehicle_PlateNumber(String plateNumber);
+public interface VehicleDocumentRepository extends JpaRepository<VehicleDocument, UUID> {
+    List<VehicleDocument> findByVehicle_Id(UUID id);
 }

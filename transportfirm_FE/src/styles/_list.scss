@@ -1,0 +1,916 @@
+/* ==========================================================
+   _list.scss — Unified Lists (Drivers / Employees / Vehicles)
+   Clean Admin UI (no glass) — DO NOT change class names here.
+========================================================== */
+
+/* =========================
+   Tokens (shared system)
+========================= */
+$accent: #3182ce;
+
+$page-bg: #f5f7fb;
+$surface: #ffffff;
+
+$text: #111827;
+$text-muted: #6b7280;
+
+$border: #e5e7eb;
+$border-2: #eef2f7;
+
+$radius-lg: 14px;
+$radius-md: 12px;
+$radius-sm: 10px;
+
+$shadow: 0 2px 10px rgba(17, 24, 39, 0.06);
+
+$danger: #ef4444;
+$danger-bg: #fef2f2;
+
+$warn: #f59e0b;
+$warn-bg: #fffbeb;
+
+$ok: #10b981;
+$ok-bg: #ecfdf5;
+
+$info: $accent;
+$info-bg: #eff6ff;
+
+$ease: 0.15s ease;
+
+/* =========================
+   Page wrapper
+========================= */
+.list-container {
+  min-height: 100vh;
+  background: $page-bg;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  color: $text;
+}
+
+/* =========================
+   Header (subtle gradient tint)
+========================= */
+.list-header {
+  position: relative;
+  overflow: hidden;
+
+  background: $surface;
+  border-bottom: 1px solid $border;
+  padding: 22px 40px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+      120deg,
+      rgba($accent, 0.06),
+      rgba($accent, 0.02),
+      rgba($accent, 0.06)
+    );
+    background-size: 200% 200%;
+    animation: listHeaderGradient 28s ease infinite;
+
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+
+    .title-section {
+      min-width: 240px;
+
+      h1 {
+        font-size: 23px; /* 22–24 */
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        letter-spacing: 0.1px;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: $text-muted;
+        font-weight: 500;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+  }
+}
+
+/* =========================
+   Buttons
+========================= */
+.btn-primary,
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  height: 40px;
+  padding: 0 14px;
+
+  border-radius: $radius-sm;
+  border: 1px solid rgba($accent, 0.35);
+  background: $accent;
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background $ease, border-color $ease, transform $ease, box-shadow $ease;
+
+  i.material-icons {
+    font-size: 18px;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    background: #2c6bb4;
+    border-color: #2c6bb4;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(49, 130, 206, 0.18);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.btn-secondary,
+.btn-export {
+  height: 40px;
+  padding: 0 14px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: $radius-sm;
+  border: 1px solid rgba($accent, 0.25);
+  background: rgba($accent, 0.08);
+  color: $accent;
+
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+
+  transition: background $ease, border-color $ease, transform $ease;
+
+  &:hover:not(:disabled) {
+    background: rgba($accent, 0.12);
+    border-color: rgba($accent, 0.35);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* =========================
+   Filters
+========================= */
+.filters-bar,
+.search-bar-container.filters-bar,
+.filters-card {
+  background: $surface;
+  border-bottom: 1px solid $border;
+  padding: 22px 40px;
+}
+
+.filters-card {
+  .card-body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.filters-row,
+.search-bar-container.filters-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: $text-muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px 0 40px;
+
+    border-radius: $radius-sm;
+    border: 1px solid $border;
+    background: #fff;
+
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: $text;
+
+    transition: border-color $ease, box-shadow $ease;
+
+    &:hover {
+      border-color: #d1d5db;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: rgba($accent, 0.75);
+      box-shadow: 0 0 0 3px rgba($accent, 0.12);
+    }
+
+    &::placeholder {
+      color: rgba(107, 114, 128, 0.9);
+    }
+  }
+}
+
+.search-input {
+  height: 40px;
+  padding: 0 12px;
+
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+  background: #fff;
+
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  color: $text;
+
+  transition: border-color $ease, box-shadow $ease;
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba($accent, 0.75);
+    box-shadow: 0 0 0 3px rgba($accent, 0.12);
+  }
+}
+
+select {
+  height: 40px;
+  padding: 0 12px;
+
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+  background: #fff;
+
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  color: $text;
+
+  cursor: pointer;
+  transition: border-color $ease, box-shadow $ease;
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba($accent, 0.75);
+    box-shadow: 0 0 0 3px rgba($accent, 0.12);
+  }
+}
+
+.filter-group {
+  min-width: 0;
+
+  &.small-filter {
+    min-width: 160px;
+  }
+
+  &.search-group {
+    flex: 1;
+    min-width: 260px;
+  }
+}
+
+/* =========================
+   TABLE LIST (drivers/employees)
+========================= */
+.table-container {
+  padding: 22px 40px;
+
+  .loading-state {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    padding: 18px;
+    color: $text-muted;
+    font-weight: 500;
+    box-shadow: $shadow;
+  }
+
+  table {
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed; /* important: stable header width */
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    box-shadow: $shadow;
+
+    th, td {
+      box-sizing: border-box;
+    }
+
+    /* FIX: header background must be on the row, not only on cells */
+    thead {
+      background: transparent;
+
+      tr {
+        background: #fafafa;
+      }
+
+      th {
+        background: transparent;
+        padding: 14px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        border-bottom: 1px solid $border;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      th:first-child {
+        border-top-left-radius: $radius-lg;
+      }
+
+      th:last-child {
+        border-top-right-radius: $radius-lg;
+      }
+    }
+
+    
+
+    tbody {
+      tr.driver-row {
+        position: relative;
+        transition: background 0.12s ease;
+
+        &:hover {
+          background: #fafbfc;
+        }
+
+        /* soft status rows */
+        &.expired-row {
+          background: $danger-bg;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba($danger, 0.9);
+          }
+        }
+
+        &.expiring-row {
+          background: $warn-bg;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba($warn, 0.9);
+          }
+        }
+
+        &.valid-row {
+          background: $ok-bg;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba($ok, 0.9);
+          }
+        }
+
+        &.missing-row {
+          background: $info-bg;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba($info, 0.9);
+          }
+        }
+
+        td {
+          padding: 14px 16px;
+          font-size: 14px;
+          font-weight: 500;
+          color: $text;
+          border-bottom: 1px solid $border-2;
+          vertical-align: middle;
+
+          .egn-value {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            color: $text-muted;
+            font-weight: 500;
+            white-space: nowrap;
+          }
+
+          .driver-name {
+            font-weight: 600;
+            color: $text;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .phone-value,
+          .email-value {
+            color: #374151;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .email-value.no-email {
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: 500;
+          }
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+
+        .actions-cell {
+          .actions-group {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+
+            .btn-action {
+              width: 34px;
+              height: 34px;
+              border-radius: 10px;
+
+              border: 1px solid transparent;
+              background: transparent;
+              cursor: pointer;
+
+              display: grid;
+              place-items: center;
+
+              transition: background $ease, border-color $ease, transform $ease;
+
+              svg {
+                width: 16px;
+                height: 16px;
+              }
+
+              &:hover {
+                transform: translateY(-1px);
+              }
+
+              &:active {
+                transform: translateY(0);
+              }
+
+              &.btn-edit {
+                color: $accent;
+
+                &:hover {
+                  background: rgba($accent, 0.10);
+                  border-color: rgba($accent, 0.18);
+                }
+              }
+
+              &.btn-docs {
+                color: $ok;
+
+                &:hover {
+                  background: rgba($ok, 0.10);
+                  border-color: rgba($ok, 0.18);
+                }
+              }
+
+              &.btn-delete {
+                color: $danger;
+
+                &:hover {
+                  background: rgba($danger, 0.10);
+                  border-color: rgba($danger, 0.18);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* =========================
+   CARD LIST (vehicles)
+   .cards-container -> .cards-grid -> .card-item
+========================= */
+.cards-container {
+  padding: 22px 40px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.card-item {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  overflow: hidden;
+
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: #dbe3ee;
+    background: #fafbfc;
+  }
+
+  &.card-expired {
+    background: $danger-bg;
+    border-color: rgba($danger, 0.18);
+  }
+
+  &.card-expiring {
+    background: $warn-bg;
+    border-color: rgba($warn, 0.18);
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid $border-2;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+
+    padding: 6px 10px;
+    border-radius: 999px;
+
+    background: rgba($accent, 0.08);
+    border: 1px solid rgba($accent, 0.20);
+    color: $accent;
+
+    white-space: nowrap;
+  }
+
+  .status-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+    white-space: nowrap;
+
+    background: rgba($accent, 0.08);
+    border: 1px solid rgba($accent, 0.20);
+    color: $accent;
+
+    &.status-ok,
+    &.status-active {
+      background: $ok-bg;
+      border-color: rgba($ok, 0.22);
+      color: $ok;
+    }
+
+    &.status-warning,
+    &.status-inactive,
+    &.status-stopped {
+      background: $warn-bg;
+      border-color: rgba($warn, 0.22);
+      color: $warn;
+    }
+
+    &.status-danger,
+    &.status-expired,
+    &.status-broken {
+      background: $danger-bg;
+      border-color: rgba($danger, 0.22);
+      color: $danger;
+    }
+  }
+
+  .card-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+
+    i.material-icons {
+      font-size: 18px;
+      color: $accent;
+      flex: 0 0 auto;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      min-width: 0;
+    }
+
+    .text-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .card-actions {
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid $border-2;
+
+    .actions-group {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn-action {
+      width: 34px;
+      height: 34px;
+
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+
+      transition: background $ease, border-color $ease, transform $ease;
+
+      /* supports BOTH icon types */
+      i.material-icons {
+        font-size: 18px;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        background: rgba($accent, 0.10);
+        border-color: rgba($accent, 0.18);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      color: $accent;
+
+      &.btn-docs {
+        color: $ok;
+
+        &:hover {
+          background: rgba($ok, 0.10);
+          border-color: rgba($ok, 0.18);
+        }
+      }
+
+      /* support both names */
+      &.btn-danger,
+      &.btn-delete {
+        color: $danger;
+
+        &:hover {
+          background: rgba($danger, 0.10);
+          border-color: rgba($danger, 0.18);
+        }
+      }
+
+      /* optional: if you use btn-edit in vehicles */
+      &.btn-edit {
+        color: $accent;
+
+        &:hover {
+          background: rgba($accent, 0.10);
+          border-color: rgba($accent, 0.18);
+        }
+      }
+    }
+  }
+}
+
+/* =========================
+   Empty state (shared)
+========================= */
+.empty-state {
+  margin: 22px 40px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+
+  padding: 56px 40px;
+  text-align: center;
+
+  .empty-icon {
+    display: inline-grid;
+    place-items: center;
+
+    width: 76px;
+    height: 76px;
+    border-radius: 16px;
+
+    background: #fafbfc;
+    border: 1px solid $border;
+    margin: 0 auto 14px;
+
+    i.material-icons {
+      font-size: 32px;
+      color: $text-muted;
+    }
+  }
+
+  h3 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $text;
+  }
+
+  p {
+    margin: 0 0 18px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-muted;
+  }
+}
+
+/* =========================
+   Keyframes
+========================= */
+@keyframes listHeaderGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  .list-header {
+    padding: 18px 16px;
+
+    .header-content {
+      .header-actions {
+        width: 100%;
+
+        .btn-primary,
+        .btn-add {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  .filters-bar,
+  .search-bar-container.filters-bar,
+  .filters-card {
+    padding: 12px 16px;
+  }
+
+  .filter-group.small-filter {
+    min-width: 100%;
+  }
+
+  .filter-group.search-group {
+    min-width: 100%;
+  }
+
+  .table-container {
+    padding: 16px;
+    overflow-x: auto;
+
+    table {
+      min-width: 720px;
+    }
+  }
+
+  .cards-container {
+    padding: 16px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state {
+    margin: 16px;
+    padding: 44px 18px;
+  }
+}

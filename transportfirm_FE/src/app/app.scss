@@ -1,9 +1,14 @@
 .app-content {
   transition: margin-left 0.3s ease;
-  padding: 40px;
+
+  /* FULL SCREEN: махаме външния padding */
+  padding: 0;
+
   min-height: 100vh;
-  background: #ffffff;
-  margin-left: 80px; /* базово — за тясната версия на sidebar-а */
+  background: #f5f7fb;
+
+  /* базово — за тясната версия на sidebar-а */
+  margin-left: 80px;
 }
 
 /* ако в collapsed режим sidebar-а е по-тесен/по-широк, смени стойността */
@@ -15,4 +20,11 @@
 .app-content.overlay {
   margin-left: 80px;
   filter: brightness(0.9);
+}
+
+/* по желание: на мобилно без отместване */
+@media (max-width: 768px) {
+  .app-content {
+    margin-left: 0;
+  }
 }

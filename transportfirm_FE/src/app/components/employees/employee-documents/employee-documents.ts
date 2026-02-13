@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -14,7 +14,14 @@ import { EmployeeDocument } from '../../../core/models/employee/employee-documen
   styleUrls: ['./employee-documents.scss']
 })
 export class EmployeeDocuments implements OnInit {
-  employeeId!: string; // ✅ UUID
+  private route = inject(ActivatedRoute);
+  private service = inject(EmployeeDocumentService);
+  private cdr = inject(ChangeDetectorRef);
+
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
+  employeeId!: string;
   documents: EmployeeDocument[] = [];
 
   selectedType: string = '';
@@ -22,28 +29,31 @@ export class EmployeeDocuments implements OnInit {
   isLoading = true;
   isUploading = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private service: EmployeeDocumentService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  errorMessage = '';
+  successMessage = '';
 
   ngOnInit(): void {
+    // ✅ SSR guard: не правим HTTP / browser APIs на сървъра
+    if (!this.isBrowser) return;
+
     const idParam = this.route.snapshot.paramMap.get('id');
 
     if (!idParam) {
-      console.error('Invalid employeeId');
+      this.errorMessage = 'Невалиден employeeId.';
       this.isLoading = false;
       this.cdr.detectChanges();
       return;
     }
 
-    this.employeeId = idParam; // ✅ БЕЗ Number(), UUID си е string
+    this.employeeId = idParam;
     this.loadDocuments();
   }
 
   loadDocuments(): void {
     this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.cdr.detectChanges();
 
     this.service.getDocuments(this.employeeId).subscribe({
       next: (docs) => {
@@ -51,16 +61,28 @@ export class EmployeeDocuments implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err: unknown) => {
+      error: (err: any) => {
         console.error('Load documents error:', err);
         this.documents = [];
         this.isLoading = false;
+
+        if (err?.status === 401) {
+          this.errorMessage = 'Нямаш активна сесия. Влез отново.';
+        } else {
+          this.errorMessage = err?.error?.message || 'Грешка при зареждане на документи.';
+        }
+
         this.cdr.detectChanges();
       }
     });
   }
 
   onFileSelected(event: Event): void {
+    if (!this.isBrowser) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -68,20 +90,23 @@ export class EmployeeDocuments implements OnInit {
     const type = (this.selectedType || '').trim();
 
     if (!type) {
-      alert('Моля, изберете тип документ!');
+      this.errorMessage = 'Моля, изберете тип документ!';
       input.value = '';
+      this.cdr.detectChanges();
       return;
     }
 
     if (file.type !== 'application/pdf') {
-      alert('Моля, качете само PDF файл!');
+      this.errorMessage = 'Моля, качете само PDF файл!';
       input.value = '';
+      this.cdr.detectChanges();
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Файлът е твърде голям (макс. 5 MB)');
+      this.errorMessage = 'Файлът е твърде голям (макс. 5 MB).';
       input.value = '';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -92,45 +117,69 @@ export class EmployeeDocuments implements OnInit {
       next: (doc) => {
         this.documents = [doc, ...this.documents];
         this.isUploading = false;
+        this.successMessage = 'Документът е качен успешно.';
         input.value = '';
         this.cdr.detectChanges();
       },
-      error: (err: unknown) => {
+      error: (err: any) => {
         console.error('Upload error:', err);
-        alert('Грешка при качване!');
         this.isUploading = false;
         input.value = '';
+
+        if (err?.status === 401) {
+          this.errorMessage = 'Нямаш активна сесия. Влез отново.';
+        } else {
+          this.errorMessage = err?.error?.message || 'Грешка при качване.';
+        }
+
         this.cdr.detectChanges();
       }
     });
   }
 
   download(doc: EmployeeDocument): void {
+    if (!this.isBrowser) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
     this.service.downloadDocument(doc.id).subscribe({
       next: (blob: Blob) => this.saveBlob(blob, doc.fileName || 'document.pdf'),
-      error: (err: unknown) => {
+      error: (err: any) => {
         console.error('Download error:', err);
-        alert('Грешка при сваляне!');
+        this.errorMessage = err?.error?.message || 'Грешка при сваляне.';
+        this.cdr.detectChanges();
       }
     });
   }
 
-  Delete(docId: string): void { 
-    if (!confirm('Наистина ли искате да изтриете този документ?')) return;
+  deleteDoc(docId: string): void {
+    if (!this.isBrowser) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    // ✅ confirm само в браузъра
+    const ok = window.confirm('Наистина ли искате да изтриете този документ?');
+    if (!ok) return;
 
     this.service.deleteDocument(docId).subscribe({
       next: () => {
         this.documents = this.documents.filter(d => d.id !== docId);
+        this.successMessage = 'Документът е изтрит.';
         this.cdr.detectChanges();
       },
-      error: (err: unknown) => {
+      error: (err: any) => {
         console.error('Delete error:', err);
-        alert('Грешка при изтриване!');
+        this.errorMessage = err?.error?.message || 'Грешка при изтриване.';
+        this.cdr.detectChanges();
       }
     });
   }
 
   private saveBlob(blob: Blob, fileName: string): void {
+    if (!this.isBrowser) return;
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

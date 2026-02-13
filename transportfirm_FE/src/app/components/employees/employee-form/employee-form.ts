@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -29,6 +29,9 @@ export class EmployeeForm implements OnInit {
   private adminService = inject(AdminService);
   private cdr = inject(ChangeDetectorRef);
 
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   form!: FormGroup;
 
   saving = false;
@@ -37,8 +40,8 @@ export class EmployeeForm implements OnInit {
 
   employeeId: string | null = null;
 
-  // пазим го за полетата, които твоят Employee model изисква, но UI не редактира
-  private loadedEmployee: Employee | null = null;
+  // public (template го ползва)
+  loadedEmployee: Employee | null = null;
 
   get isEdit(): boolean {
     return !!this.employeeId;
@@ -50,23 +53,26 @@ export class EmployeeForm implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+
+    // ✅ SSR: не правим HTTP към бекенда (няма auth токен)
+    if (!this.isBrowser) {
+      return;
+    }
+
     this.loadIfEdit();
   }
 
   private initForm(): void {
     this.form = this.fb.group({
-      // лични
       egn: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       name: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
       phone: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
 
-      // адреси
       addressPermanent: [''],
       addressCurrent: [''],
 
-      // фирмени
       jobTitle: ['', Validators.required],
       role: ['', Validators.required],
       hiredDate: ['', Validators.required],
@@ -76,11 +82,10 @@ export class EmployeeForm implements OnInit {
       salaryCurrency: ['', Validators.required],
       workingHours: ['', Validators.required],
 
-      // банкови
       bankName: ['', Validators.required],
       iban: ['', Validators.required],
 
-      // auth (само за create)
+      // само за create
       username: ['', Validators.required]
     });
   }
@@ -89,16 +94,15 @@ export class EmployeeForm implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     this.employeeId = id;
 
-    // CREATE MODE -> няма loading
     if (!id) {
       this.loading = false;
       this.cdr.detectChanges();
       return;
     }
 
-    // EDIT MODE
     this.loading = true;
     this.errorMessage = '';
+    this.loadedEmployee = null;
     this.cdr.detectChanges();
 
     this.adminService.getEmployeeById(id)
@@ -146,7 +150,12 @@ export class EmployeeForm implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err: any) => {
-          this.errorMessage = err?.error?.message || 'Грешка при зареждане на служител';
+          if (err?.status === 401) {
+            this.errorMessage = 'Нямаш активна сесия. Влез отново.';
+            // this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+          } else {
+            this.errorMessage = err?.error?.message || 'Грешка при зареждане на служител';
+          }
           console.error(err);
           this.cdr.detectChanges();
         }
@@ -188,21 +197,12 @@ export class EmployeeForm implements OnInit {
     };
   }
 
-  private toUpdatePayload(): Employee {
-    if (!this.loadedEmployee) {
-      throw new Error('Employee not loaded');
-    }
+  private toUpdatePayload(): Partial<Employee> {
+    if (!this.loadedEmployee) throw new Error('Employee not loaded yet');
 
     const v = this.form.getRawValue();
 
     return {
-      // required by your Employee model:
-      id: this.loadedEmployee.id,
-      employmentStatus: this.loadedEmployee.employmentStatus,
-      firedDate: this.loadedEmployee.firedDate,
-      documents: this.loadedEmployee.documents,
-
-      // editable fields:
       egn: v.egn,
       name: v.name,
       dateOfBirth: v.dateOfBirth,
@@ -212,7 +212,8 @@ export class EmployeeForm implements OnInit {
       addressPermanent: v.addressPermanent || null,
       addressCurrent: v.addressCurrent || null,
 
-      jobTitle: v.jobTitle, // locked but included
+      jobTitle: this.loadedEmployee.jobTitle,
+
       role: v.role,
       hiredDate: v.hiredDate,
       contractType: v.contractType,
@@ -223,17 +224,21 @@ export class EmployeeForm implements OnInit {
       workingHours: v.workingHours,
 
       bankName: v.bankName,
-      iban: v.iban,
-
-      // keep any extra fields backend might send (safe):
-      driverInfo: (this.loadedEmployee as any).driverInfo ?? null,
-      mechanicInfo: (this.loadedEmployee as any).mechanicInfo ?? null,
-      dispatcherInfo: (this.loadedEmployee as any).dispatcherInfo ?? null
-    } as Employee;
+      iban: v.iban
+    };
   }
 
   submit(): void {
     this.errorMessage = '';
+
+    // ✅ SSR safety: submit само в браузъра
+    if (!this.isBrowser) return;
+
+    if (this.isEdit && !this.loadedEmployee) {
+      this.errorMessage = 'Данните още се зареждат.';
+      this.cdr.detectChanges();
+      return;
+    }
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -255,9 +260,7 @@ export class EmployeeForm implements OnInit {
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: () => {
-          this.router.navigate(['/employees']);
-        },
+        next: () => this.router.navigate(['/employees']),
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message ||

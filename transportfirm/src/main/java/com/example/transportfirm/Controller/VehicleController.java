@@ -4,7 +4,6 @@ import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.Enum.VehicleDocumentType;
 import com.example.transportfirm.service.VehicleService;
-
 import jakarta.validation.Valid;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -28,57 +27,43 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-
-    // ===========================================================
-    // VEHICLE CRUD
-    // ===========================================================
-
     @GetMapping
-    public List<VehicleRecord> getAllVehicles() {
-        return vehicleService.getAll();
+    public ResponseEntity<List<VehicleRecord>> getAllVehicles() {
+        return ResponseEntity.ok(vehicleService.getAll());
     }
 
     @GetMapping("/{id}")
-    public VehicleRecord getVehicle(@PathVariable UUID id) {
-        return vehicleService.getByPlate(id);
+    public ResponseEntity<VehicleRecord> getVehicle(@PathVariable UUID id) {
+        return ResponseEntity.ok(vehicleService.getByPlate(id));
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public VehicleRecord createVehicle(@RequestBody VehicleRecord vehicle) {
         return vehicleService.save(vehicle);
     }
 
-
-    @PutMapping(
-            value = "/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public VehicleRecord updateVehicle(
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VehicleRecord> updateVehicle(
             @PathVariable UUID id,
             @Valid @RequestBody VehicleRecord vehicle
     ) {
-        return vehicleService.update(id, vehicle);
+        return ResponseEntity.ok(vehicleService.update(id, vehicle));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVehicle(@PathVariable UUID id) {
         vehicleService.delete(id);
-        return ResponseEntity.noContent().build();
     }
-
-
-    // ===========================================================
-    // DOCUMENT LOGIC
-    // ===========================================================
 
     @GetMapping("/{id}/documents")
-    public List<VehicleDocument> getVehicleDocuments(@PathVariable UUID id) {
-        return vehicleService.getDocumentsByVehicle(id);
+    public ResponseEntity<List<VehicleDocument>> getVehicleDocuments(@PathVariable UUID id) {
+        return ResponseEntity.ok(vehicleService.getDocumentsByVehicle(id));
     }
 
-
     @PostMapping("/{id}/documents")
+    @ResponseStatus(HttpStatus.CREATED)
     public VehicleDocument uploadDocument(
             @PathVariable UUID id,
             @RequestParam("type") VehicleDocumentType type,
@@ -86,7 +71,6 @@ public class VehicleController {
     ) throws IOException {
         return vehicleService.addDocument(id, type, file);
     }
-
 
     @GetMapping("/documents/{id}/download")
     public ResponseEntity<Resource> downloadVehicleDocument(@PathVariable UUID id) {
@@ -108,10 +92,9 @@ public class VehicleController {
                 .body(resource);
     }
 
-
     @DeleteMapping("/documents/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDocument(@PathVariable UUID id) {
         vehicleService.deleteDocument(id);
-        return ResponseEntity.noContent().build();
     }
 }

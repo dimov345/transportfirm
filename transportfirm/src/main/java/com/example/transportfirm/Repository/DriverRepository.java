@@ -10,4 +10,6 @@ public interface DriverRepository extends JpaRepository<DriverInfo, UUID> {
 
     Optional<DriverInfo> findByEmployeeId(UUID employeeId);
 
+    Optional<DriverInfo> findByVehicle_Id(UUID vehicleId);
+
 }

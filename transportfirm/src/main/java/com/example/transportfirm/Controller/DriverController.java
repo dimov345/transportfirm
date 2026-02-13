@@ -8,16 +8,19 @@ import com.example.transportfirm.Enum.JobTitle;
 import com.example.transportfirm.service.DriverService;
 import com.example.transportfirm.service.EmployeeService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/drivers")
@@ -31,56 +34,49 @@ public class DriverController {
         this.employeeService = employeeService;
     }
 
-    // 🔹 ВРЪЩА EMPLOYEE С ВЪТРЕШЕН driverInfo / mechanicInfo / dispatcherInfo
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<Employee> getEmployee(@PathVariable UUID employeeId) {
         return ResponseEntity.ok(employeeService.getById(employeeId));
     }
 
-    // 🔹 ВСИЧКИ СЛУЖИТЕЛИ С jobTitle=DRIVER
     @GetMapping("/job/{jobTitle}")
     public ResponseEntity<List<Employee>> getAllDriversFromEmployee(@PathVariable JobTitle jobTitle) {
         return ResponseEntity.ok(employeeService.getByJobTitle(jobTitle));
     }
 
-    // 🔹 UPDATE DriverInfo
     @PutMapping(value = "/{driverInfoId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public DriverInfo updateDriver(
+    public ResponseEntity<DriverInfo> updateDriver(
             @PathVariable UUID driverInfoId,
             @Valid @RequestBody DriverInfo driver
     ) {
-        return driverService.updateDriver(driverInfoId, driver);
+        return ResponseEntity.ok(driverService.updateDriver(driverInfoId, driver));
     }
 
-    // 🔹 DELETE DriverInfo
     @DeleteMapping("/{driverInfoId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDriver(@PathVariable UUID driverInfoId) {
         driverService.deleteDriver(driverInfoId);
     }
 
-    // ---------------- DOCUMENTS ----------------
-
-    // ✅ employeeId вместо driverInfoId
     @GetMapping("/employee/{employeeId}/documents")
-    public List<DriverDocument> getDocuments(@PathVariable UUID employeeId) {
-        return driverService.getDriverDocumentsByEmployee(employeeId);
+    public ResponseEntity<List<DriverDocument>> getDocuments(@PathVariable UUID employeeId) {
+        return ResponseEntity.ok(driverService.getDriverDocumentsByEmployee(employeeId));
     }
 
     @GetMapping("/documents/{docId}/download")
     public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID docId) throws IOException {
         DriverDocument doc = driverService.getDocument(docId);
-
-        java.nio.file.Path path = java.nio.file.Paths.get(doc.getFilePath());
-        byte[] fileBytes = java.nio.file.Files.readAllBytes(path);
+        Path path = Paths.get(doc.getFilePath());
+        byte[] fileBytes = Files.readAllBytes(path);
 
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"" + doc.getFileName() + "\"")
-                .header("Content-Type", "application/pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
                 .body(fileBytes);
     }
 
-    // ✅ employeeId вместо driverInfoId
     @PostMapping("/employee/{employeeId}/documents")
+    @ResponseStatus(HttpStatus.CREATED)
     public DriverDocument upload(
             @PathVariable UUID employeeId,
             @RequestParam("type") DriverDocumentType type,
@@ -90,9 +86,8 @@ public class DriverController {
     }
 
     @DeleteMapping("/documents/{docId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDoc(@PathVariable UUID docId) {
         driverService.deleteDocument(docId);
     }
-
 }
-

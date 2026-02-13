@@ -2,42 +2,54 @@ import { SidebarItem } from "./sidebar.model";
 
 export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
-    label: 'Начало',
+    label: 'Начална страница',
     icon: 'home',
     route: '/',
   },
   {
-    label: 'Работници',
+    label: 'Админ',
     icon: 'users',
     route: '/employees',
     roles: ['ADMIN', 'MANAGER']
   },
   {
-    label: 'Документи',
+    label: 'Екип и техникаn',
     icon: 'folder',
     children: [
       {
         label: 'Шофьори',
         icon: 'truck',
         route: '/drivers',
-        roles: ['ADMIN', 'MANAGER', 'DISPATCHER']
+        roles: ['ADMIN', 'DISPATCHER']
+      },
+      {
+        label: 'Спидитори',
+        icon: 'lorry',
+        route: '/dispatchers',
+        roles: ['ADMIN', 'DISPATCHER']
+      },
+      {
+        label: 'Механици',
+        icon: 'wrench',
+        route: '/mechanics',
+        roles: ['ADMIN', 'MANAGER', 'MECHANIC']
       },
       {
         label: 'ППС',
         icon: 'lorry',
         route: '/vehicles',
-        roles: ['ADMIN', 'MANAGER', 'MECHANIC']
+        roles: ['ADMIN', 'DISPATCHER', 'MECHANIC']
       }
     ]
   },
   {
-    label: 'Отчети',
+    label: 'Счетоводство',
     icon: 'chart',
     route: '/reports',
-    roles: ['ADMIN', 'ACCOUNTANT', 'MANAGER']
+    roles: ['ADMIN', 'ACCOUNTANT']
   },
   {
-    label: 'Админ',
+    label: 'Профил',
     icon: 'settings',
     route: '/admin',
     roles: ['ADMIN']

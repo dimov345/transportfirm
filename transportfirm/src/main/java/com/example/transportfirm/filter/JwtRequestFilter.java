@@ -8,9 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -39,56 +37,65 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String servletPath = request.getServletPath();
 
-        // Skip public endpoints
+        // 1️⃣ Пропускаме public endpoints
         if (PUBLIC_URLS.contains(servletPath)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = resolveJwt(request);
+        try {
+            // 2️⃣ Вземаме JWT (header или cookie)
+            String jwt = resolveJwt(request);
 
-        if (jwt != null) {
-            try {
+            if (jwt != null) {
+                // 3️⃣ Извличаме email (subject)
                 String email = jwtUtil.extractEmail(jwt);
 
-                if (email != null && !hasRealAuthentication()) {
+                if (email != null) {
+                    // 4️⃣ Зареждаме user-а
                     UserDetails userDetails = appUserDetailsService.loadUserByUsername(email);
 
+                    // 5️⃣ Валидираме token-а
                     if (jwtUtil.validateToken(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authenticationToken =
+
+                        // 6️⃣ Създаваме Authentication
+                        UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(
                                         userDetails,
                                         null,
                                         userDetails.getAuthorities()
                                 );
 
-                        authenticationToken.setDetails(
+                        authentication.setDetails(
                                 new WebAuthenticationDetailsSource().buildDetails(request)
                         );
 
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        // 7️⃣ ВИНАГИ сетваме SecurityContext
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
-
-            } catch (Exception ignored) {
-                // intentionally ignored (invalid token etc.)
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
+        // 8️⃣ Продължаваме по веригата
         filterChain.doFilter(request, response);
     }
 
     private String resolveJwt(HttpServletRequest request) {
+        // 1) Authorization header
         String authHeader = request.getHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
 
+        // 2) Cookie
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return null;
 
@@ -99,12 +106,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         return null;
-    }
-
-    private boolean hasRealAuthentication() {
-        Authentication existing = SecurityContextHolder.getContext().getAuthentication();
-        return existing != null
-                && existing.isAuthenticated()
-                && !(existing instanceof AnonymousAuthenticationToken);
     }
 }

@@ -1,7 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
+import { AssignmentService } from '../../../core/services/assignment.service';
+import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 
 @Component({
   selector: 'app-vehicle-details',
@@ -11,22 +14,32 @@ import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.serv
   styleUrls: ['./vehicle-details.scss']
 })
 export class VehicleDetails implements OnInit {
-  vehicle!: VehicleInfo;
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private vehicleService = inject(VehicleService);
+  private assignmentService = inject(AssignmentService);
+  private cdr = inject(ChangeDetectorRef);
 
-  private id = ''; // UUID
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private vehicleService: VehicleService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  vehicle: VehicleInfo | null = null;
+
+  // ✅ DriverInfo за това ППС (има employee.name)
+  assignedDriverInfo: DriverInfo | null = null;
+
+  loading = false;
+  errorMessage = '';
+
+  private id = ''; // vehicle UUID
 
   ngOnInit() {
+    if (!this.isBrowser) return;
+
     this.id = this.route.snapshot.paramMap.get('id') || '';
 
     if (!this.id) {
-      console.error('Не е предоставен id на ППС');
+      this.errorMessage = 'Не е предоставен ID на ППС.';
       this.router.navigate(['/vehicles']);
       return;
     }
@@ -34,18 +47,53 @@ export class VehicleDetails implements OnInit {
     this.loadVehicle(this.id);
   }
 
-  loadVehicle(id: string) {
+  private loadVehicle(id: string) {
+    this.loading = true;
+    this.errorMessage = '';
+    this.vehicle = null;
+    this.assignedDriverInfo = null;
+    this.cdr.detectChanges();
+
     this.vehicleService.getById(id).subscribe({
       next: (vehicle) => {
         this.vehicle = vehicle;
+        this.loading = false;
         this.cdr.detectChanges();
+
+        // ✅ след като имаме vehicle -> дърпаме шофьора
+        this.loadAssignedDriver(vehicle.id);
       },
       error: (error) => {
-        console.error('Грешка при зареждане на данните за превозното средство!', error);
-        if (error.status === 404) {
-          console.error('Превозното средство не е намерено');
+        this.loading = false;
+
+        if (error?.status === 401) {
+          this.errorMessage = 'Нямаш активна сесия. Влез отново.';
+        } else if (error?.status === 404) {
+          this.errorMessage = 'ППС не е намерено.';
           this.router.navigate(['/vehicles']);
+        } else {
+          this.errorMessage = 'Грешка при зареждане на данните за превозното средство!';
         }
+
+        console.error('VehicleDetails load error:', error);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadAssignedDriver(vehicleId: string) {
+    this.assignedDriverInfo = null;
+    this.cdr.detectChanges();
+
+    this.assignmentService.getDriverOfVehicle(vehicleId).subscribe({
+      next: (driverInfo) => {
+        this.assignedDriverInfo = driverInfo;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // ако няма назначен -> 404/204
+        this.assignedDriverInfo = null;
+        this.cdr.detectChanges();
       }
     });
   }

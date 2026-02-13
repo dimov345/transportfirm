@@ -4,6 +4,7 @@ import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.Enum.JobTitle;
 import com.example.transportfirm.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,8 +46,8 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
         employeeService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }

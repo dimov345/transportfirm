@@ -22,7 +22,7 @@
 
         <div class="type-select">
           <label>Тип документ:</label>
-          <select [(ngModel)]="selectedType">
+          <select [(ngModel)]="selectedType" [disabled]="isUploading || isLoading">
             <option value="">Изберете тип</option>
             <option value="ID_CARD">Лична карта</option>
             <option value="PASSPORT">Паспорт</option>
@@ -38,7 +38,7 @@
             type="file"
             (change)="onFileSelected($event)"
             accept="application/pdf"
-            [disabled]="isUploading"
+            [disabled]="isUploading || isLoading"
           />
           <span class="file-input-button" [class.is-loading]="isUploading">
             <span *ngIf="!isUploading">Качи документ</span>
@@ -61,13 +61,26 @@
 
           <div class="doc-info">
             <span class="doc-name">{{ doc.fileName }}</span>
+            <span class="doc-type" *ngIf="doc.type">{{ doc.type }}</span>
           </div>
 
           <div class="doc-actions">
-            <button class="icon-btn icon-btn--download" (click)="download(doc)">
+            <button
+              class="icon-btn icon-btn--download"
+              type="button"
+              (click)="download(doc)"
+              [disabled]="!isBrowser"
+              title="Изтегли"
+            >
               <i class="material-icons">download</i>
             </button>
-            <button class="icon-btn icon-btn--delete" (click)="delete(doc.id)">
+
+            <button
+              class="icon-btn icon-btn--delete"
+              type="button"
+              (click)="delete(doc.id)"
+              title="Изтрий"
+            >
               <i class="material-icons">delete</i>
             </button>
           </div>

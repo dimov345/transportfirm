@@ -1,5 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+  Inject,
+  PLATFORM_ID
+} from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -14,7 +20,7 @@ import { DriverDocument } from '../../../core/models/driver/driver-document.mode
   styleUrls: ['./driver-documents.scss']
 })
 export class DriverDocumentsComponent implements OnInit {
-  employeeId!: string; // ✅ UUID
+  employeeId!: string; // UUID
   documents: DriverDocument[] = [];
 
   selectedType: string = '';
@@ -22,11 +28,16 @@ export class DriverDocumentsComponent implements OnInit {
   isLoading = true;
   isUploading = false;
 
+  readonly isBrowser: boolean;
+
   constructor(
     private route: ActivatedRoute,
     private driverService: DriverService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) platformId: object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -38,11 +49,15 @@ export class DriverDocumentsComponent implements OnInit {
       return;
     }
 
-    this.employeeId = idParam; // ✅ UUID е string
-    this.loadDocuments();
+    this.employeeId = idParam;
+
+    if (this.isBrowser) {
+      this.loadDocuments();
+    } else {
+      this.isLoading = false;
+    }
   }
 
-  /** Зареждане на документи (по employeeId) */
   loadDocuments(): void {
     this.isLoading = true;
 
@@ -61,13 +76,15 @@ export class DriverDocumentsComponent implements OnInit {
     });
   }
 
-  /** Качване */
+
   onFileSelected(event: Event): void {
+
+    if (!this.isBrowser) return;
+
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // махаме празните/грешни option-и с интервали
     const type = (this.selectedType || '').trim();
 
     if (!type) {
@@ -108,8 +125,10 @@ export class DriverDocumentsComponent implements OnInit {
     });
   }
 
-  /** 📥 Изтегляне (по docId) */
+
   download(doc: DriverDocument): void {
+    if (!this.isBrowser) return;
+
     this.driverService.downloadDocument(doc.id).subscribe({
       next: (blob: Blob) => this.saveBlob(blob, doc.fileName || 'document.pdf'),
       error: (err: unknown) => {
@@ -120,16 +139,18 @@ export class DriverDocumentsComponent implements OnInit {
   }
 
   private saveBlob(blob: Blob, fileName: string): void {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+
+    if (!this.isBrowser) return;
+
+    const url = window.URL.createObjectURL(blob);
+    const a = window.document.createElement('a');
     a.href = url;
     a.download = fileName;
     a.click();
-    URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
   }
 
-  /** 🗑️ Изтриване (по docId) */
-  delete(docId: string): void { // ✅ UUID
+  delete(docId: string): void {
     if (!confirm('Наистина ли искате да изтриете този документ?')) return;
 
     this.driverService.deleteDocument(docId).subscribe({

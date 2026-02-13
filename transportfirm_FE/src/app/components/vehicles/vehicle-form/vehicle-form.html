@@ -31,6 +31,13 @@
     </div>
   </div>
 
+  <!-- Banner -->
+  <div class="tf-banner" *ngIf="loading">Зареждам данни...</div>
+
+  <div class="tf-banner error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
 
 
   <div class="tf-body">
@@ -255,7 +262,7 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="vehicleForm.invalid || isSubmitting"
+          [disabled]="vehicleForm.invalid || isSubmitting || loading"
         >
           {{ isSubmitting ? 'Запазване...' : (isEdit ? 'Запази промените' : 'Добави ППС') }}
         </button>

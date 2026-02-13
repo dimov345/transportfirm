@@ -74,7 +74,7 @@ export class AdminService {
     return this.http.get<Employee>(`${this.baseUrl}/employees/${id}`);
   }
 
-  updateEmployee(id: string, employee: Employee): Observable<Employee> {
-    return this.http.put<Employee>(`${this.baseUrl}/employees/update/${id}`, employee);
+  updateEmployee(id: string, payload: Partial<Employee>): Observable<Employee> {
+    return this.http.put<Employee>(`${this.baseUrl}/employees/update/${id}`, payload);
   }
 }

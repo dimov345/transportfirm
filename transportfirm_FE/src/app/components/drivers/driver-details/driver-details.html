@@ -38,6 +38,8 @@
             <i class="material-icons">folder</i>
             Документи
           </button>
+
+          
         </div>
       </div>
     </div>
@@ -231,6 +233,21 @@
             </button>
           </div>
         </div>
+
+        @if (driverInfo?.id) {
+          <div class="info-card">
+            <div class="card-header">
+              <i class="material-icons">local_shipping</i>
+              <h2>Назначено превозно средство</h2>
+            </div>
+
+            <app-driver-vehicle-assignment
+              [driverInfoId]="driverInfo!.id">
+            </app-driver-vehicle-assignment>
+          </div>
+        }
+
+
       </div>
     </div>
   } @else {

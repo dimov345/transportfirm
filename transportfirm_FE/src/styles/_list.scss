@@ -371,11 +371,11 @@ select {
     overflow: hidden;
     box-shadow: $shadow;
 
-    th, td {
+    th,
+    td {
       box-sizing: border-box;
     }
 
-    /* FIX: header background must be on the row, not only on cells */
     thead {
       background: transparent;
 
@@ -394,6 +394,7 @@ select {
         border-bottom: 1px solid $border;
         text-align: left;
         white-space: nowrap;
+        vertical-align: middle;
       }
 
       th:first-child {
@@ -403,74 +404,36 @@ select {
       th:last-child {
         border-top-right-radius: $radius-lg;
       }
-    }
-
     
+    }
 
     tbody {
       tr.driver-row {
-        position: relative;
-        transition: background 0.12s ease;
+        transition: background 0.12s ease, box-shadow 0.12s ease;
 
         &:hover {
           background: #fafbfc;
         }
 
-        /* soft status rows */
+        /* ✅ soft status rows WITHOUT pseudo elements (no shifting) */
         &.expired-row {
           background: $danger-bg;
-
-          &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: rgba($danger, 0.9);
-          }
+          box-shadow: inset 3px 0 0 rgba($danger, 0.9);
         }
 
         &.expiring-row {
           background: $warn-bg;
-
-          &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: rgba($warn, 0.9);
-          }
+          box-shadow: inset 3px 0 0 rgba($warn, 0.9);
         }
 
         &.valid-row {
           background: $ok-bg;
-
-          &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: rgba($ok, 0.9);
-          }
+          box-shadow: inset 3px 0 0 rgba($ok, 0.9);
         }
 
         &.missing-row {
           background: $info-bg;
-
-          &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: rgba($info, 0.9);
-          }
+          box-shadow: inset 3px 0 0 rgba($info, 0.9);
         }
 
         td {
@@ -517,64 +480,69 @@ select {
           border-bottom: none;
         }
 
+        /* ✅ align actions cell content */
+        td.actions-cell {
+          text-align: right;
+        }
+
         .actions-cell {
           .actions-group {
             display: flex;
             gap: 8px;
-            justify-content: flex-end;
+            align-items: center;
+          }
 
-            .btn-action {
-              width: 34px;
-              height: 34px;
-              border-radius: 10px;
+          .btn-action {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
 
-              border: 1px solid transparent;
-              background: transparent;
-              cursor: pointer;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
 
-              display: grid;
-              place-items: center;
+            display: grid;
+            place-items: center;
 
-              transition: background $ease, border-color $ease, transform $ease;
+            transition: background $ease, border-color $ease, transform $ease;
 
-              svg {
-                width: 16px;
-                height: 16px;
-              }
+            svg {
+              width: 16px;
+              height: 16px;
+            }
+
+            &:hover {
+              transform: translateY(-1px);
+            }
+
+            &:active {
+              transform: translateY(0);
+            }
+
+            &.btn-edit {
+              color: $accent;
 
               &:hover {
-                transform: translateY(-1px);
+                background: rgba($accent, 0.10);
+                border-color: rgba($accent, 0.18);
               }
+            }
 
-              &:active {
-                transform: translateY(0);
+            &.btn-docs {
+              color: $ok;
+
+              &:hover {
+                background: rgba($ok, 0.10);
+                border-color: rgba($ok, 0.18);
               }
+            }
 
-              &.btn-edit {
-                color: $accent;
+            &.btn-delete {
+              color: $danger;
 
-                &:hover {
-                  background: rgba($accent, 0.10);
-                  border-color: rgba($accent, 0.18);
-                }
-              }
-
-              &.btn-docs {
-                color: $ok;
-
-                &:hover {
-                  background: rgba($ok, 0.10);
-                  border-color: rgba($ok, 0.18);
-                }
-              }
-
-              &.btn-delete {
-                color: $danger;
-
-                &:hover {
-                  background: rgba($danger, 0.10);
-                  border-color: rgba($danger, 0.18);
-                }
+              &:hover {
+                background: rgba($danger, 0.10);
+                border-color: rgba($danger, 0.18);
               }
             }
           }
@@ -732,6 +700,7 @@ select {
       display: flex;
       gap: 8px;
       justify-content: flex-end;
+      align-items: center;
     }
 
     .btn-action {

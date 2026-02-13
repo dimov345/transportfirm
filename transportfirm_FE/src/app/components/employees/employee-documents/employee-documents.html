@@ -13,6 +13,8 @@
     </div>
   </div>
 
+  
+
   <div class="docs-content">
     <!-- Upload Section -->
     <div class="upload-section">
@@ -24,8 +26,6 @@
           <label>Тип документ:</label>
           <select [(ngModel)]="selectedType">
             <option value="">Изберете тип</option>
-
-            <!-- IMPORTANT: стойностите трябва да са 1:1 с EmployeeDocumentType enum -->
             <option value="ID_CARD">Лична карта</option>
             <option value="PASSPORT">Паспорт</option>
             <option value="CONTRACT">Договор</option>
@@ -68,7 +68,7 @@
             <button class="icon-btn icon-btn--download" (click)="download(doc)">
               <i class="material-icons">download</i>
             </button>
-            <button class="icon-btn icon-btn--delete" (click)="Delete(doc.id)">
+            <button class="icon-btn icon-btn--delete" (click)="deleteDoc(doc.id)">
               <i class="material-icons">delete</i>
             </button>
           </div>
@@ -80,12 +80,6 @@
         <div class="empty-icon">📂</div>
         <h3>Няма прикачени документи</h3>
         <p>Качете първия PDF документ</p>
-      </div>
-
-      <!-- Loading State -->
-      <div class="loading-state" *ngIf="isLoading">
-        <div class="loading-spinner"></div>
-        <p>Зареждане на документи...</p>
       </div>
     </div>
   </div>

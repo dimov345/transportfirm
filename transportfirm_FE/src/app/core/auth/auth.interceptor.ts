@@ -34,7 +34,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(cloned).pipe(
     catchError((err: HttpErrorResponse) => {
       // --- 401 -> redirect към login ---
-      /*if (err?.status === 401) {
+      if (err?.status === 401) {
         const isLoginRequest = req.url.includes('/auth/login');
         const alreadyOnLogin = router.url.startsWith('/login');
 
@@ -51,7 +51,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
 
         return throwError(() => err);
-      }*/
+      }
 
       // --- 403 firstLoginRequired -> redirect към first-login ---
       const firstLoginRequired =

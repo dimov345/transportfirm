@@ -2,7 +2,6 @@
   <div class="tf-header">
     <div class="tf-header-main">
       <div class="tf-icon" aria-hidden="true">
-        <!-- outline icon like sidebar -->
         <svg class="tf-svg" viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
@@ -178,15 +177,14 @@
             </div>
           </div>
 
-          <ng-container *ngIf="!isEdit">
-            <div class="tf-group">
-              <label class="tf-label">Потребителско име *</label>
-              <input class="tf-input" formControlName="username" type="text" />
-              <div class="tf-error" *ngIf="field('username')?.touched && field('username')?.invalid">
-                <small>Потребителското име е задължително.</small>
-              </div>
+          <!-- username само при create -->
+          <div class="tf-group" *ngIf="!isEdit">
+            <label class="tf-label">Потребителско име *</label>
+            <input class="tf-input" formControlName="username" type="text" />
+            <div class="tf-error" *ngIf="field('username')?.touched && field('username')?.invalid">
+              <small>Потребителското име е задължително.</small>
             </div>
-          </ng-container>
+          </div>
         </div>
       </div>
 
@@ -215,7 +213,9 @@
           Отказ
         </button>
 
-        <button type="submit" class="btn btn-primary" [disabled]="saving || loading">
+        <button type="submit"
+                class="btn btn-primary"
+                [disabled]="saving || loading || (isEdit && !loadedEmployee)">
           {{ saving ? 'Записвам...' : (isEdit ? 'Запази промените' : 'Добави служител') }}
         </button>
       </div>

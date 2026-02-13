@@ -7,16 +7,28 @@ import { DriverService } from '../../../core/services/driver.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 
+import { DriverVehicleAssignment } from '../../assignment/driver-vehicle-assignment/driver-vehicle-assignment';
+import { VehicleInfo, VehicleService } from '../../../core/services/vehicle.service';
+import { AssignmentService } from '../../../core/services/assignment.service';
+
 @Component({
   selector: 'app-driver-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DriverVehicleAssignment],
   templateUrl: './driver-details.html',
   styleUrls: ['./driver-details.scss']
 })
 export class DriverDetails implements OnInit {
   employee: Employee | null = null;
   driverInfo: DriverInfo | null = null;
+
+  currentVehicle: VehicleInfo | null = null;
+  availableVehicles: VehicleInfo[] = [];
+  selectedVehicleId = '';
+
+  assignError = '';
+  assignSuccess = '';
+  saving = false;
 
   error = '';
   loading = true;
@@ -30,7 +42,9 @@ export class DriverDetails implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private driverService: DriverService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private assignmentService: AssignmentService,
+    private vehicleService: VehicleService
   ) {}
 
   ngOnInit() {
@@ -72,8 +86,68 @@ export class DriverDetails implements OnInit {
 
       this.loading = false;
       this.cdr.detectChanges();
+      this.loadAssignmentData();
     });
   }
+
+  loadAssignmentData(): void {
+    // текущо МПС
+    this.assignmentService.getVehicleOfDriver(this.driverInfo!.id)
+      .subscribe({
+        next: v => this.currentVehicle = v,
+        error: () => this.currentVehicle = null
+      });
+
+    // свободни МПС
+    this.assignmentService.getAvailableVehicles()
+      .subscribe(list => this.availableVehicles = list);
+  }
+
+  assignVehicle(): void {
+    if (!this.selectedVehicleId) return;
+
+    this.saving = true;
+    this.assignError = '';
+    this.assignSuccess = '';
+
+    this.assignmentService.assignVehicleToDriver(
+      this.driverInfo!.id,
+      this.selectedVehicleId
+    ).subscribe({
+      next: () => {
+        this.assignSuccess = 'МПС е назначено.';
+        this.selectedVehicleId = '';
+        this.saving = false;
+        this.loadAssignmentData();
+      },
+      error: err => {
+        this.saving = false;
+        this.assignError =
+          err.status === 409 ? 'МПС е вече заето.' : 'Грешка при назначаване.';
+      }
+    });
+  }
+
+  unassignVehicle(): void {
+    this.saving = true;
+    this.assignError = '';
+    this.assignSuccess = '';
+
+    this.assignmentService.unassignVehicleFromDriver(this.driverInfo!.id)
+      .subscribe({
+        next: () => {
+          this.assignSuccess = 'МПС е откачено.';
+          this.saving = false;
+          this.loadAssignmentData();
+        },
+        error: () => {
+          this.saving = false;
+          this.assignError = 'Грешка при откачане.';
+        }
+      });
+  }
+
+
 
   // ---------------- DOCUMENT STATUS ------------------
 

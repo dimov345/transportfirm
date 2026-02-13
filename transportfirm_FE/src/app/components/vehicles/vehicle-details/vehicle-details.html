@@ -1,5 +1,24 @@
 <div class="details-container">
-  <ng-container *ngIf="vehicle as v; else errorTpl">
+
+  <!-- Loading -->
+  <div class="tf-banner" *ngIf="loading">Зареждам данни...</div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="!loading && errorMessage">
+    <div class="error-icon">
+      <i class="material-icons">error_outline</i>
+    </div>
+    <h3>Неуспешно зареждане на данни</h3>
+    <p>{{ errorMessage }}</p>
+
+    <button type="button" class="btn-primary" routerLink="/vehicles">
+      <i class="material-icons">arrow_back</i>
+      Назад към списъка
+    </button>
+  </div>
+
+  <!-- Success -->
+  <ng-container *ngIf="!loading && !errorMessage && vehicle as v">
     <!-- Page Header -->
     <div class="details-header">
       <div class="header-content">
@@ -42,6 +61,24 @@
     <!-- Vehicle Details -->
     <div class="details-content">
       <div class="details-grid">
+
+        <!-- ✅ Assigned Driver -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">person</i>
+            <h2>Шофьор</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Назначен шофьор</label>
+              <span class="value">
+                {{ assignedDriverInfo?.employee?.name || 'Няма назначен шофьор' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <!-- Basic Information -->
         <div class="info-card">
           <div class="card-header">
@@ -111,14 +148,10 @@
 
           <div class="documents-status">
             <div class="doc-item" [class.expired]="isExpired(v.kaskoDo)">
-              <div class="doc-icon">
-                <i class="material-icons">shield</i>
-              </div>
+              <div class="doc-icon"><i class="material-icons">shield</i></div>
               <div class="doc-info">
                 <span class="doc-title">Каско</span>
-                <span class="doc-dates">
-                  {{ formatDate(v.kaskoOt) }} - {{ formatDate(v.kaskoDo) }}
-                </span>
+                <span class="doc-dates">{{ formatDate(v.kaskoOt) }} - {{ formatDate(v.kaskoDo) }}</span>
               </div>
               <div class="doc-status" [class.expired]="isExpired(v.kaskoDo)">
                 {{ isExpired(v.kaskoDo) ? 'Изтекла' : 'Активна' }}
@@ -126,9 +159,7 @@
             </div>
 
             <div class="doc-item" [class.expired]="isExpired(v.grazhdanskaOtgovornostDo)">
-              <div class="doc-icon">
-                <i class="material-icons">gavel</i>
-              </div>
+              <div class="doc-icon"><i class="material-icons">gavel</i></div>
               <div class="doc-info">
                 <span class="doc-title">Гражданска отговорност</span>
                 <span class="doc-dates">
@@ -141,14 +172,10 @@
             </div>
 
             <div class="doc-item" [class.expired]="isExpired(v.gtpDo)">
-              <div class="doc-icon">
-                <i class="material-icons">construction</i>
-              </div>
+              <div class="doc-icon"><i class="material-icons">construction</i></div>
               <div class="doc-info">
                 <span class="doc-title">ГТП</span>
-                <span class="doc-dates">
-                  {{ formatDate(v.gtpOt) }} - {{ formatDate(v.gtpDo) }}
-                </span>
+                <span class="doc-dates">{{ formatDate(v.gtpOt) }} - {{ formatDate(v.gtpDo) }}</span>
               </div>
               <div class="doc-status" [class.expired]="isExpired(v.gtpDo)">
                 {{ isExpired(v.gtpDo) ? 'Изтекла' : 'Активна' }}
@@ -156,14 +183,10 @@
             </div>
 
             <div class="doc-item" [class.expired]="isExpired(v.vinetkaDo)">
-              <div class="doc-icon">
-                <i class="material-icons">local_shipping</i>
-              </div>
+              <div class="doc-icon"><i class="material-icons">local_shipping</i></div>
               <div class="doc-info">
                 <span class="doc-title">Винетка</span>
-                <span class="doc-dates">
-                  {{ formatDate(v.vinetkaOt) }} - {{ formatDate(v.vinetkaDo) }}
-                </span>
+                <span class="doc-dates">{{ formatDate(v.vinetkaOt) }} - {{ formatDate(v.vinetkaDo) }}</span>
               </div>
               <div class="doc-status" [class.expired]="isExpired(v.vinetkaDo)">
                 {{ isExpired(v.vinetkaDo) ? 'Изтекла' : 'Активна' }}
@@ -172,43 +195,9 @@
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="info-card">
-          <div class="card-header">
-            <i class="material-icons">flash_on</i>
-            <h2>Бързи действия</h2>
-          </div>
-
-          <div class="quick-actions">
-            <button type="button" class="action-btn" [routerLink]="['/vehicles/edit', v.id]">
-              <i class="material-icons">edit</i>
-              <span>Редактирай данни</span>
-            </button>
-
-            <button type="button" class="action-btn" [routerLink]="['/vehicles-documents', v.id]">
-              <i class="material-icons">folder</i>
-              <span>Управление на документи</span>
-            </button>
-          </div>
-        </div>
+       
 
       </div>
     </div>
   </ng-container>
-
-  <!-- Error State -->
-  <ng-template #errorTpl>
-    <div class="error-state">
-      <div class="error-icon">
-        <i class="material-icons">error_outline</i>
-      </div>
-      <h3>Неуспешно зареждане на данни</h3>
-      <p>Не можахме да заредим информацията за това превозно средство</p>
-
-      <button type="button" class="btn-primary" routerLink="/vehicles">
-        <i class="material-icons">arrow_back</i>
-        Назад към списъка
-      </button>
-    </div>
-  </ng-template>
 </div>

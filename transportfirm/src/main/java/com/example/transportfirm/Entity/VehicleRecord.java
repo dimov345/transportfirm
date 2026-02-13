@@ -76,16 +76,14 @@ public class VehicleRecord {
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
 
-    // Група към която принадлежи камионът
     @ManyToOne
     @JoinColumn(name = "truck_group_id")
     private TruckGroup truckGroup;
 
-    // Един шофьор кара един камион
     @OneToOne(mappedBy = "vehicle")
+    @JsonIgnoreProperties({"vehicle", "employee", "hibernateLazyInitializer", "handler"})
     private DriverInfo driver;
 
-    // Документи на камиона
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
     private List<VehicleDocument> documents = new ArrayList<>();
 

@@ -12,30 +12,14 @@ import java.io.IOException;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
     @Override
-    public void commence(HttpServletRequest request,
-                         HttpServletResponse response,
-                         org.springframework.security.core.AuthenticationException authException) throws IOException {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        boolean isRealAuth = auth != null
-                && auth.isAuthenticated()
-                && !(auth instanceof AnonymousAuthenticationToken);
-
-        if (isRealAuth) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
-            return;
-        }
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                         org.springframework.security.core.AuthenticationException ex) throws IOException {
+        response.setStatus(401);
         response.setContentType("application/json");
         response.getWriter().write("""
-            {
-              "authenticated": false,
-              "message": "User is not authenticated"
-            }
-        """);
+      {"status":401,"error":"UNAUTHORIZED","message":"User is not authenticated"}
+    """);
     }
 }
+

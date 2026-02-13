@@ -1,0 +1,44 @@
+.current {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    font-weight: 600;
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+
+  .value {
+    font-size: 15px;
+  }
+}
+
+.actions .row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  select {
+    min-width: 280px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #d6dbe6;
+    background: #fff;
+  }
+}
+
+.msg {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.msg.error {
+  background: #ffe8e8;
+}
+
+.msg.success {
+  background: #e9ffea;
+}

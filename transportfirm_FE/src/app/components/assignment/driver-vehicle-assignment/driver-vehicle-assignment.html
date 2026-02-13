@@ -1,0 +1,54 @@
+<div class="assignment-card">
+  <div *ngIf="loading" class="loading-state">Зареждане...</div>
+
+  <div *ngIf="!loading">
+    <!-- Текущо назначение -->
+    <div class="current">
+      <label>Текущо назначение</label>
+      <div class="value">
+        <span *ngIf="currentVehicle; else noVehicle">
+          {{ currentVehicle.plateNumber }} — {{ currentVehicle.model }}
+        </span>
+        <ng-template #noVehicle>Няма назначено МПС</ng-template>
+      </div>
+    </div>
+
+    <div class="actions">
+      <!-- Ако НЯМА назначено МПС -> dropdown + Назначи -->
+      <div *ngIf="!currentVehicle; else assignedBlock" class="row">
+        <select [(ngModel)]="selectedVehicleId" [disabled]="saving">
+          <option value="">Избери свободно МПС...</option>
+          <option *ngFor="let v of availableVehicles" [value]="v.id">
+            {{ v.plateNumber }} — {{ v.model }}
+          </option>
+        </select>
+
+        <button
+          class="btn-primary"
+          type="button"
+          (click)="assign()"
+          [disabled]="saving || !selectedVehicleId"
+        >
+          Назначи
+        </button>
+      </div>
+
+      <!-- Ако ИМА назначено МПС -> само Откачи -->
+      <ng-template #assignedBlock>
+        <div class="row">
+          <button
+            class="btn-secondary"
+            type="button"
+            (click)="unassign()"
+            [disabled]="saving"
+          >
+            Откачи
+          </button>
+        </div>
+      </ng-template>
+
+      <div *ngIf="error" class="msg error">{{ error }}</div>
+      <div *ngIf="success" class="msg success">{{ success }}</div>
+    </div>
+  </div>
+</div>

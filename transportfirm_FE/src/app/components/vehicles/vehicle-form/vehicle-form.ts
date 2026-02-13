@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
+
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
@@ -12,9 +14,21 @@ import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.serv
   styleUrls: ['./vehicle-form.scss']
 })
 export class VehicleFormComponent implements OnInit {
-  vehicleForm: FormGroup;
+  private fb = inject(FormBuilder);
+  private vehicleService = inject(VehicleService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
+
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
+  vehicleForm: FormGroup = this.createForm();
+
   isEdit = false;
   isSubmitting = false;
+  loading = false;
+  errorMessage = '';
 
   id = ''; // UUID от route
 
@@ -40,20 +54,12 @@ export class VehicleFormComponent implements OnInit {
     'Бракувано'
   ];
 
-  emissionStandards = [
-    'Euro 1', 'Euro 2', 'Euro 3', 'Euro 4', 'Euro 5', 'Euro 6'
-  ];
-
-  constructor(
-    private fb: FormBuilder,
-    private vehicleService: VehicleService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.vehicleForm = this.createForm();
-  }
+  emissionStandards = ['Euro 1', 'Euro 2', 'Euro 3', 'Euro 4', 'Euro 5', 'Euro 6'];
 
   ngOnInit() {
+    // ✅ SSR guard: не правим HTTP и не ползваме browser APIs
+    if (!this.isBrowser) return;
+
     this.id = this.route.snapshot.paramMap.get('id') || '';
 
     if (this.id) {
@@ -66,9 +72,9 @@ export class VehicleFormComponent implements OnInit {
     }
   }
 
-  createForm(): FormGroup {
+  private createForm(): FormGroup {
     return this.fb.group({
-      id: [''], // може да стои (backend може да го игнорира при create)
+      id: [''],
       plateNumber: ['', [Validators.required, Validators.maxLength(20)]],
       model: ['', [Validators.required, Validators.maxLength(100)]],
       engineNumber: ['', [Validators.required, Validators.maxLength(50)]],
@@ -89,43 +95,73 @@ export class VehicleFormComponent implements OnInit {
     });
   }
 
-  loadVehicle() {
-    this.vehicleService.getById(this.id).subscribe({
-      next: (vehicle: VehicleInfo) => {
-        this.vehicleForm.patchValue(vehicle);
-      },
-      error: () => {
-        alert('Грешка при зареждане на данните за превозното средство!');
-        this.router.navigate(['/vehicles']);
-      }
-    });
+  private loadVehicle() {
+    this.loading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    this.vehicleService.getById(this.id)
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (vehicle: VehicleInfo) => {
+          this.vehicleForm.patchValue(vehicle);
+          this.vehicleForm.markAsPristine();
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          // ✅ вместо alert -> UI message (SSR-safe)
+          this.errorMessage =
+            err?.error?.message || 'Грешка при зареждане на данните за превозното средство!';
+          console.error(err);
+          this.cdr.detectChanges();
+
+          // по желание: върни към списъка
+          this.router.navigate(['/vehicles']);
+        }
+      });
   }
 
   onSubmit() {
+    this.errorMessage = '';
+
+    // ✅ SSR safety
+    if (!this.isBrowser) return;
+
     if (this.vehicleForm.invalid) {
       this.markAllFieldsAsTouched();
+      this.errorMessage = 'Попълнете задължителните полета.';
+      this.cdr.detectChanges();
       return;
     }
 
     this.isSubmitting = true;
+    this.cdr.detectChanges();
 
-    // IMPORTANT: включва disabled полета (plateNumber) в payload-а
+    // включва disabled полета (plateNumber) в payload-а
     const formData = this.vehicleForm.getRawValue();
 
     const request = this.isEdit
       ? this.vehicleService.update(this.id, formData)
       : this.vehicleService.create(formData);
 
-    request.subscribe({
-      next: () => {
+    request
+      .pipe(finalize(() => {
         this.isSubmitting = false;
-        this.router.navigate(['/vehicles']);
-      },
-      error: () => {
-        this.isSubmitting = false;
-        alert(`Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`);
-      }
-    });
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: () => this.router.navigate(['/vehicles']),
+        error: (err: any) => {
+          this.errorMessage =
+            err?.error?.message ||
+            `Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`;
+          console.error(err);
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -140,7 +176,8 @@ export class VehicleFormComponent implements OnInit {
     if (field.errors['required']) return 'Това поле е задължително';
     if (field.errors['min']) return `Минимална стойност е ${field.errors['min'].min}`;
     if (field.errors['max']) return `Максимална стойност е ${field.errors['max'].max}`;
-    if (field.errors['maxlength']) return `Максимална дължина е ${field.errors['maxlength'].requiredLength} символа`;
+    if (field.errors['maxlength'])
+      return `Максимална дължина е ${field.errors['maxlength'].requiredLength} символа`;
 
     return 'Невалидна стойност';
   }

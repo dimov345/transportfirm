@@ -8,6 +8,8 @@ import com.example.transportfirm.repository.DriverDocumentRepository;
 import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 
+import com.example.transportfirm.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class DriverService {
 
     private final DriverRepository driverRepository;
@@ -27,12 +30,6 @@ public class DriverService {
 
     private final String uploadDir = "driver_documents";
 
-    public DriverService(DriverRepository driverRepository,
-                         DriverDocumentRepository documentRepository, EmployeeRepository employeeRepository) {
-        this.driverRepository = driverRepository;
-        this.documentRepository = documentRepository;
-        this.employeeRepository = employeeRepository;
-    }
 
     // =========================
     // DRIVER CRUD

@@ -100,7 +100,7 @@ public class Employee {
     private List<EmployeeDocument> documents = new ArrayList<>();
 
     @OneToOne(mappedBy = "employee")
-    @JsonManagedReference("employee-driver")
+    @JsonIgnoreProperties({"employee", "vehicle", "hibernateLazyInitializer", "handler"})
     private DriverInfo driverInfo;
 
     @OneToOne(mappedBy = "employee")

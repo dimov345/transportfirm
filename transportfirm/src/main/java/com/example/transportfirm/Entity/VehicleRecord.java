@@ -1,10 +1,12 @@
 package com.example.transportfirm.entity;
 
+import com.example.transportfirm.enums.VehicleStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +78,43 @@ public class VehicleRecord {
     private LocalDate vinetkaOt;
     private LocalDate vinetkaDo;
 
-    @ManyToOne
-    @JoinColumn(name = "truck_group_id")
-    private TruckGroup truckGroup;
+
+    @Column(nullable = false)
+    private boolean leased;
+
+    private LocalDate leasingStartDate;
+    private LocalDate leasingEndDate;
+
+    private String leasingCompany;
+    private String leasingContractNumber;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dispatcher_group_id")
+    private TruckGroup dispatcherGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mechanic_group_id")
+    private TruckGroup mechanicGroup;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VehicleStatus vehicleStatus = VehicleStatus.AVAILABLE;
+
+    private Long odometerKm;
+
+    private Long lastServiceOdometerKm;
+    private LocalDate lastServiceDate;
+
+    private Long nextServiceDueOdometerKm;
+    private LocalDate nextServiceDueDate;
+
+    // полезно за dispatcher calculator по-късно
+    private BigDecimal avgConsumptionLper100;
+
+    @Column(length = 1000)
+    private String notesForMechanic;
 
     @OneToOne(mappedBy = "vehicle")
     @JsonIgnoreProperties({"vehicle", "employee", "hibernateLazyInitializer", "handler"})

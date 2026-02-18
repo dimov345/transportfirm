@@ -3,12 +3,11 @@ package com.example.transportfirm.service;
 import com.example.transportfirm.entity.DriverDocument;
 import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.Enum.DriverDocumentType;
+import com.example.transportfirm.enums.DriverDocumentType;
 import com.example.transportfirm.repository.DriverDocumentRepository;
 import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 
-import com.example.transportfirm.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

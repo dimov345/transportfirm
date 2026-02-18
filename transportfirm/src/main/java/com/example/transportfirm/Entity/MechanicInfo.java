@@ -1,6 +1,8 @@
 package com.example.transportfirm.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,6 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "mechanics_info")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class MechanicInfo {
 
     @Id
@@ -23,6 +26,7 @@ public class MechanicInfo {
     @JsonBackReference("employee-mechanic")
     private Employee employee;
 
-    @OneToMany(mappedBy = "mechanic", cascade = CascadeType.ALL)
-    private List<TruckGroup> truckGroups = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "mechanic")
+    private List<TruckGroup> mechanicGroups = new ArrayList<>();
 }

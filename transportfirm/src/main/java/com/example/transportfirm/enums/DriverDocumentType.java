@@ -1,4 +1,4 @@
-package com.example.transportfirm.Enum;
+package com.example.transportfirm.enums;
 
 
 public enum DriverDocumentType {

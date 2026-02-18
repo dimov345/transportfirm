@@ -1,0 +1,56 @@
+.assignment-card {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+select {
+  min-width: 260px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.15);
+}
+
+hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.muted { opacity: .7; }
+
+.alert {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.alert.error { background: rgba(255,0,0,.06); }
+.alert.success { background: rgba(0,180,0,.06); }

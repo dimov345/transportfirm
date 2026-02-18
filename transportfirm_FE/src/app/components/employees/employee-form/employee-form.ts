@@ -205,7 +205,7 @@ export class EmployeeForm implements OnInit {
     return {
       egn: v.egn,
       name: v.name,
-      dateOfBirth: v.dateOfBirth,
+      dateOfBirth: v.dateOfBirth,np
       phone: v.phone,
       email: v.email,
 

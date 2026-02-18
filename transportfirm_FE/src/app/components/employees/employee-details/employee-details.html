@@ -2,34 +2,34 @@
   <div class="details-container">
     <!-- Header -->
     <div class="details-header">
-      
-
       <div class="header-content">
         <div class="title-section">
           <h1>Детайли за служител</h1>
           <div class="plate-number">{{ e.name }}</div>
         </div>
 
-
-         <div class="header-actions">
-          <button 
-            type="button" 
-            class="btn-secondary" 
-            routerLink="/employees" 
+        <div class="header-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            routerLink="/employees"
             aria-label="Назад към списъка">
             <i class="material-icons">arrow_back_ios</i>
             Назад
           </button>
 
-          <button
-            type="button"
-            class="btn-secondary"
-            [routerLink]="['/employees/edit', e.id]"
-            aria-label="Редактирай служител"
-          >
-            <i class="material-icons">edit</i>
-            Редактирай
-          </button>
+          <!-- ✅ само ADMIN -->
+          @if (isAdmin) {
+            <button
+              type="button"
+              class="btn-secondary"
+              [routerLink]="['/employees/edit', e.id]"
+              aria-label="Редактирай служител"
+            >
+              <i class="material-icons">edit</i>
+              Редактирай
+            </button>
+          }
 
           <button
             type="button"
@@ -47,6 +47,7 @@
     <!-- Content -->
     <div class="details-content">
       <div class="details-grid">
+
         <!-- Лични данни -->
         <div class="info-card">
           <div class="card-header">
@@ -80,7 +81,6 @@
               <span class="value">{{ e.email || '—' }}</span>
             </div>
 
-            <!-- Адреси (преместени тук) -->
             <div class="info-item">
               <label>Постоянен адрес</label>
               <span class="value">{{ e.addressPermanent || '—' }}</span>
@@ -133,6 +133,80 @@
           </div>
         </div>
 
+        
+        @if (isMechanic() || isDispatcher()) {
+
+          <div class="info-card">
+            <div class="card-header">
+              <i class="material-icons">groups</i>
+              <h2>Група</h2>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Тип</label>
+                <span class="value">{{ getGroupTypeLabel() }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Име</label>
+                <span class="value">{{ hasGroup() ? getGroupName() : 'Няма група' }}</span>
+              </div>
+
+              @if (hasGroup()) {
+                <div class="info-item">
+                  <label>ID</label>
+                  <span class="value">{{ getGroupId() }}</span>
+                </div>
+              } @else {
+                <div class="info-item">
+                  <label>Статус</label>
+                  <span class="value">Не е назначен към група</span>
+                </div>
+              }
+            </div>
+
+            <!-- Actions -->
+            <div style="margin-top: 12px; display:flex; gap:10px; flex-wrap: wrap;">
+              @if (!hasGroup()) {
+                <button type="button" class="btn-primary" (click)="toggleCreateGroup()">
+                  + Създай група
+                </button>
+              } @else {
+                <button type="button" class="btn-secondary" (click)="toggleAssignVehicles()">
+                  Управлявай ППС
+                </button>
+              }
+            </div>
+
+            @if (showCreateGroup && !hasGroup()) {
+              <div style="margin-top: 12px;">
+                <div class="info-item">
+                  <label>Име на група</label>
+                  <input type="text" [(ngModel)]="groupName" placeholder="Напр. Mechanics A" />
+                </div>
+
+                <div style="margin-top: 10px; display:flex; gap:10px;">
+                  <button type="button" class="btn-primary" (click)="createGroup()">Запази</button>
+                  <button type="button" class="btn-secondary" (click)="toggleCreateGroup()">Отказ</button>
+                </div>
+              </div>
+            }
+
+            @if (hasGroup() && showAssignVehicles) {
+              <div style="margin-top: 12px;">
+                <app-group-vehicle-assignment
+                  [groupId]="getGroupId()"
+                  [groupType]="getGroupTypeValue()!"
+                />
+              </div>
+            }
+          </div>
+
+        }
+
+
+
         <!-- Банкови данни -->
         <div class="info-card">
           <div class="card-header">
@@ -167,6 +241,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

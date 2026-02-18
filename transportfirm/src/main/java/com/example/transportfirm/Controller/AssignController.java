@@ -3,6 +3,7 @@ package com.example.transportfirm.controller;
 import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.service.AssignService;
+import com.example.transportfirm.service.TruckGroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class AssignController {
 
     private final AssignService assignService;
+
+    private final TruckGroupService truckGroupService;
 
     // =========================
     // COMMANDS (write)
@@ -91,5 +94,30 @@ public class AssignController {
     @GetMapping("/vehicles/available")
     public List<VehicleRecord> getAvailableVehicles() {
         return assignService.getAvailableVehicles();
+    }
+
+
+    // PUT /assign/dispatcher-group/{groupId}/vehicle/{vehicleId}
+    @PutMapping("/dispatcher-group/{groupId}/vehicle/{vehicleId}")
+    public void assignVehicleToDispatcherGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
+        truckGroupService.assignVehicleToDispatcherGroup(groupId, vehicleId);
+    }
+
+    // DELETE /assign/dispatcher-group/{groupId}/vehicle/{vehicleId}
+    @DeleteMapping("/dispatcher-group/{groupId}/vehicle/{vehicleId}")
+    public void removeVehicleFromDispatcherGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
+        truckGroupService.removeVehicleFromDispatcherGroup(groupId, vehicleId);
+    }
+
+    // PUT /assign/mechanic-group/{groupId}/vehicle/{vehicleId}
+    @PutMapping("/mechanic-group/{groupId}/vehicle/{vehicleId}")
+    public void assignVehicleToMechanicGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
+        truckGroupService.assignVehicleToMechanicGroup(groupId, vehicleId);
+    }
+
+    // DELETE /assign/mechanic-group/{groupId}/vehicle/{vehicleId}
+    @DeleteMapping("/mechanic-group/{groupId}/vehicle/{vehicleId}")
+    public void removeVehicleFromMechanicGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
+        truckGroupService.removeVehicleFromMechanicGroup(groupId, vehicleId);
     }
 }

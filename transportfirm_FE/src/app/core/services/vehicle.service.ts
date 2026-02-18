@@ -21,11 +21,33 @@ export interface VehicleInfo {
   gtpDo?: string;
   vinetkaOt?: string;
   vinetkaDo?: string;
+
+  // ===== New model fields (backend VehicleRecord) =====
+  vehicleStatus?: string;
+  odometerKm?: number;
+  lastServiceOdometerKm?: number;
+  lastServiceDate?: string;
+  nextServiceDueOdometerKm?: number;
+  nextServiceDueDate?: string;
+  avgConsumptionLper100?: number;
+  notesForMechanic?: string;
+
+  // Leasing
+  leased?: boolean;
+  leasingStartDate?: string;
+  leasingEndDate?: string;
+  leasingCompany?: string;
+  leasingContractNumber?: string;
+
+  // Assignments / groups (optional; used mainly in details screens)
+  dispatcherGroup?: { id: string; groupName?: string } | null;
+  mechanicGroup?: { id: string; groupName?: string } | null;
+  driver?: any | null;
 }
 
 export interface VehicleDocument {
   id: string;
-  type: string;            
+  type: string;
   fileName: string;
   filePath: string;
   vehicle: {
@@ -66,7 +88,7 @@ export class VehicleService {
   }
 
   uploadDocument(id: string, type: string, file: File): Observable<VehicleDocument> {
-    const formData = new FormData(); 
+    const formData = new FormData();
     formData.append('type', type);
     formData.append('file', file);
     return this.http.post<VehicleDocument>(`${this.apiUrl}/${id}/documents`, formData);
@@ -79,5 +101,4 @@ export class VehicleService {
   deleteDocument(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
   }
-
 }

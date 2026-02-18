@@ -93,7 +93,20 @@
               <i class="material-icons">calendar_today</i>
               <span>{{ vehicle.yearOfManufacture }} г.</span>
             </div>
+
+            <div class="info-item" *ngIf="vehicle.vehicleStatus">
+              <i class="material-icons">fact_check</i>
+              <span class="status-badge" [ngClass]="getVehicleStatusClass(vehicle.vehicleStatus)">
+                {{ getVehicleStatusLabel(vehicle.vehicleStatus) }}
+              </span>
+            </div>
+
+            <div class="info-item" *ngIf="vehicle.odometerKm !== undefined && vehicle.odometerKm !== null">
+              <i class="material-icons">speed</i>
+              <span>{{ vehicle.odometerKm }} км</span>
+            </div>
           </div>
+
 
           <div class="card-actions">
             <div class="actions-group">

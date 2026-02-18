@@ -2,7 +2,7 @@ package com.example.transportfirm.controller;
 
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.entity.VehicleDocument;
-import com.example.transportfirm.Enum.VehicleDocumentType;
+import com.example.transportfirm.enums.VehicleDocumentType;
 import com.example.transportfirm.service.VehicleService;
 import jakarta.validation.Valid;
 import org.springframework.core.io.FileSystemResource;

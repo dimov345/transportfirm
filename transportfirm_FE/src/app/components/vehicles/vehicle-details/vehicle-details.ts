@@ -118,4 +118,33 @@ export class VehicleDetails implements OnInit {
       default: return 'status-inactive';
     }
   }
+
+  vehicleStatuses = [
+    { value: 'AVAILABLE', label: 'Свободно' },
+    { value: 'ON_ROUTE', label: 'На курс' },
+    { value: 'IN_SERVICE', label: 'В сервиз' },
+    { value: 'BROKEN_DOWN', label: 'Повредено' },
+    { value: 'WAITING_PARTS', label: 'Чака части' },
+    { value: 'OUT_OF_SERVICE', label: 'Извън експлоатация' }
+  ];
+
+  getVehicleStatusLabel(value?: string | null): string {
+    if (!value) return '—';
+    return this.vehicleStatuses.find(s => s.value === value)?.label ?? value;
+  }
+
+  // ако искаш badge класове (по желание)
+  getVehicleStatusClass(value?: string | null): string {
+    switch (value) {
+      case 'AVAILABLE': return 'status-available';
+      case 'ON_ROUTE': return 'status-on-route';
+      case 'IN_SERVICE': return 'status-in-service';
+      case 'BROKEN_DOWN': return 'status-broken';
+      case 'WAITING_PARTS': return 'status-waiting';
+      case 'OUT_OF_SERVICE': return 'status-out';
+      default: return '';
+    }
+  }
+
+  
 }

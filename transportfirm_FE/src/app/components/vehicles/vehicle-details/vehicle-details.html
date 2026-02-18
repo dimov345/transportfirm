@@ -106,6 +106,8 @@
           </div>
         </div>
 
+        <!-- ... горната част е същата ... -->
+
         <!-- Technical Information -->
         <div class="info-card">
           <div class="card-header">
@@ -138,6 +140,111 @@
             </div>
           </div>
         </div>
+
+        <!-- Vehicle status / service -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">speed</i>
+            <h2>Експлоатация и сервиз</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Статус (VehicleStatus)</label>
+              <span class="value status-badge" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">
+                {{ getVehicleStatusLabel(v.vehicleStatus) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Километраж</label>
+              <span class="value">{{ v.odometerKm ?? '—' }} км</span>
+            </div>
+            <div class="info-item">
+              <label>Последен сервиз</label>
+              <span class="value">
+                {{ v.lastServiceOdometerKm ?? '—' }} км / {{ formatDate(v.lastServiceDate) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Следващ сервиз</label>
+              <span class="value">
+                {{ v.nextServiceDueOdometerKm ?? '—' }} км / {{ formatDate(v.nextServiceDueDate) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Среден разход</label>
+              <span class="value">{{ v.avgConsumptionLper100 ?? '—' }} л/100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leasing -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">payments</i>
+            <h2>Лизинг</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>На лизинг</label>
+              <span class="value">{{ v.leased ? 'Да' : 'Не' }}</span>
+            </div>
+
+            <ng-container *ngIf="v.leased">
+              <div class="info-item">
+                <label>Компания</label>
+                <span class="value">{{ v.leasingCompany || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <label>Договор №</label>
+                <span class="value">{{ v.leasingContractNumber || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <label>Период</label>
+                <span class="value">{{ formatDate(v.leasingStartDate) }} - {{ formatDate(v.leasingEndDate) }}</span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Notes for mechanic -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">sticky_note_2</i>
+            <h2>Бележки за механик</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <label>Бележки</label>
+              <span class="value">{{ v.notesForMechanic || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Groups (optional) -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">groups</i>
+            <h2>Групи</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Dispatcher group</label>
+              <span class="value">{{ v.dispatcherGroup?.groupName || v.dispatcherGroup?.id || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Mechanic group</label>
+              <span class="value">{{ v.mechanicGroup?.groupName || v.mechanicGroup?.id || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents Status -->
+        <!-- ... останалото е същото ... -->
+
 
         <!-- Documents Status -->
         <div class="info-card">

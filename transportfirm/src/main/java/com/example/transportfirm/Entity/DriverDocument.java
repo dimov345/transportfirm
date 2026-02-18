@@ -1,10 +1,9 @@
 package com.example.transportfirm.entity;
 
-import com.example.transportfirm.Enum.DriverDocumentType;
+import com.example.transportfirm.enums.DriverDocumentType;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity

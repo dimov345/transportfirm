@@ -1,6 +1,6 @@
 package com.example.transportfirm.entity;
 
-import com.example.transportfirm.Enum.EmployeeDocumentType;
+import com.example.transportfirm.enums.EmployeeDocumentType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

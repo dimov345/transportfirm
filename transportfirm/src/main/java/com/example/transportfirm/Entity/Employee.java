@@ -1,9 +1,9 @@
 package com.example.transportfirm.entity;
 
-import com.example.transportfirm.Enum.ContractType;
-import com.example.transportfirm.Enum.EmploymentStatus;
-import com.example.transportfirm.Enum.JobTitle;
-import com.example.transportfirm.Enum.Role;
+import com.example.transportfirm.enums.ContractType;
+import com.example.transportfirm.enums.EmploymentStatus;
+import com.example.transportfirm.enums.JobTitle;
+import com.example.transportfirm.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -99,15 +99,15 @@ public class Employee {
     @JsonManagedReference("employee-docs")
     private List<EmployeeDocument> documents = new ArrayList<>();
 
-    @OneToOne(mappedBy = "employee")
+    @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"employee", "vehicle", "hibernateLazyInitializer", "handler"})
     private DriverInfo driverInfo;
 
-    @OneToOne(mappedBy = "employee")
+    @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY)
     @JsonManagedReference("employee-mechanic")
     private MechanicInfo mechanicInfo;
 
-    @OneToOne(mappedBy = "employee")
+    @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY)
     @JsonManagedReference("employee-dispatcher")
     private DispatcherInfo dispatcherInfo;
 

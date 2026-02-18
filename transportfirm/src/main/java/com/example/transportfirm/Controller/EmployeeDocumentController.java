@@ -1,7 +1,7 @@
 package com.example.transportfirm.controller;
 
 import com.example.transportfirm.entity.EmployeeDocument;
-import com.example.transportfirm.Enum.EmployeeDocumentType;
+import com.example.transportfirm.enums.EmployeeDocumentType;
 import com.example.transportfirm.service.EmployeeDocumentService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

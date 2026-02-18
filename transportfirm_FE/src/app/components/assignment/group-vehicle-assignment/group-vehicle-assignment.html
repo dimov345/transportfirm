@@ -1,0 +1,45 @@
+<div class="assignment-card">
+  @if (loading) {
+    <div class="muted">Зареждане…</div>
+  } @else {
+
+    @if (error) { <div class="alert error">{{ error }}</div> }
+    @if (success) { <div class="alert success">{{ success }}</div> }
+
+    <div class="row">
+      <label>Добави ППС към групата</label>
+
+      <div class="controls">
+        <select [(ngModel)]="selectedVehicleId" [disabled]="saving">
+          <option value="">-- избери ППС --</option>
+          @for (v of availableVehicles; track v.id) {
+            <option [value]="v.id">{{ v.plateNumber }} — {{ v.model }}</option>
+          }
+        </select>
+
+        <button class="btn-primary" type="button" (click)="assign()" [disabled]="saving || !selectedVehicleId">
+          + Добави
+        </button>
+      </div>
+    </div>
+
+    <hr />
+
+    <h3>ППС в групата</h3>
+
+    @if (vehiclesInGroup.length === 0) {
+      <div class="muted">Няма назначени ППС.</div>
+    } @else {
+      <div class="list">
+        @for (v of vehiclesInGroup; track v.id) {
+          <div class="item">
+            <div class="title">{{ v.plateNumber }} — {{ v.model }}</div>
+            <button class="btn-secondary" type="button" (click)="remove(v.id)" [disabled]="saving">
+              Махни
+            </button>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,7 +1,7 @@
 package com.example.transportfirm.controller;
 
 import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.Enum.JobTitle;
+import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

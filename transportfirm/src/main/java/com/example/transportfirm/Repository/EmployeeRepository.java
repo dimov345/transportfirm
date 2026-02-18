@@ -1,7 +1,7 @@
 package com.example.transportfirm.repository;
 
 import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.Enum.JobTitle;
+import com.example.transportfirm.enums.JobTitle;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +13,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByEgn(String egn);
 
     List<Employee> findByJobTitle(JobTitle jobTitle);
+
+    Optional<Employee> findByEmail(String email);
 }

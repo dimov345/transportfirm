@@ -1,4 +1,0 @@
-package com.example.transportfirm.entity;
-
-public class VehicleMaintanceRecord {
-}

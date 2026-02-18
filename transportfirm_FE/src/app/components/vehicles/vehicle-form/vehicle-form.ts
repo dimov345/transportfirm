@@ -29,8 +29,7 @@ export class VehicleFormComponent implements OnInit {
   isSubmitting = false;
   loading = false;
   errorMessage = '';
-
-  id = ''; // UUID от route
+  id = '';
 
   vehicleTypes = [
     'Лек автомобил',
@@ -56,42 +55,68 @@ export class VehicleFormComponent implements OnInit {
 
   emissionStandards = ['Euro 1', 'Euro 2', 'Euro 3', 'Euro 4', 'Euro 5', 'Euro 6'];
 
+  // Enum -> BG labels
+  vehicleStatuses = [
+    { value: 'AVAILABLE', label: 'Свободно' },
+    { value: 'ON_ROUTE', label: 'На курс' },
+    { value: 'IN_SERVICE', label: 'В сервиз' },
+    { value: 'BROKEN_DOWN', label: 'Повредено' },
+    { value: 'WAITING_PARTS', label: 'Чака части' },
+    { value: 'OUT_OF_SERVICE', label: 'Извън експлоатация' }
+  ];
+
   ngOnInit() {
-    // ✅ SSR guard: не правим HTTP и не ползваме browser APIs
     if (!this.isBrowser) return;
 
     this.id = this.route.snapshot.paramMap.get('id') || '';
 
     if (this.id) {
       this.isEdit = true;
-
-      // не позволявай промяна на plateNumber при edit
       this.vehicleForm.get('plateNumber')?.disable({ emitEvent: false });
-
       this.loadVehicle();
     }
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
-      id: [''],
+      // важно: null, не ''
+      id: [null],
+
       plateNumber: ['', [Validators.required, Validators.maxLength(20)]],
       model: ['', [Validators.required, Validators.maxLength(100)]],
       engineNumber: ['', [Validators.required, Validators.maxLength(50)]],
       chassisNumber: ['', [Validators.required, Validators.maxLength(50)]],
-      yearOfManufacture: ['', [Validators.required, Validators.min(1900), Validators.max(2100)]],
+      yearOfManufacture: [null, [Validators.required, Validators.min(1900), Validators.max(2100)]],
       owner: ['', [Validators.required, Validators.maxLength(100)]],
       typePps: ['', Validators.required],
       technicalCondition: ['', Validators.required],
       standardEmissions: ['', Validators.required],
-      kaskoOt: [''],
-      kaskoDo: [''],
-      grazhdanskaOtgovornostOt: [''],
-      grazhdanskaOtgovornostDo: [''],
-      gtpOt: [''],
-      gtpDo: [''],
-      vinetkaOt: [''],
-      vinetkaDo: ['']
+
+      // New fields
+      vehicleStatus: [null], // важно: null, не ''
+      odometerKm: [null],
+      lastServiceOdometerKm: [null],
+      lastServiceDate: [null],
+      nextServiceDueOdometerKm: [null],
+      nextServiceDueDate: [null],
+      avgConsumptionLper100: [null],
+      notesForMechanic: [''],
+
+      // Leasing
+      leased: [false],
+      leasingStartDate: [null],
+      leasingEndDate: [null],
+      leasingCompany: [''],
+      leasingContractNumber: [''],
+
+      kaskoOt: [null],
+      kaskoDo: [null],
+      grazhdanskaOtgovornostOt: [null],
+      grazhdanskaOtgovornostDo: [null],
+      gtpOt: [null],
+      gtpDo: [null],
+      vinetkaOt: [null],
+      vinetkaDo: [null]
     });
   }
 
@@ -100,25 +125,41 @@ export class VehicleFormComponent implements OnInit {
     this.errorMessage = '';
     this.cdr.detectChanges();
 
-    this.vehicleService.getById(this.id)
-      .pipe(finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }))
+    this.vehicleService
+      .getById(this.id)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
       .subscribe({
         next: (vehicle: VehicleInfo) => {
-          this.vehicleForm.patchValue(vehicle);
+          // ако backend връща "" за неща (рядко) - нормализираме към null
+          this.vehicleForm.patchValue({
+            ...vehicle,
+            vehicleStatus: (vehicle as any)?.vehicleStatus || null,
+            lastServiceDate: (vehicle as any)?.lastServiceDate || null,
+            nextServiceDueDate: (vehicle as any)?.nextServiceDueDate || null,
+            kaskoOt: (vehicle as any)?.kaskoOt || null,
+            kaskoDo: (vehicle as any)?.kaskoDo || null,
+            grazhdanskaOtgovornostOt: (vehicle as any)?.grazhdanskaOtgovornostOt || null,
+            grazhdanskaOtgovornostDo: (vehicle as any)?.grazhdanskaOtgovornostDo || null,
+            gtpOt: (vehicle as any)?.gtpOt || null,
+            gtpDo: (vehicle as any)?.gtpDo || null,
+            vinetkaOt: (vehicle as any)?.vinetkaOt || null,
+            vinetkaDo: (vehicle as any)?.vinetkaDo || null,
+            leasingStartDate: (vehicle as any)?.leasingStartDate || null,
+            leasingEndDate: (vehicle as any)?.leasingEndDate || null,
+          });
+
           this.vehicleForm.markAsPristine();
           this.cdr.detectChanges();
         },
         error: (err: any) => {
-          // ✅ вместо alert -> UI message (SSR-safe)
-          this.errorMessage =
-            err?.error?.message || 'Грешка при зареждане на данните за превозното средство!';
+          this.errorMessage = err?.error?.message || 'Грешка при зареждане на данните за превозното средство!';
           console.error(err);
           this.cdr.detectChanges();
-
-          // по желание: върни към списъка
           this.router.navigate(['/vehicles']);
         }
       });
@@ -126,8 +167,6 @@ export class VehicleFormComponent implements OnInit {
 
   onSubmit() {
     this.errorMessage = '';
-
-    // ✅ SSR safety
     if (!this.isBrowser) return;
 
     if (this.vehicleForm.invalid) {
@@ -140,24 +179,44 @@ export class VehicleFormComponent implements OnInit {
     this.isSubmitting = true;
     this.cdr.detectChanges();
 
-    // включва disabled полета (plateNumber) в payload-а
-    const formData = this.vehicleForm.getRawValue();
+    const raw = this.vehicleForm.getRawValue();
+
+    // ===== Build payload safely =====
+    const payload: any = { ...raw };
+
+    // при create махаме празни полета, за да не гръмнат UUID/enum
+    if (!payload.id) delete payload.id;
+    if (!payload.vehicleStatus) delete payload.vehicleStatus;
+
+    // date empty -> null
+    const dateKeys = [
+      'kaskoOt','kaskoDo',
+      'grazhdanskaOtgovornostOt','grazhdanskaOtgovornostDo',
+      'gtpOt','gtpDo',
+      'vinetkaOt','vinetkaDo',
+      'leasingStartDate','leasingEndDate',
+      'lastServiceDate','nextServiceDueDate'
+    ];
+    for (const k of dateKeys) {
+      if (payload[k] === '') payload[k] = null;
+    }
 
     const request = this.isEdit
-      ? this.vehicleService.update(this.id, formData)
-      : this.vehicleService.create(formData);
+      ? this.vehicleService.update(this.id, payload)
+      : this.vehicleService.create(payload);
 
     request
-      .pipe(finalize(() => {
-        this.isSubmitting = false;
-        this.cdr.detectChanges();
-      }))
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        })
+      )
       .subscribe({
         next: () => this.router.navigate(['/vehicles']),
         error: (err: any) => {
           this.errorMessage =
-            err?.error?.message ||
-            `Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`;
+            err?.error?.message || `Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`;
           console.error(err);
           this.cdr.detectChanges();
         }
@@ -176,15 +235,19 @@ export class VehicleFormComponent implements OnInit {
     if (field.errors['required']) return 'Това поле е задължително';
     if (field.errors['min']) return `Минимална стойност е ${field.errors['min'].min}`;
     if (field.errors['max']) return `Максимална стойност е ${field.errors['max'].max}`;
-    if (field.errors['maxlength'])
-      return `Максимална дължина е ${field.errors['maxlength'].requiredLength} символа`;
+    if (field.errors['maxlength']) return `Максимална дължина е ${field.errors['maxlength'].requiredLength} символа`;
 
     return 'Невалидна стойност';
   }
 
   private markAllFieldsAsTouched() {
-    Object.keys(this.vehicleForm.controls).forEach(key => {
+    Object.keys(this.vehicleForm.controls).forEach((key) => {
       this.vehicleForm.get(key)?.markAsTouched();
     });
+  }
+
+  getVehicleStatusLabel(value?: string | null): string {
+    if (!value) return '—';
+    return this.vehicleStatuses.find(s => s.value === value)?.label ?? value;
   }
 }

@@ -2,7 +2,7 @@ package com.example.transportfirm.service;
 
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.entity.VehicleDocument;
-import com.example.transportfirm.Enum.VehicleDocumentType;
+import com.example.transportfirm.enums.VehicleDocumentType;
 import com.example.transportfirm.repository.VehicleRepository;
 import com.example.transportfirm.repository.VehicleDocumentRepository;
 

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Employee } from '../models/employee/employee.model';
 
@@ -77,4 +77,15 @@ export class AdminService {
   updateEmployee(id: string, payload: Partial<Employee>): Observable<Employee> {
     return this.http.put<Employee>(`${this.baseUrl}/employees/update/${id}`, payload);
   }
+
+  createDispatcherGroup(dispatcherId: string, groupName: string): Observable<any> {
+  const params = new HttpParams().set('name', groupName);
+  return this.http.post<any>(`${this.baseUrl}/auth/admin/groups/dispatcher/${dispatcherId}`, null, { params });
+}
+
+createMechanicGroup(mechanicId: string, groupName: string): Observable<any> {
+  const params = new HttpParams().set('name', groupName);
+  return this.http.post<any>(`${this.baseUrl}/auth/admin/groups/mechanic/${mechanicId}`, null, { params });
+}
+
 }

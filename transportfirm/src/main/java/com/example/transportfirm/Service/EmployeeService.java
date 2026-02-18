@@ -3,7 +3,7 @@ package com.example.transportfirm.service;
 import com.example.transportfirm.entity.DispatcherInfo;
 import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.Enum.JobTitle;
+import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.entity.MechanicInfo;
 import com.example.transportfirm.repository.DispatcherRepository;
 import com.example.transportfirm.repository.DriverRepository;

@@ -1,6 +1,6 @@
 package com.example.transportfirm.entity;
 
-import com.example.transportfirm.Enum.VehicleDocumentType;
+import com.example.transportfirm.enums.VehicleDocumentType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;

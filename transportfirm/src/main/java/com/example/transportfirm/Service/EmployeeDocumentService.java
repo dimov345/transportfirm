@@ -2,7 +2,7 @@ package com.example.transportfirm.service;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.EmployeeDocument;
-import com.example.transportfirm.Enum.EmployeeDocumentType;
+import com.example.transportfirm.enums.EmployeeDocumentType;
 import com.example.transportfirm.repository.EmployeeDocumentRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 import org.springframework.http.HttpStatus;

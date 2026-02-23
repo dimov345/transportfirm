@@ -2,12 +2,16 @@ package com.example.transportfirm.service;
 
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.entity.VehicleDocument;
+import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.enums.VehicleDocumentType;
+import com.example.transportfirm.repository.DriverRepository;
+import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.VehicleRepository;
 import com.example.transportfirm.repository.VehicleDocumentRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,13 +25,19 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleDocumentRepository documentRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleMaintenanceRecordRepository maintenanceRecordRepository;
 
     private final String uploadDir = "vehicle_documents";
 
     public VehicleService(VehicleRepository vehicleRepository,
-                          VehicleDocumentRepository documentRepository) {
+                          VehicleDocumentRepository documentRepository,
+                          DriverRepository driverRepository,
+                          VehicleMaintenanceRecordRepository maintenanceRecordRepository) {
         this.vehicleRepository = vehicleRepository;
         this.documentRepository = documentRepository;
+        this.driverRepository = driverRepository;
+        this.maintenanceRecordRepository = maintenanceRecordRepository;
     }
 
 
@@ -58,12 +68,23 @@ public class VehicleService {
         return vehicleRepository.save(updated);
     }
 
+    @Transactional
     public void delete(UUID id) {
         VehicleRecord v = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
 
-        // изтриваме документи на камиона
+        // откачаме шофьора от vehicle-то
+        driverRepository.findByVehicle_Id(id).ifPresent(driverInfo -> {
+            driverInfo.setVehicle(null);
+            driverRepository.save(driverInfo);
+        });
+
+        // изтриваме maintenance записите (cascade ще изтрие maintenance документите)
+        List<VehicleMaintenanceRecord> maintenanceRecords = maintenanceRecordRepository.findAllByVehicle_Id(id);
+        maintenanceRecordRepository.deleteAll(maintenanceRecords);
+
+        // изтриваме документите на камиона от файловата система
         List<VehicleDocument> docs = documentRepository.findByVehicle_Id(id);
         docs.forEach(doc -> {
             try {

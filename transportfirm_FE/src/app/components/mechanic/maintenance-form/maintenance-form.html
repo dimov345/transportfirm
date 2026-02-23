@@ -1,0 +1,194 @@
+<div class="mf-container">
+
+  <!-- Loading -->
+  <div class="mf-loading" *ngIf="loading">
+    <div class="mf-spinner"></div>
+    <span>Зареждам...</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Header -->
+    <div class="mf-header">
+      <button class="btn-back" (click)="goBack()">
+        <i class="material-icons">arrow_back_ios</i>
+        Назад
+      </button>
+      <h1>{{ isNew ? 'Нов запис за поддръжка' : 'Редактиране на запис' }}</h1>
+    </div>
+
+    <!-- Error / Success -->
+    <div class="mf-alert mf-error" *ngIf="error">
+      <i class="material-icons">error_outline</i> {{ error }}
+    </div>
+    <div class="mf-alert mf-success" *ngIf="success">
+      <i class="material-icons">check_circle</i> {{ success }}
+    </div>
+
+    <div class="mf-body">
+
+      <!-- ===== FORM ===== -->
+      <div class="mf-card">
+        <div class="mf-card-title">
+          <i class="material-icons">build</i>
+          <span>Данни за поддръжката</span>
+        </div>
+
+        <!-- Type + Status -->
+        <div class="mf-row">
+          <div class="mf-field">
+            <label>Вид *</label>
+            <select [(ngModel)]="form.type">
+              <option *ngFor="let t of typeOptions" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+
+          <div class="mf-field" *ngIf="!isNew">
+            <label>Статус</label>
+            <select [(ngModel)]="form.status">
+              <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Odometer + Workshop -->
+        <div class="mf-row">
+          <div class="mf-field">
+            <label>Километраж при сервиз</label>
+            <input type="number" [(ngModel)]="form.odometerKmAtService" placeholder="напр. 125000" />
+          </div>
+          <div class="mf-field">
+            <label>Сервиз / Изпълнител</label>
+            <input type="text" [(ngModel)]="form.workshopName" placeholder="Nazwa na serwisa" />
+          </div>
+        </div>
+
+        <!-- Invoice -->
+        <div class="mf-row">
+          <div class="mf-field">
+            <label>Фактура №</label>
+            <input type="text" [(ngModel)]="form.invoiceNumber" placeholder="напр. 00001234" />
+          </div>
+          <div class="mf-field">
+            <label>Дата на фактура</label>
+            <input type="date" [(ngModel)]="form.invoiceDate" />
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mf-field mf-full">
+          <label>Описание</label>
+          <textarea [(ngModel)]="form.description" rows="4" placeholder="Описание на извършените дейности..."></textarea>
+        </div>
+
+        <!-- Costs -->
+        <div class="mf-card-title mf-card-title-sub">
+          <i class="material-icons">payments</i>
+          <span>Разходи</span>
+        </div>
+
+        <div class="mf-costs-grid">
+          <div class="mf-field">
+            <label>Части — нето (лв.)</label>
+            <input type="number" step="0.01" [(ngModel)]="form.partsNet" placeholder="0.00" />
+          </div>
+          <div class="mf-field">
+            <label>Части — ДДС (лв.)</label>
+            <input type="number" step="0.01" [(ngModel)]="form.partsVat" placeholder="0.00" />
+          </div>
+          <div class="mf-field">
+            <label>Други — нето (лв.)</label>
+            <input type="number" step="0.01" [(ngModel)]="form.otherNet" placeholder="0.00" />
+          </div>
+          <div class="mf-field">
+            <label>Други — ДДС (лв.)</label>
+            <input type="number" step="0.01" [(ngModel)]="form.otherVat" placeholder="0.00" />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mf-actions">
+          <button
+            class="btn-save"
+            (click)="save()"
+            [disabled]="saving">
+            <i class="material-icons">save</i>
+            {{ saving ? 'Запазване...' : 'Запази' }}
+          </button>
+
+          <button
+            class="btn-close-rec"
+            *ngIf="!isNew && form.status === 'OPEN'"
+            (click)="closeRecord()"
+            [disabled]="saving">
+            <i class="material-icons">check_circle</i>
+            Затвори запис
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== DOCUMENTS ===== -->
+      <div class="mf-card" *ngIf="!isNew">
+        <div class="mf-card-title">
+          <i class="material-icons">attach_file</i>
+          <span>Документи</span>
+        </div>
+
+        <!-- Upload -->
+        <div class="mf-upload-row">
+          <div class="mf-field mf-field-sm">
+            <label>Тип</label>
+            <select [(ngModel)]="uploadDocType">
+              <option *ngFor="let d of docTypeOptions" [value]="d.value">{{ d.label }}</option>
+            </select>
+          </div>
+
+          <div class="mf-field mf-field-grow">
+            <label>Файл</label>
+            <input type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" />
+          </div>
+
+          <button
+            class="btn-upload"
+            (click)="uploadDocument()"
+            [disabled]="!selectedFile || uploadingDoc">
+            <i class="material-icons">upload</i>
+            {{ uploadingDoc ? 'Качване...' : 'Качи' }}
+          </button>
+        </div>
+
+        <div class="mf-doc-error" *ngIf="docError">{{ docError }}</div>
+
+        <!-- Documents list -->
+        <div class="mf-docs-empty" *ngIf="documents.length === 0">
+          Няма добавени документи
+        </div>
+
+        <div class="mf-doc-list" *ngIf="documents.length > 0">
+          <div class="mf-doc-item" *ngFor="let doc of documents">
+            <i class="material-icons">description</i>
+            <span class="mf-doc-name">{{ doc.fileName }}</span>
+            <span class="mf-doc-type" *ngIf="doc.docType">{{ doc.docType }}</span>
+
+            <div class="mf-doc-actions">
+              <button class="btn-icon btn-download" (click)="downloadDocument(doc.id, doc.fileName)" title="Изтегли">
+                <i class="material-icons">download</i>
+              </button>
+              <button class="btn-icon btn-del" (click)="deleteDocument(doc.id)" title="Изтрий">
+                <i class="material-icons">delete</i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note for new record -->
+      <div class="mf-note" *ngIf="isNew">
+        <i class="material-icons">info</i>
+        Запази записа първо, за да можеш да добавяш документи.
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

@@ -105,6 +105,7 @@ export class VehicleListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error deleting vehicle:', error);
+        alert(error?.error?.message || 'Грешка при изтриване на превозното средство!');
       }
     });
   }

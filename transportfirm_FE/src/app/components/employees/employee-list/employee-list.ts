@@ -94,7 +94,10 @@ export class EmployeeList implements OnInit {
         this.employees = this.employees.filter(e => e.id !== id);
         this.search();
       },
-      error: (err) => console.error('Error deleting employee:', err)
+      error: (err) => {
+        console.error('Error deleting employee:', err);
+        alert(err?.error?.message || 'Грешка при изтриване на служителя!');
+      }
     });
   }
 

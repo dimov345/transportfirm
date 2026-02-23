@@ -101,6 +101,13 @@ public class DriverService {
     }
 
     public void deleteDocument(UUID id) {
-        documentRepository.deleteById(id);
+        DriverDocument doc = documentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+
+        try {
+            Files.deleteIfExists(Path.of(doc.getFilePath()));
+        } catch (IOException ignored) {}
+
+        documentRepository.delete(doc);
     }
 }

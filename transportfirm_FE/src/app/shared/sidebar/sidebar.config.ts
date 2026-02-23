@@ -32,7 +32,13 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
         label: 'Механици',
         icon: 'wrench',
         route: '/mechanics',
-        roles: ['ADMIN', 'MANAGER', 'MECHANIC']
+        roles: ['ADMIN', 'MANAGER']
+      },
+      {
+        label: 'Моите ППС',
+        icon: 'wrench',
+        route: '/mechanic',
+        roles: ['MECHANIC']
       },
       {
         label: 'ППС',

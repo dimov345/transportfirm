@@ -1,17 +1,27 @@
 package com.example.transportfirm.service;
 
 import com.example.transportfirm.entity.DispatcherInfo;
+import com.example.transportfirm.entity.DriverDocument;
 import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.entity.MechanicInfo;
+import com.example.transportfirm.entity.TruckGroup;
+import com.example.transportfirm.entity.VehicleRecord;
+import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.repository.DispatcherRepository;
+import com.example.transportfirm.repository.DriverDocumentRepository;
 import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 import com.example.transportfirm.repository.MechanicRepository;
+import com.example.transportfirm.repository.TruckGroupRepository;
+import com.example.transportfirm.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +33,9 @@ public class EmployeeService {
     private final DriverRepository driverInfoRepository;
     private final MechanicRepository  mechanicRepository;
     private final DispatcherRepository dispatcherRepository;
+    private final DriverDocumentRepository driverDocumentRepository;
+    private final TruckGroupRepository truckGroupRepository;
+    private final VehicleRepository vehicleRepository;
 
     public Employee createEmployee(Employee employee) {
         Employee saved = employeeRepository.save(employee);
@@ -88,10 +101,63 @@ public class EmployeeService {
         return employeeRepository.save(existing);
     }
 
-
-
+    @Transactional
     public void delete(UUID id) {
-        employeeRepository.deleteById(id);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        switch (employee.getJobTitle()) {
+            case DRIVER -> {
+                driverInfoRepository.findByEmployeeId(id).ifPresent(driverInfo -> {
+                    // изтриваме driver документите от файловата система
+                    List<DriverDocument> driverDocs = driverDocumentRepository.findByEmployee_Id(id);
+                    driverDocs.forEach(doc -> {
+                        try {
+                            Files.deleteIfExists(Path.of(doc.getFilePath()));
+                        } catch (IOException ignored) {}
+                    });
+                    driverDocumentRepository.deleteAll(driverDocs);
+
+                    // откачаме vehicle-то от driver-а преди изтриване
+                    if (driverInfo.getVehicle() != null) {
+                        driverInfo.setVehicle(null);
+                        driverInfoRepository.save(driverInfo);
+                    }
+
+                    driverInfoRepository.delete(driverInfo);
+                });
+            }
+            case MECHANIC -> {
+                mechanicRepository.findByEmployee_Id(id).ifPresent(mechanicInfo -> {
+                    List<TruckGroup> groups = truckGroupRepository.findByMechanic_Id(mechanicInfo.getId());
+                    groups.forEach(group -> {
+                        // null-ваме mechanic референцията в групата и null-ваме vehicle assignments
+                        group.getMechanicVehicles().forEach(v -> {
+                            v.setMechanicGroup(null);
+                            vehicleRepository.save(v);
+                        });
+                        truckGroupRepository.delete(group);
+                    });
+                    mechanicRepository.delete(mechanicInfo);
+                });
+            }
+            case DISPATCHER -> {
+                dispatcherRepository.findByEmployee_Id(id).ifPresent(dispatcherInfo -> {
+                    List<TruckGroup> groups = truckGroupRepository.findByDispatcher_Id(dispatcherInfo.getId());
+                    groups.forEach(group -> {
+                        // null-ваме dispatcher референцията в групата и null-ваме vehicle assignments
+                        group.getDispatcherVehicles().forEach(v -> {
+                            v.setDispatcherGroup(null);
+                            vehicleRepository.save(v);
+                        });
+                        truckGroupRepository.delete(group);
+                    });
+                    dispatcherRepository.delete(dispatcherInfo);
+                });
+            }
+        }
+
+        employeeRepository.delete(employee);
     }
 
     public Employee getById(UUID id) {

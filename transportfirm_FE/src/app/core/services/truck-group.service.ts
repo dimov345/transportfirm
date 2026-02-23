@@ -45,4 +45,9 @@ export class TruckGroupService {
     return this.http.get<TruckGroup[]>(`${this.apiUrl}/dispatcher/${dispatcherId}`);
   }
 
+  // GET /mechanics/me/groups — групите на логнатия механик (Principal от JWT)
+  getGroupsByMechanicMe() {
+    return this.http.get<TruckGroup[]>('http://localhost:8080/api/mechanics/me/groups');
+  }
+
 }

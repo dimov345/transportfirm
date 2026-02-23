@@ -18,6 +18,8 @@ import { EmployeeForm } from './components/employees/employee-form/employee-form
 import { EmployeeDetails } from './components/employees/employee-details/employee-details';
 import { EmployeeDocuments } from './components/employees/employee-documents/employee-documents';
 import { FirstLogin } from './pages/first-login/first-login';
+import { MechanicDashboardComponent } from './components/mechanic/mechanic-dashboard/mechanic-dashboard';
+import { MaintenanceFormComponent } from './components/mechanic/maintenance-form/maintenance-form';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -42,6 +44,10 @@ export const routes: Routes = [
   { path: 'employees/edit/:id', component: EmployeeForm, canActivate: [authGuard] },
   { path: 'employees/details/:id', component: EmployeeDetails, canActivate: [authGuard] },
   { path: 'employees-documents/:id', component: EmployeeDocuments, canActivate: [authGuard] },
+
+  { path: 'mechanic', component: MechanicDashboardComponent, canActivate: [authGuard] },
+  { path: 'mechanic/maintenance/new/:vehicleId', component: MaintenanceFormComponent, canActivate: [authGuard] },
+  { path: 'mechanic/maintenance/edit/:recordId', component: MaintenanceFormComponent, canActivate: [authGuard] },
 
   { path: '**', redirectTo: '' }
 ];

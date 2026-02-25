@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { SIDEBAR_ITEMS } from './sidebar.config';
+import { SidebarItem } from './sidebar.model';
+import { AuthService } from '../../core/auth/auth.service';
 
-type IconName = 'home' | 'users' | 'folder' | 'truck' | 'lorry' | 'chart' | 'settings' | 'chevron';
+type IconName = 'home' | 'users' | 'folder' | 'truck' | 'lorry' | 'chart' | 'settings' | 'chevron' | 'wrench';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,17 +20,35 @@ export class SidebarComponent {
 
   isExpanded = false;
   activeMenu: number | null = null;
-  items = SIDEBAR_ITEMS;
+  items: SidebarItem[] = [];
+
+  private buildVisibleItems(): SidebarItem[] {
+    return SIDEBAR_ITEMS
+      .filter(item => this.canSee(item))
+      .map(item => {
+        if (!item.children) return item;
+        const visibleChildren = item.children.filter(c => this.canSee(c));
+        return { ...item, children: visibleChildren };
+      })
+      .filter(item => !item.children || item.children.length > 0);
+  }
+
+  private canSee(item: SidebarItem): boolean {
+    if (!item.roles || item.roles.length === 0) return true;
+    return this.auth.hasRole(...item.roles);
+  }
 
   // ✅ SSR-safe default
   private isSmallScreen = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private auth: AuthService) {
     // ✅ SSR-safe check
     this.isSmallScreen =
       typeof window !== 'undefined' &&
       !!window.matchMedia &&
       window.matchMedia('(max-width: 768px)').matches;
+
+    this.items = this.buildVisibleItems();
 
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
@@ -65,7 +85,7 @@ export class SidebarComponent {
 
   iconName(icon: any): IconName {
     const s = String(icon || '').toLowerCase();
-    const allowed = ['home', 'users', 'folder', 'truck', 'lorry', 'chart', 'settings', 'chevron'];
+    const allowed = ['home', 'users', 'folder', 'truck', 'lorry', 'chart', 'settings', 'chevron', 'wrench'];
     return (allowed.includes(s) ? (s as IconName) : 'home');
   }
 

@@ -6,6 +6,7 @@ import { AuthResponse, LoginRequest } from './auth.models';
 
 const TOKEN_KEY = 'auth_token';
 const EMAIL_KEY = 'auth_email';
+const ROLE_KEY  = 'auth_role';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -30,6 +31,8 @@ export class AuthService {
           if (this.isBrowser) {
             localStorage.setItem(TOKEN_KEY, res.token);
             localStorage.setItem(EMAIL_KEY, res.email);
+            const role = this.decodeRole(res.token);
+            if (role) localStorage.setItem(ROLE_KEY, role);
           }
           this._isAuthed$.next(true);
         })
@@ -40,6 +43,7 @@ export class AuthService {
     if (this.isBrowser) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(EMAIL_KEY);
+      localStorage.removeItem(ROLE_KEY);
     }
     this._isAuthed$.next(false);
   }
@@ -54,6 +58,16 @@ export class AuthService {
     return localStorage.getItem(EMAIL_KEY);
   }
 
+  getRole(): string | null {
+    if (!this.isBrowser) return null;
+    return localStorage.getItem(ROLE_KEY);
+  }
+
+  hasRole(...roles: string[]): boolean {
+    const role = this.getRole();
+    return role !== null && roles.includes(role);
+  }
+
   isAuthenticated(): boolean {
     return this.hasToken();
   }
@@ -62,5 +76,16 @@ export class AuthService {
     if (!this.isBrowser) return false;
     const t = localStorage.getItem(TOKEN_KEY);
     return !!t && t.trim().length > 0;
+  }
+
+  private decodeRole(token: string): string | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const authorities: string[] = payload.authorities ?? payload.roles ?? [];
+      const found = authorities.find((a: string) => a.startsWith('ROLE_'));
+      return found ? found.replace('ROLE_', '') : null;
+    } catch {
+      return null;
+    }
   }
 }

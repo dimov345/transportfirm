@@ -1,0 +1,115 @@
+.profile-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 24px;
+  box-sizing: border-box;
+}
+
+.profile-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.08);
+  padding: 44px 40px;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// ---- Avatar ----
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  background: #ebf4ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3182ce;
+  margin-bottom: 18px;
+}
+
+// ---- Name / Email ----
+.profile-email {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  word-break: break-all;
+}
+
+// ---- Role badge ----
+.profile-role-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  background: #ebf4ff;
+  color: #2b6cb0;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+}
+
+// ---- Info grid ----
+.profile-info-grid {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.info-row {
+  display: flex;
+  padding: 13px 16px;
+  gap: 16px;
+  background: #fff;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+  }
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  min-width: 72px;
+  padding-top: 1px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #111827;
+  word-break: break-all;
+}
+
+// ---- Logout button ----
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #fed7d7;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #fed7d7;
+    border-color: #fc8181;
+  }
+}

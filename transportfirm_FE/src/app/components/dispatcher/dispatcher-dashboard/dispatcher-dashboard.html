@@ -1,0 +1,234 @@
+<div class="dd-container">
+
+  <!-- Loading -->
+  <div class="dd-loading" *ngIf="loading">
+    <div class="dd-spinner"></div>
+    <span>Зареждам данни...</span>
+  </div>
+
+  <!-- Error -->
+  <div class="dd-error" *ngIf="!loading && error">
+    <i class="material-icons">error_outline</i>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main layout -->
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- Header -->
+    <div class="dd-header">
+      <div class="dd-header-left">
+        <i class="material-icons">local_shipping</i>
+        <div>
+          <h1>Спедитор — Моите ППС</h1>
+          <span class="dd-subtitle">
+            {{ vehicles.length }} превозни средства в {{ groups.length }} групи
+          </span>
+        </div>
+      </div>
+      <div class="dd-readonly-badge">
+        <i class="material-icons">visibility</i>
+        Само за преглед
+      </div>
+    </div>
+
+    <!-- Body: main (left) + sidebar (right) -->
+    <div class="dd-body">
+
+      <!-- ===== LEFT: Main content ===== -->
+      <div class="dd-main">
+
+        <!-- No vehicle selected -->
+        <div class="dd-empty-select" *ngIf="!selectedVehicle">
+          <i class="material-icons">directions_car</i>
+          <p>Избери ППС от списъка вдясно</p>
+        </div>
+
+        <ng-container *ngIf="selectedVehicle as v">
+
+          <!-- Vehicle info card -->
+          <div class="dd-vehicle-card">
+            <div class="ddc-header">
+              <div class="ddc-title">
+                <span class="ddc-plate">{{ v.plateNumber }}</span>
+                <span class="ddc-model">{{ v.model }}</span>
+              </div>
+              <span class="vs-badge" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">
+                {{ getVehicleStatusLabel(v.vehicleStatus) }}
+              </span>
+            </div>
+
+            <div class="ddc-grid">
+              <div class="ddc-item">
+                <label>Километраж</label>
+                <span>{{ v.odometerKm ?? '—' }} км</span>
+              </div>
+              <div class="ddc-item">
+                <label>Последен сервиз</label>
+                <span>
+                  {{ v.lastServiceOdometerKm ?? '—' }} км
+                  <span class="ddc-date" *ngIf="v.lastServiceDate">/ {{ formatDate(v.lastServiceDate) }}</span>
+                </span>
+              </div>
+              <div class="ddc-item">
+                <label>Следващ сервиз</label>
+                <span [class.ddc-urgent]="isExpired(v.nextServiceDueDate)">
+                  {{ v.nextServiceDueOdometerKm ?? '—' }} км
+                  <span class="ddc-date" *ngIf="v.nextServiceDueDate">/ {{ formatDate(v.nextServiceDueDate) }}</span>
+                </span>
+              </div>
+              <div class="ddc-item">
+                <label>Ср. разход</label>
+                <span>{{ v.avgConsumptionLper100 ?? '—' }} л/100</span>
+              </div>
+            </div>
+
+            <div class="ddc-notes" *ngIf="v.notesForMechanic">
+              <i class="material-icons">sticky_note_2</i>
+              <span>{{ v.notesForMechanic }}</span>
+            </div>
+          </div>
+
+          <!-- Maintenance summary badges -->
+          <div class="maint-summary">
+            <div class="ms-badge ms-total">
+              <span class="ms-num">{{ maintenanceRecords.length }}</span>
+              <span class="ms-label">Всичко записи</span>
+            </div>
+            <div class="ms-badge ms-cost">
+              <span class="ms-num">{{ totalCost().toFixed(2) }}</span>
+              <span class="ms-label">Общо разходи (лв.)</span>
+            </div>
+          </div>
+
+          <!-- Maintenance records list (READ-ONLY) -->
+          <div class="maint-section">
+            <h2 class="maint-title">История на поддръжката</h2>
+
+            <div class="maint-loading" *ngIf="loadingMaintenance">Зареждам...</div>
+
+            <div class="maint-empty" *ngIf="!loadingMaintenance && maintenanceRecords.length === 0">
+              <i class="material-icons">inbox</i>
+              <p>Няма записи за това ППС</p>
+            </div>
+
+            <div class="maint-list" *ngIf="!loadingMaintenance && maintenanceRecords.length > 0">
+              <div
+                class="maint-record"
+                *ngFor="let rec of maintenanceRecords"
+                [ngClass]="statusClasses[rec.status]">
+
+                <!-- Record header (always visible) -->
+                <div class="mr-header" (click)="toggleRecord(rec.id)">
+                  <div class="mr-left">
+                    <span class="mr-type">{{ maintenanceTypeLabels[rec.type] }}</span>
+                    <span class="mr-status-badge" [ngClass]="statusClasses[rec.status]">
+                      {{ statusLabels[rec.status] }}
+                    </span>
+                    <span class="mr-date">{{ formatDateTime(rec.openedAt) }}</span>
+                  </div>
+                  <div class="mr-right">
+                    <span class="mr-cost" *ngIf="rec.totalGross">{{ formatMoney(rec.totalGross) }}</span>
+                    <i class="material-icons mr-chevron">
+                      {{ expandedRecordId === rec.id ? 'expand_less' : 'expand_more' }}
+                    </i>
+                  </div>
+                </div>
+
+                <!-- Record details (expandable) -->
+                <div class="mr-details" *ngIf="expandedRecordId === rec.id">
+                  <div class="mr-details-grid">
+                    <div class="mr-detail-item" *ngIf="rec.description">
+                      <label>Описание</label>
+                      <span>{{ rec.description }}</span>
+                    </div>
+                    <div class="mr-detail-item" *ngIf="rec.odometerKmAtService">
+                      <label>Километраж при сервиз</label>
+                      <span>{{ rec.odometerKmAtService }} км</span>
+                    </div>
+                    <div class="mr-detail-item" *ngIf="rec.workshopName">
+                      <label>Сервиз</label>
+                      <span>{{ rec.workshopName }}</span>
+                    </div>
+                    <div class="mr-detail-item" *ngIf="rec.invoiceNumber">
+                      <label>Фактура №</label>
+                      <span>{{ rec.invoiceNumber }}</span>
+                    </div>
+                    <div class="mr-detail-item" *ngIf="rec.invoiceDate">
+                      <label>Дата на фактура</label>
+                      <span>{{ formatDate(rec.invoiceDate) }}</span>
+                    </div>
+                    <div class="mr-detail-item" *ngIf="rec.closedAt">
+                      <label>Затворен на</label>
+                      <span>{{ formatDateTime(rec.closedAt) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="mr-costs" *ngIf="rec.totalGross">
+                    <div class="mr-cost-row">
+                      <span>Части (нето)</span><span>{{ formatMoney(rec.partsNet) }}</span>
+                    </div>
+                    <div class="mr-cost-row">
+                      <span>Части (ДДС)</span><span>{{ formatMoney(rec.partsVat) }}</span>
+                    </div>
+                    <div class="mr-cost-row" *ngIf="rec.otherNet">
+                      <span>Други (нето)</span><span>{{ formatMoney(rec.otherNet) }}</span>
+                    </div>
+                    <div class="mr-cost-row" *ngIf="rec.otherVat">
+                      <span>Други (ДДС)</span><span>{{ formatMoney(rec.otherVat) }}</span>
+                    </div>
+                    <div class="mr-cost-row mr-cost-total">
+                      <span>Общо (бруто)</span><span>{{ formatMoney(rec.totalGross) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+
+      <!-- ===== RIGHT: Vehicle list sidebar ===== -->
+      <div class="dd-sidebar">
+        <div class="dds-header">
+          <i class="material-icons">directions_car</i>
+          <span>Моите ППС</span>
+        </div>
+
+        <div class="dds-empty" *ngIf="vehicles.length === 0">
+          Няма назначени ППС
+        </div>
+
+        <div
+          class="dds-vehicle"
+          *ngFor="let v of vehicles"
+          [class.dds-selected]="selectedVehicle?.id === v.id"
+          (click)="selectVehicle(v)">
+
+          <div class="dds-plate">{{ v.plateNumber }}</div>
+          <div class="dds-model">{{ v.model }}</div>
+
+          <div class="dds-meta">
+            <span class="vs-dot" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">●</span>
+            <span class="dds-status-text">{{ getVehicleStatusLabel(v.vehicleStatus) }}</span>
+          </div>
+
+          <div class="dds-odometer" *ngIf="v.odometerKm">
+            <i class="material-icons">speed</i> {{ v.odometerKm }} км
+          </div>
+
+          <div class="dds-service-due" *ngIf="v.nextServiceDueDate">
+            <i class="material-icons" [class.dds-urgent]="isExpired(v.nextServiceDueDate)">build</i>
+            <span [class.dds-urgent]="isExpired(v.nextServiceDueDate)">
+              {{ formatDate(v.nextServiceDueDate) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

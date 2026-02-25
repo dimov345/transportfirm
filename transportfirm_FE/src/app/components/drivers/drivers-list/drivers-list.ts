@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { DriverService } from '../../../core/services/driver.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { DriverInfo } from '../../../core/models/driver/driver-info.model';
+import { AuthService } from '../../../core/auth/auth.service';
 
 type DriverRow = {
   id: string | null;
@@ -51,6 +52,11 @@ export class DriversListComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private auth = inject(AuthService);
+
+  get isDispatcher(): boolean {
+    return this.auth.hasRole('DISPATCHER');
+  }
 
   constructor(
     private driverService: DriverService,

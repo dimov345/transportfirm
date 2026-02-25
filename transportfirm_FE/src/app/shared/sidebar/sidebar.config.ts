@@ -13,20 +13,20 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     roles: ['ADMIN', 'MANAGER']
   },
   {
-    label: 'Екип и техникаn',
+    label: 'Екип и техника',
     icon: 'folder',
     children: [
       {
         label: 'Шофьори',
         icon: 'truck',
         route: '/drivers',
-        roles: ['ADMIN', 'DISPATCHER']
+        roles: ['ADMIN', 'MANAGER', 'DISPATCHER']
       },
       {
-        label: 'Спидитори',
+        label: 'Спедитори',
         icon: 'lorry',
         route: '/dispatchers',
-        roles: ['ADMIN', 'DISPATCHER']
+        roles: ['ADMIN', 'MANAGER']
       },
       {
         label: 'Механици',
@@ -39,6 +39,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
         icon: 'wrench',
         route: '/mechanic',
         roles: ['MECHANIC']
+      },
+      {
+        label: 'Моите ППС',
+        icon: 'lorry',
+        route: '/dispatcher',
+        roles: ['DISPATCHER']
       },
       {
         label: 'ППС',
@@ -57,7 +63,6 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     label: 'Профил',
     icon: 'settings',
-    route: '/admin',
-    roles: ['ADMIN']
+    route: '/profile'
   }
 ];

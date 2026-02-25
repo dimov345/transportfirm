@@ -95,6 +95,7 @@
           <td class="actions-cell">
             <div class="actions-group">
               <button
+                *ngIf="!isDispatcher"
                 type="button"
                 class="btn-action btn-edit"
                 (click)="addDriverInfo(d)"

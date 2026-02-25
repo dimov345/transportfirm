@@ -8,46 +8,67 @@ export interface TruckGroup {
   id: string;
   groupName: string;
   groupType: GroupType;
-
-  // backend може да връща owner info (не е задължително)
   mechanic?: { id: string } | null;
   dispatcher?: { id: string } | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class TruckGroupService {
-  // важно: следвам твоя pattern с /api
-  private apiUrl = 'http://localhost:8080/api/auth/admin';
+  private apiUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
 
+  // Групите на логнатия механик (от JWT Principal)
+  getGroupsByMechanicMe(): Observable<TruckGroup[]> {
+    return this.http.get<TruckGroup[]>(`${this.apiUrl}/mechanics/me/groups`);
+  }
+
+  // Групите на логнатия спедитор (от JWT Principal)
+  getGroupsByDispatcherMe(): Observable<TruckGroup[]> {
+    return this.http.get<TruckGroup[]>(`${this.apiUrl}/dispatchers/me/groups`);
+  }
+
+  // Групите на конкретен механик (по mechanicInfoId) — за admin view
+  getGroupsByMechanic(mechanicInfoId: string): Observable<TruckGroup[]> {
+    return this.http.get<TruckGroup[]>(`${this.apiUrl}/mechanics/${mechanicInfoId}/groups`);
+  }
+
+  // Групите на конкретен спедитор (по dispatcherInfoId) — за admin view
+  getGroupsByDispatcher(dispatcherInfoId: string): Observable<TruckGroup[]> {
+    return this.http.get<TruckGroup[]>(`${this.apiUrl}/dispatchers/${dispatcherInfoId}/groups`);
+  }
+
+  // Създаване на група за механик (за employee-details)
   createMechanicGroup(mechanicId: string, groupName: string): Observable<TruckGroup> {
-    const url = `${this.apiUrl}/groups/mechanic/${mechanicId}`;
-    return this.http.post<TruckGroup>(url, null, {
-      params: { name: groupName },
-      withCredentials: true
-    });
+    return this.http.post<TruckGroup>(
+      `${this.apiUrl}/auth/admin/groups/mechanic/${mechanicId}`,
+      null,
+      { params: { name: groupName } }
+    );
   }
 
+  // Създаване на група за спедитор (за employee-details)
   createDispatcherGroup(dispatcherId: string, groupName: string): Observable<TruckGroup> {
-    const url = `${this.apiUrl}/groups/dispatcher/${dispatcherId}`;
-    return this.http.post<TruckGroup>(url, null, {
-      params: { name: groupName },
-      withCredentials: true
-    });
+    return this.http.post<TruckGroup>(
+      `${this.apiUrl}/auth/admin/groups/dispatcher/${dispatcherId}`,
+      null,
+      { params: { name: groupName } }
+    );
   }
 
-  getGroupsByMechanic(mechanicId: string) {
-    return this.http.get<TruckGroup[]>(`${this.apiUrl}/mechanic/${mechanicId}`);
+  getAll(): Observable<TruckGroup[]> {
+    return this.http.get<TruckGroup[]>(`${this.apiUrl}/truck-groups`);
   }
 
-  getGroupsByDispatcher(dispatcherId: string) {
-    return this.http.get<TruckGroup[]>(`${this.apiUrl}/dispatcher/${dispatcherId}`);
+  create(groupName: string, groupType: GroupType): Observable<TruckGroup> {
+    return this.http.post<TruckGroup>(`${this.apiUrl}/truck-groups`, { groupName, groupType });
   }
 
-  // GET /mechanics/me/groups — групите на логнатия механик (Principal от JWT)
-  getGroupsByMechanicMe() {
-    return this.http.get<TruckGroup[]>('http://localhost:8080/api/mechanics/me/groups');
+  update(id: string, groupName: string): Observable<TruckGroup> {
+    return this.http.put<TruckGroup>(`${this.apiUrl}/truck-groups/${id}`, { groupName });
   }
 
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/truck-groups/${id}`);
+  }
 }

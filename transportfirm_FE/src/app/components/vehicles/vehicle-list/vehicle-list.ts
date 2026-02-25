@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -22,6 +23,11 @@ export class VehicleListComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private auth = inject(AuthService);
+
+  get isDispatcher(): boolean {
+    return this.auth.hasRole('DISPATCHER');
+  }
 
   constructor(private vehicleService: VehicleService, private cdr: ChangeDetectorRef) {}
 

@@ -7,7 +7,7 @@
         <p class="subtitle">Списък на всички превозни средства</p>
       </div>
 
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="!isDispatcher">
         <button type="button" class="btn-primary" routerLink="/vehicles/new">
           <i class="material-icons">add</i>
           Добави ново ППС
@@ -124,6 +124,7 @@
 
               <!-- EDIT -->
               <button
+                *ngIf="!isDispatcher"
                 type="button"
                 class="btn-action btn-edit"
                 [routerLink]="['/vehicles/edit', vehicle.id]"
@@ -148,6 +149,7 @@
 
               <!-- DELETE -->
               <button
+                *ngIf="!isDispatcher"
                 type="button"
                 class="btn-action btn-danger"
                 (click)="deleteVehicle(vehicle.id)"
@@ -171,7 +173,7 @@
     </div>
     <h3>Няма намерени превозни средства</h3>
     <p>Добавете първото превозно средство към системата</p>
-    <button type="button" class="btn-primary" routerLink="/vehicles/new">
+    <button *ngIf="!isDispatcher" type="button" class="btn-primary" routerLink="/vehicles/new">
       <i class="material-icons">add</i>
       Добави ППС
     </button>

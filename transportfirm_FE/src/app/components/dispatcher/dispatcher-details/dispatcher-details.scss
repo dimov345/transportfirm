@@ -1,0 +1,155 @@
+.status-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.status-active   { background: #ecfdf5; border-color: rgba(16, 185, 129, 0.22); color: #10b981; }
+.status-inactive { background: #f9fafb; border-color: #e5e7eb;                  color: #6b7280; }
+.status-fired    { background: #fef2f2; border-color: rgba(239, 68, 68, 0.22);  color: #ef4444; }
+.status-leave    { background: #fffbeb; border-color: rgba(245, 158, 11, 0.22); color: #f59e0b; }
+
+.groups-list { display: flex; flex-direction: column; gap: 8px; }
+
+.group-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+
+  &:hover { background: #fafbfc; border-color: #dbe3ee; transform: translateY(-1px); }
+
+  .group-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: rgba(49, 130, 206, 0.08);
+    border: 1px solid rgba(49, 130, 206, 0.18);
+    border-radius: 10px;
+    color: #3182ce;
+
+    .material-icons { font-size: 20px; }
+  }
+
+  .group-info { display: flex; flex-direction: column; gap: 2px; }
+  .group-name { font-size: 14px; font-weight: 600; color: #111827; }
+  .group-type { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+}
+
+.empty-section {
+  padding: 28px 16px;
+  text-align: center;
+  color: #6b7280;
+
+  .material-icons { font-size: 32px; color: #d1d5db; display: block; margin-bottom: 8px; }
+  p { font-size: 14px; margin: 0; font-weight: 500; }
+}
+
+.upload-section { margin-bottom: 16px; }
+
+.upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+
+  select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111827;
+    background: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    min-width: 200px;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(49, 130, 206, 0.75);
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.12);
+    }
+  }
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 40px;
+  background: #3182ce;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  border: 1px solid rgba(49, 130, 206, 0.35);
+
+  .material-icons { font-size: 18px; }
+  input[type="file"] { display: none; }
+
+  &:hover:not(.disabled) { background: #2c6bb4; transform: translateY(-1px); }
+  &.disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.upload-hint { font-size: 12px; color: #6b7280; margin: 0; font-weight: 500; }
+
+.docs-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafbfc;
+  transition: background 0.12s;
+
+  &:hover { background: #f3f4f6; }
+
+  .doc-icon { font-size: 20px; color: #ef4444; }
+  .doc-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .doc-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-type { font-size: 12px; color: #6b7280; font-weight: 500; }
+  .doc-actions { display: flex; gap: 6px; }
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+  color: #3182ce;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+
+  .material-icons { font-size: 18px; }
+  &:hover { background: rgba(49, 130, 206, 0.10); border-color: rgba(49, 130, 206, 0.18); transform: translateY(-1px); }
+
+  &.btn-danger {
+    color: #ef4444;
+    &:hover { background: rgba(239, 68, 68, 0.10); border-color: rgba(239, 68, 68, 0.18); }
+  }
+}
+
+.loading-state-small { padding: 16px; font-size: 14px; color: #6b7280; font-weight: 500; }

@@ -1,0 +1,183 @@
+<div class="details-container">
+
+  <!-- LOADING -->
+  <div class="loading-state" *ngIf="loading">
+    <span>Зареждане...</span>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-state" *ngIf="!loading && error">
+    <i class="material-icons">error_outline</i>
+    <h3>Грешка</h3>
+    <p>{{ error }}</p>
+    <button type="button" class="btn-primary" (click)="goBack()">
+      <i class="material-icons">arrow_back</i>
+      Назад
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <ng-container *ngIf="!loading && !error && employee">
+
+    <!-- HEADER -->
+    <div class="details-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1>Детайли — спедитор</h1>
+          <div class="subtitle">{{ employee.name }}</div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">
+            <i class="material-icons">arrow_back_ios</i>
+            Назад
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS GRID -->
+    <div class="details-content">
+      <div class="details-grid">
+
+        <!-- Лична информация -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">person</i>
+            <h2>Лична информация</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>ЕГН</label>
+              <span>{{ employee.egn || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Дата на раждане</label>
+              <span>{{ formatDate(employee.dateOfBirth) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Телефон</label>
+              <span>
+                <a *ngIf="employee.phone" class="contact-link"
+                   [href]="'https://wa.me/' + employee.phone"
+                   target="_blank" rel="noopener">{{ employee.phone }}</a>
+                <span *ngIf="!employee.phone">—</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Имейл</label>
+              <span>
+                <a *ngIf="employee.email" class="contact-link"
+                   [href]="'mailto:' + employee.email">{{ employee.email }}</a>
+                <span *ngIf="!employee.email">—</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Статус</label>
+              <span class="status-badge" [ngClass]="getStatusClass(employee.employmentStatus)">
+                {{ getStatusLabel(employee.employmentStatus) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Назначен от</label>
+              <span>{{ formatDate(employee.hiredDate) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Групи -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">group_work</i>
+            <h2>Назначени групи</h2>
+          </div>
+
+          <div *ngIf="groups.length === 0" class="empty-section">
+            <i class="material-icons">inbox</i>
+            <p>Няма назначени групи</p>
+          </div>
+
+          <div class="groups-list" *ngIf="groups.length > 0">
+            <div class="group-item" *ngFor="let g of groups">
+              <div class="group-icon">
+                <i class="material-icons">local_shipping</i>
+              </div>
+              <div class="group-info">
+                <span class="group-name">{{ g.groupName }}</span>
+                <span class="group-type">{{ g.groupType }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Документи -->
+        <div class="info-card full-width">
+          <div class="card-header">
+            <i class="material-icons">folder</i>
+            <h2>Документи</h2>
+          </div>
+
+          <!-- Upload -->
+          <div class="upload-section">
+            <div class="upload-controls">
+              <select [(ngModel)]="selectedDocType" [disabled]="isUploading || loadingDocs">
+                <option value="">Изберете тип</option>
+                <option value="ID_CARD">Лична карта</option>
+                <option value="PASSPORT">Паспорт</option>
+                <option value="CONTRACT">Трудов договор</option>
+                <option value="CERTIFICATE">Сертификат</option>
+                <option value="OTHER">Друго</option>
+              </select>
+
+              <label class="file-btn" [class.disabled]="isUploading || loadingDocs">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  [disabled]="isUploading || loadingDocs"
+                  (change)="onFileSelected($event)"
+                />
+                <i class="material-icons">upload</i>
+                <span>{{ isUploading ? 'Качване...' : 'Качи PDF' }}</span>
+              </label>
+            </div>
+            <p class="upload-hint">Само PDF, макс. 5 MB</p>
+          </div>
+
+          <!-- Loading docs -->
+          <div class="loading-state-small" *ngIf="loadingDocs">
+            Зареждане на документи...
+          </div>
+
+          <!-- Docs list -->
+          <div class="docs-list" *ngIf="!loadingDocs && documents.length > 0">
+            <div class="doc-item" *ngFor="let doc of documents">
+              <i class="material-icons doc-icon">picture_as_pdf</i>
+              <div class="doc-info">
+                <span class="doc-name">{{ doc.fileName }}</span>
+                <span class="doc-type" *ngIf="doc.type">{{ doc.type }}</span>
+              </div>
+              <div class="doc-actions">
+                <button type="button" class="btn-icon" (click)="downloadDocument(doc)" title="Изтегли">
+                  <i class="material-icons">download</i>
+                </button>
+                <button type="button" class="btn-icon btn-danger" (click)="deleteDocument(doc.id)" title="Изтрий">
+                  <i class="material-icons">delete</i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty docs -->
+          <div class="empty-section" *ngIf="!loadingDocs && documents.length === 0">
+            <i class="material-icons">folder_open</i>
+            <p>Няма прикачени документи</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

@@ -7,6 +7,7 @@ import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.TruckGroup;
 import com.example.transportfirm.repository.EmployeeRepository;
 import com.example.transportfirm.service.TruckGroupService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
@@ -24,7 +25,8 @@ public class DispatcherController {
         this.truckGroupService = truckGroupService;
     }
 
-    // GET /dispatchers/me/groups
+    // GET /dispatchers/me/groups — само за логнатия спедитор
+    @PreAuthorize("hasRole('DISPATCHER')")
     @GetMapping("/me/groups")
     public List<TruckGroup> myGroups(Principal principal) {
         Employee emp = employeeRepository.findByEmail(principal.getName())
@@ -35,6 +37,13 @@ public class DispatcherController {
         }
 
         UUID dispatcherId = emp.getDispatcherInfo().getId();
+        return truckGroupService.getDispatcherGroups(dispatcherId);
+    }
+
+    // GET /dispatchers/{dispatcherId}/groups — за admin/manager преглед
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @GetMapping("/{dispatcherId}/groups")
+    public List<TruckGroup> getGroupsByDispatcher(@PathVariable UUID dispatcherId) {
         return truckGroupService.getDispatcherGroups(dispatcherId);
     }
 }

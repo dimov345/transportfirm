@@ -1,4 +1,6 @@
 import { DriverInfo } from "../driver/driver-info.model";
+import { MechanicInfo } from "../mechanic/mechanic-info.model";
+import { DispatcherInfo } from "../dispatcher/dispatcher-info.model";
 
 export interface Employee {
   id: string;
@@ -29,6 +31,6 @@ export interface Employee {
   documents: any[];
 
   driverInfo?: DriverInfo | null;
-  mechanicInfo?: any | null;
-  dispatcherInfo?: any | null;
+  mechanicInfo?: MechanicInfo | null;
+  dispatcherInfo?: DispatcherInfo | null;
 }

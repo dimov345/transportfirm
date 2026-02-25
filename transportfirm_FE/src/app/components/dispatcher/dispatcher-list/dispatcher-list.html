@@ -1,0 +1,103 @@
+<div class="list-container">
+  <!-- HEADER -->
+  <div class="list-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Спедитори</h1>
+        <p class="subtitle">Общо {{ dispatchers.length }} спедитора</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <input
+      type="text"
+      placeholder="Търси по име или ЕГН..."
+      class="search-input"
+      [(ngModel)]="filters.search"
+      (input)="applyFilters()"
+    />
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-container">
+    <div *ngIf="loading" class="loading-state">
+      Зареждане...
+    </div>
+
+    <table *ngIf="!loading && dispatchers.length > 0">
+      <thead>
+        <tr>
+          <th class="col-egn">ЕГН</th>
+          <th class="col-name">Име</th>
+          <th class="col-phone">Телефон</th>
+          <th class="col-email">Имейл</th>
+          <th class="col-status">Статус</th>
+          <th class="col-actions">Действия</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let d of dispatchers; trackBy: trackByEmployeeId"
+          class="table-row"
+        >
+          <td>
+            <div class="cell-value">{{ d.employee.egn }}</div>
+          </td>
+
+          <td>
+            <div class="cell-name">{{ d.employee.name }}</div>
+          </td>
+
+          <td>
+            <div class="cell-value">{{ d.employee.phone || '—' }}</div>
+          </td>
+
+          <td>
+            <div class="cell-value" [class.no-email]="!d.employee.email">
+              {{ d.employee.email || 'Няма имейл' }}
+            </div>
+          </td>
+
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(d.employee.employmentStatus)">
+              {{ getStatusLabel(d.employee.employmentStatus) }}
+            </span>
+          </td>
+
+          <td class="actions-cell">
+            <div class="actions-group">
+              <!-- Детайли -->
+              <button
+                type="button"
+                class="btn-action btn-view"
+                (click)="viewDetails(d.employeeId)"
+                title="Детайли"
+              >
+                <i class="material-icons">visibility</i>
+              </button>
+
+              <!-- Документи -->
+              <button
+                type="button"
+                class="btn-action btn-docs"
+                (click)="viewDocuments(d.employeeId)"
+                title="Документи"
+              >
+                <i class="material-icons">folder</i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="!loading && dispatchers.length === 0">
+      <i class="material-icons">local_shipping</i>
+      <h3>Няма намерени спедитори</h3>
+    </div>
+  </div>
+</div>

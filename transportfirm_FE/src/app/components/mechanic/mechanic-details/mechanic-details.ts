@@ -59,6 +59,8 @@ export class MechanicDetailsComponent implements OnInit {
   private loadData() {
     this.loading = true;
     this.error = '';
+    this.groups = [];
+    this.groupVehicles = new Map();
 
     this.mechanicService.getEmployee(this.employeeId).pipe(
       catchError((err: unknown) => {

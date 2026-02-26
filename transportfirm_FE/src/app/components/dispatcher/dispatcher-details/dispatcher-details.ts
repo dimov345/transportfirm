@@ -59,6 +59,8 @@ export class DispatcherDetailsComponent implements OnInit {
   private loadData() {
     this.loading = true;
     this.error = '';
+    this.groups = [];
+    this.groupVehicles = new Map();
 
     this.dispatcherService.getEmployee(this.employeeId).pipe(
       catchError((err: unknown) => {

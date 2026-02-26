@@ -118,7 +118,7 @@
                   {{ v.plateNumber }}
                 </span>
                 <span class="no-vehicles-text"
-                      *ngIf="groupVehicles.has(g.id) && groupVehicles.get(g.id)!.length === 0">
+                      *ngIf="groupVehicles.has(g.id) && groupVehicles.get(g.id)?.length === 0">
                   Няма назначени ППС
                 </span>
               </div>

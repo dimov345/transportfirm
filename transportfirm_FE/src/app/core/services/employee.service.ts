@@ -81,7 +81,6 @@ export interface EmployeeDocument {
   id: string;
   type: string;
   fileName: string;
-  filePath: string;
 }
 
 @Injectable({ providedIn: 'root' })

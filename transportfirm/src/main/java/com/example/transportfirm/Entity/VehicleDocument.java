@@ -27,6 +27,8 @@ public class VehicleDocument {
     private VehicleDocumentType type;
 
     private String fileName;
+
+    @JsonIgnore
     private String filePath;
 
 }

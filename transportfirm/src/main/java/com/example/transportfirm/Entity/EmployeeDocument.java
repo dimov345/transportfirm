@@ -2,6 +2,7 @@ package com.example.transportfirm.entity;
 
 import com.example.transportfirm.enums.EmployeeDocumentType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,5 +29,7 @@ public class EmployeeDocument {
     private EmployeeDocumentType type;
 
     private String fileName;
+
+    @JsonIgnore
     private String filePath;
 }

@@ -1,6 +1,7 @@
 package com.example.transportfirm.entity;
 
 import com.example.transportfirm.enums.DriverDocumentType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class DriverDocument {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
+    @JsonIgnore
     private Employee employee;
 
     @Enumerated(EnumType.STRING)
@@ -27,6 +29,7 @@ public class DriverDocument {
     @Column(nullable = false)
     private String fileName;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String filePath;
 

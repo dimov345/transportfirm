@@ -49,10 +49,6 @@ export interface VehicleDocument {
   id: string;
   type: string;
   fileName: string;
-  filePath: string;
-  vehicle: {
-    plateNumber: string;
-  };
 }
 
 @Injectable({ providedIn: 'root' })

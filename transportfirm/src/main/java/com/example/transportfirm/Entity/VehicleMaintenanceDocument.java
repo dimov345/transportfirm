@@ -1,6 +1,7 @@
 package com.example.transportfirm.entity;
 
 import com.example.transportfirm.enums.VehicleMaintenanceDocumentType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +22,13 @@ public class VehicleMaintenanceDocument {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "maintenance_record_id", nullable = false)
+    @JsonIgnore
     private VehicleMaintenanceRecord maintenanceRecord;
 
     @Column(nullable = false)
     private String fileName;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String filePath;
 

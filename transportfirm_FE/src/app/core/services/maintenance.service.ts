@@ -30,7 +30,6 @@ export interface MaintenanceRecord {
 export interface MaintenanceDocument {
   id: string;
   fileName: string;
-  filePath: string;
   docType?: MaintenanceDocumentType;
 }
 

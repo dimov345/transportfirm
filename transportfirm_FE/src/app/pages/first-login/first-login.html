@@ -18,80 +18,66 @@
 
     <div class="card">
       <h1 class="title">Първо влизане</h1>
-      <p class="desc">Смени временната парола, за да активираш акаунта си.</p>
+      <p class="desc">Въведи OTP кода от имейла и задай нова парола.</p>
 
-      <div class="alert info" *ngIf="infoMsg">{{ infoMsg }}</div>
+      <div class="alert info"  *ngIf="infoMsg">{{ infoMsg }}</div>
       <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
         <div class="field">
           <label>Email</label>
           <div class="control">
-            <input type="email" formControlName="email" placeholder="example@mail.com" autocomplete="username" />
+            <input type="email" formControlName="email"
+                   placeholder="example@mail.com" autocomplete="username" />
           </div>
         </div>
 
         <div class="field">
           <label>OTP код</label>
           <div class="control">
-            <input
-              type="text"
-              formControlName="otp"
-              placeholder="6 цифри"
-              maxlength="6"
-              inputmode="numeric"
-              autocomplete="one-time-code"
-            />
+            <input type="text" formControlName="otp"
+                   placeholder="6 цифри" maxlength="6"
+                   inputmode="numeric" autocomplete="one-time-code" />
           </div>
-
-          <div class="otp-row">
-            <button
-              type="button"
-              class="btn secondary"
-              (click)="resendOtp()"
-              [disabled]="resendLoading || resendCooldown > 0"
-            >
-              {{
-                resendLoading
-                  ? 'Изпращам...'
-                  : (resendCooldown > 0
-                      ? ('Изпрати нов OTP (' + resendCooldown + 's)')
-                      : 'Изпрати нов OTP')
-              }}
-            </button>
-          </div>
-
-          <div class="alert info" *ngIf="resendInfo">{{ resendInfo }}</div>
-          <div class="alert error" *ngIf="resendError">{{ resendError }}</div>
+          <small class="hint error"
+                 *ngIf="form.get('otp')?.touched && form.get('otp')?.invalid">
+            Въведи 6-цифрен OTP код.
+          </small>
         </div>
 
         <div class="field">
           <label>Нова парола</label>
           <div class="control">
-            <input type="password" formControlName="newPassword" placeholder="••••••••" autocomplete="new-password" />
+            <input type="password" formControlName="newPassword"
+                   placeholder="••••••••" autocomplete="new-password" />
           </div>
+          <small class="hint error"
+                 *ngIf="form.get('newPassword')?.touched && form.get('newPassword')?.invalid">
+            Паролата трябва да е поне 6 символа.
+          </small>
         </div>
 
         <div class="field">
           <label>Повтори парола</label>
           <div class="control">
-            <input type="password" formControlName="confirmPassword" placeholder="••••••••" autocomplete="new-password" />
+            <input type="password" formControlName="confirmPassword"
+                   placeholder="••••••••" autocomplete="new-password" />
           </div>
-        </div>
-
-        <div class="alert error"
-             *ngIf="form.value.newPassword && form.value.confirmPassword && form.value.newPassword !== form.value.confirmPassword">
-          Паролите не съвпадат.
+          <small class="hint error" *ngIf="passwordMismatch">
+            Паролите не съвпадат.
+          </small>
         </div>
 
         <button class="btn" type="submit" [disabled]="loading">
-          <span class="btn-text">{{ loading ? 'Записвам...' : 'Смени паролата' }}</span>
+          <span class="btn-text">{{ loading ? 'Записвам...' : 'Активирай акаунта' }}</span>
           <span class="btn-shine" aria-hidden="true"></span>
         </button>
 
         <div class="footer">
           <a routerLink="/login">Обратно към вход</a>
         </div>
+
       </form>
     </div>
   </div>

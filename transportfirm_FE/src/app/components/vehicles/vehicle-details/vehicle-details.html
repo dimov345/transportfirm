@@ -38,6 +38,7 @@
           </button>
 
           <button
+            *ngIf="isAdminOrManager"
             type="button"
             class="btn-secondary"
             [routerLink]="['/vehicles/edit', v.id]"
@@ -302,7 +303,36 @@
           </div>
         </div>
 
-       
+        <!-- Maintenance History -->
+        <div class="info-card" style="grid-column: 1 / -1;">
+          <div class="card-header">
+            <i class="material-icons">build_circle</i>
+            <h2>История на ремонти и сервиз</h2>
+          </div>
+
+          <div *ngIf="loadingMaintenance" class="tf-banner">Зареждам...</div>
+
+          <div *ngIf="!loadingMaintenance && maintenanceRecords.length === 0" class="empty-maintenance">
+            <i class="material-icons">check_circle_outline</i>
+            <span>Няма записани ремонти или сервизи</span>
+          </div>
+
+          <div *ngIf="!loadingMaintenance && maintenanceRecords.length > 0" class="maintenance-list">
+            <div class="maintenance-item" *ngFor="let r of maintenanceRecords"
+                 [routerLink]="['/mechanic/maintenance/edit', r.id]">
+              <div class="m-row">
+                <span class="m-type">{{ maintenanceTypeLabels[r.type] || r.type }}</span>
+                <span class="m-status-badge" [ngClass]="maintenanceStatusClasses[r.status]">
+                  {{ maintenanceStatusLabels[r.status] || r.status }}
+                </span>
+                <span class="m-date">{{ formatDateTime(r.openedAt) }}</span>
+                <span class="m-workshop" *ngIf="r.workshopName">{{ r.workshopName }}</span>
+                <span class="m-cost" *ngIf="r.totalGross != null">{{ r.totalGross.toFixed(2) }} лв.</span>
+              </div>
+              <div class="m-desc" *ngIf="r.description">{{ r.description }}</div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>

@@ -26,7 +26,8 @@ export class AppComponent {
 
         this.isAuthRoute =
           url.startsWith('/login') ||
-          url.startsWith('/first-login');
+          url.startsWith('/first-login') ||
+          url.startsWith('/forgot-password');
 
         this.showSidebar = !this.isAuthRoute;
 

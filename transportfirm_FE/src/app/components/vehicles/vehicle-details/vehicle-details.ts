@@ -5,6 +5,8 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 import { AssignmentService } from '../../../core/services/assignment.service';
 import { DriverInfo } from '../../../core/models/driver/driver-info.model';
+import { AuthService } from '../../../core/auth/auth.service';
+import { MaintenanceService, MaintenanceRecord } from '../../../core/services/maintenance.service';
 
 @Component({
   selector: 'app-vehicle-details',
@@ -18,20 +20,48 @@ export class VehicleDetails implements OnInit {
   private router = inject(Router);
   private vehicleService = inject(VehicleService);
   private assignmentService = inject(AssignmentService);
+  private auth = inject(AuthService);
+  private maintenanceService = inject(MaintenanceService);
   private cdr = inject(ChangeDetectorRef);
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
   vehicle: VehicleInfo | null = null;
-
-  // ✅ DriverInfo за това ППС (има employee.name)
   assignedDriverInfo: DriverInfo | null = null;
+  maintenanceRecords: MaintenanceRecord[] = [];
+  loadingMaintenance = false;
 
   loading = false;
   errorMessage = '';
 
-  private id = ''; // vehicle UUID
+  private id = '';
+
+  get isAdminOrManager(): boolean {
+    return this.auth.hasRole('ADMIN', 'MANAGER');
+  }
+
+  readonly maintenanceTypeLabels: Record<string, string> = {
+    REPAIR: 'Ремонт',
+    SERVICE: 'Сервиз',
+    INSPECTION: 'Технически преглед',
+    TIRE_CHANGE: 'Смяна на гуми',
+    BREAKDOWN: 'Авария',
+    ACCIDENT: 'Катастрофа',
+    OTHER: 'Друго'
+  };
+
+  readonly maintenanceStatusClasses: Record<string, string> = {
+    OPEN: 'mstatus-open',
+    CLOSED: 'mstatus-closed',
+    CANCELED: 'mstatus-canceled'
+  };
+
+  readonly maintenanceStatusLabels: Record<string, string> = {
+    OPEN: 'Отворен',
+    CLOSED: 'Затворен',
+    CANCELED: 'Отменен'
+  };
 
   ngOnInit() {
     if (!this.isBrowser) return;
@@ -60,8 +90,8 @@ export class VehicleDetails implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
 
-        // ✅ след като имаме vehicle -> дърпаме шофьора
         this.loadAssignedDriver(vehicle.id);
+        this.loadMaintenance(vehicle.id);
       },
       error: (error) => {
         this.loading = false;
@@ -98,9 +128,32 @@ export class VehicleDetails implements OnInit {
     });
   }
 
+  private loadMaintenance(vehicleId: string) {
+    this.loadingMaintenance = true;
+    this.maintenanceRecords = [];
+    this.cdr.detectChanges();
+
+    this.maintenanceService.getByVehicle(vehicleId, 0, 50).subscribe({
+      next: (page) => {
+        this.maintenanceRecords = page.content;
+        this.loadingMaintenance = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingMaintenance = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   formatDate(dateString?: string): string {
     if (!dateString) return 'Не е посочена';
     return new Date(dateString).toLocaleDateString('bg-BG');
+  }
+
+  formatDateTime(dateString?: string): string {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleString('bg-BG');
   }
 
   isExpired(dateString?: string): boolean {
@@ -133,7 +186,6 @@ export class VehicleDetails implements OnInit {
     return this.vehicleStatuses.find(s => s.value === value)?.label ?? value;
   }
 
-  // ако искаш badge класове (по желание)
   getVehicleStatusClass(value?: string | null): string {
     switch (value) {
       case 'AVAILABLE': return 'status-available';

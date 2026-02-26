@@ -30,6 +30,7 @@ import { DispatcherDetailsComponent } from './components/dispatcher/dispatcher-d
 import { DispatcherDashboardComponent } from './components/dispatcher/dispatcher-dashboard/dispatcher-dashboard';
 
 import { ProfileComponent } from './pages/profile/profile';
+import { ForgotPassword } from './pages/forgot-password/forgot-password';
 
 const ADMIN_MANAGER = ['ADMIN', 'MANAGER'];
 const ADMIN_MANAGER_DISPATCHER = ['ADMIN', 'MANAGER', 'DISPATCHER'];
@@ -39,6 +40,7 @@ const ALL_STAFF = ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC'];
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'first-login', component: FirstLogin },
+  { path: 'forgot-password', component: ForgotPassword },
 
   { path: '', component: Home, canActivate: [authGuard] },
 

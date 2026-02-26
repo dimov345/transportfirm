@@ -32,10 +32,6 @@ public class FirstLoginServiceImpl implements FirstLoginService {
             throw new RuntimeException("Invalid OTP");
         }
 
-        if (user.getVerifyOtpExpireAt() < System.currentTimeMillis()) {
-            throw new RuntimeException("OTP expired");
-        }
-
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setFirstLogin(false);
         user.setIsAccountVerified(true);

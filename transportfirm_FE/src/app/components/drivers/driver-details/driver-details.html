@@ -20,6 +20,7 @@
           </button>
 
           <button
+            *ngIf="isAdminOrManager"
             type="button"
             class="btn-secondary"
             (click)="editDriver()"
@@ -125,7 +126,7 @@
               </div>
               <h3>Няма срокове за документи</h3>
               <p>За този служител няма DriverInfo.</p>
-              <button type="button" class="btn-primary" (click)="editDriver()">
+              <button *ngIf="isAdminOrManager" type="button" class="btn-primary" (click)="editDriver()">
                 <i class="material-icons">add</i>
                 Добави срокове
               </button>
@@ -223,7 +224,7 @@
           </div>
 
           <div class="quick-actions">
-            <button type="button" class="action-btn" (click)="editDriver()">
+            <button *ngIf="isAdminOrManager" type="button" class="action-btn" (click)="editDriver()">
               <i class="material-icons">edit</i>
               <span>Редактирай данни</span>
             </button>

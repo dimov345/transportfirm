@@ -20,7 +20,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/maintenance")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
 public class VehicleMaintenanceController {
 
     private final VehicleMaintenanceService maintenanceService;
@@ -38,6 +37,7 @@ public class VehicleMaintenanceController {
 
     // GET /maintenance/vehicle/{vehicleId}?page=0&size=10
     @GetMapping("/vehicle/{vehicleId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
     public Page<VehicleMaintenanceRecord> history(
             @PathVariable UUID vehicleId,
             @RequestParam(defaultValue = "0") int page,
@@ -48,12 +48,14 @@ public class VehicleMaintenanceController {
 
     // GET /maintenance/{recordId}
     @GetMapping("/{recordId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
     public VehicleMaintenanceRecord getById(@PathVariable UUID recordId) {
         return maintenanceService.getById(recordId);
     }
 
     // POST /maintenance/create/{vehicleId}?type=REPAIR
     @PostMapping("/create/{vehicleId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
     public VehicleMaintenanceRecord create(
             @PathVariable UUID vehicleId,
             @RequestParam("type") MaintenanceType type
@@ -62,8 +64,8 @@ public class VehicleMaintenanceController {
     }
 
     // PUT /maintenance/{recordId}
-    // body: VehicleMaintenanceRecord (без DTO)
     @PutMapping("/{recordId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
     public VehicleMaintenanceRecord update(
             @PathVariable UUID recordId,
             @RequestBody VehicleMaintenanceRecord updated
@@ -73,6 +75,7 @@ public class VehicleMaintenanceController {
 
     // PUT /maintenance/{recordId}/close
     @PutMapping("/{recordId}/close")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
     public VehicleMaintenanceRecord close(@PathVariable UUID recordId) {
         return maintenanceService.close(recordId);
     }
@@ -81,6 +84,7 @@ public class VehicleMaintenanceController {
 
     // POST /maintenance/{recordId}/documents/upload?docType=INVOICE
     @PostMapping(value = "/{recordId}/documents/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
     public VehicleMaintenanceDocument uploadDocument(
             @PathVariable UUID recordId,
             @RequestParam("file") MultipartFile file,
@@ -91,22 +95,22 @@ public class VehicleMaintenanceController {
 
     // GET /maintenance/{recordId}/documents
     @GetMapping("/{recordId}/documents")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
     public List<VehicleMaintenanceDocument> listDocuments(@PathVariable UUID recordId) {
         return documentService.list(recordId);
     }
 
     // GET /maintenance/documents/{documentId}/download
     @GetMapping("/documents/{documentId}/download")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
     public ResponseEntity<Resource> download(@PathVariable UUID documentId) {
         return documentService.download(documentId);
     }
 
     // DELETE /maintenance/documents/{documentId}
     @DeleteMapping("/documents/{documentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
     public void deleteDocument(@PathVariable UUID documentId) {
         documentService.delete(documentId);
     }
-
-
 }
-

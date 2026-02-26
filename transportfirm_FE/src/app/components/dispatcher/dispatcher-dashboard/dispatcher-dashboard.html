@@ -1,13 +1,13 @@
-<div class="dd-container">
+<div class="dash-container">
 
   <!-- Loading -->
-  <div class="dd-loading" *ngIf="loading">
-    <div class="dd-spinner"></div>
+  <div class="dash-loading" *ngIf="loading">
+    <div class="dash-spinner"></div>
     <span>Зареждам данни...</span>
   </div>
 
   <!-- Error -->
-  <div class="dd-error" *ngIf="!loading && error">
+  <div class="dash-error" *ngIf="!loading && error">
     <i class="material-icons">error_outline</i>
     <p>{{ error }}</p>
   </div>
@@ -16,30 +16,30 @@
   <ng-container *ngIf="!loading && !error">
 
     <!-- Header -->
-    <div class="dd-header">
-      <div class="dd-header-left">
+    <div class="dash-header">
+      <div class="dash-header-left">
         <i class="material-icons">local_shipping</i>
         <div>
           <h1>Спедитор — Моите ППС</h1>
-          <span class="dd-subtitle">
+          <span class="dash-subtitle">
             {{ vehicles.length }} превозни средства в {{ groups.length }} групи
           </span>
         </div>
       </div>
-      <div class="dd-readonly-badge">
+      <div class="dash-readonly-badge">
         <i class="material-icons">visibility</i>
         Само за преглед
       </div>
     </div>
 
     <!-- Body: main (left) + sidebar (right) -->
-    <div class="dd-body">
+    <div class="dash-body">
 
       <!-- ===== LEFT: Main content ===== -->
-      <div class="dd-main">
+      <div class="dash-main">
 
         <!-- No vehicle selected -->
-        <div class="dd-empty-select" *ngIf="!selectedVehicle">
+        <div class="dash-empty-select" *ngIf="!selectedVehicle">
           <i class="material-icons">directions_car</i>
           <p>Избери ППС от списъка вдясно</p>
         </div>
@@ -47,49 +47,49 @@
         <ng-container *ngIf="selectedVehicle as v">
 
           <!-- Vehicle info card -->
-          <div class="dd-vehicle-card">
-            <div class="ddc-header">
-              <div class="ddc-title">
-                <span class="ddc-plate">{{ v.plateNumber }}</span>
-                <span class="ddc-model">{{ v.model }}</span>
+          <div class="dash-vehicle-card">
+            <div class="dvc-header">
+              <div class="dvc-title">
+                <span class="dvc-plate">{{ v.plateNumber }}</span>
+                <span class="dvc-model">{{ v.model }}</span>
               </div>
               <span class="vs-badge" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">
                 {{ getVehicleStatusLabel(v.vehicleStatus) }}
               </span>
             </div>
 
-            <div class="ddc-grid">
-              <div class="ddc-item">
+            <div class="dvc-grid">
+              <div class="dvc-item">
                 <label>Километраж</label>
                 <span>{{ v.odometerKm ?? '—' }} км</span>
               </div>
-              <div class="ddc-item">
+              <div class="dvc-item">
                 <label>Последен сервиз</label>
                 <span>
                   {{ v.lastServiceOdometerKm ?? '—' }} км
-                  <span class="ddc-date" *ngIf="v.lastServiceDate">/ {{ formatDate(v.lastServiceDate) }}</span>
+                  <span class="dvc-date" *ngIf="v.lastServiceDate">/ {{ formatDate(v.lastServiceDate) }}</span>
                 </span>
               </div>
-              <div class="ddc-item">
+              <div class="dvc-item">
                 <label>Следващ сервиз</label>
-                <span [class.ddc-urgent]="isExpired(v.nextServiceDueDate)">
+                <span [class.dvc-urgent]="isExpired(v.nextServiceDueDate)">
                   {{ v.nextServiceDueOdometerKm ?? '—' }} км
-                  <span class="ddc-date" *ngIf="v.nextServiceDueDate">/ {{ formatDate(v.nextServiceDueDate) }}</span>
+                  <span class="dvc-date" *ngIf="v.nextServiceDueDate">/ {{ formatDate(v.nextServiceDueDate) }}</span>
                 </span>
               </div>
-              <div class="ddc-item">
+              <div class="dvc-item">
                 <label>Ср. разход</label>
                 <span>{{ v.avgConsumptionLper100 ?? '—' }} л/100</span>
               </div>
             </div>
 
-            <div class="ddc-notes" *ngIf="v.notesForMechanic">
+            <div class="dvc-notes" *ngIf="v.notesForMechanic">
               <i class="material-icons">sticky_note_2</i>
               <span>{{ v.notesForMechanic }}</span>
             </div>
           </div>
 
-          <!-- Maintenance summary badges -->
+          <!-- Maintenance summary badges (read-only — no open count) -->
           <div class="maint-summary">
             <div class="ms-badge ms-total">
               <span class="ms-num">{{ maintenanceRecords.length }}</span>
@@ -191,37 +191,37 @@
       </div>
 
       <!-- ===== RIGHT: Vehicle list sidebar ===== -->
-      <div class="dd-sidebar">
-        <div class="dds-header">
+      <div class="dash-sidebar">
+        <div class="dsh-header">
           <i class="material-icons">directions_car</i>
           <span>Моите ППС</span>
         </div>
 
-        <div class="dds-empty" *ngIf="vehicles.length === 0">
+        <div class="dsh-empty" *ngIf="vehicles.length === 0">
           Няма назначени ППС
         </div>
 
         <div
-          class="dds-vehicle"
+          class="dsh-vehicle"
           *ngFor="let v of vehicles"
-          [class.dds-selected]="selectedVehicle?.id === v.id"
+          [class.dsh-selected]="selectedVehicle?.id === v.id"
           (click)="selectVehicle(v)">
 
-          <div class="dds-plate">{{ v.plateNumber }}</div>
-          <div class="dds-model">{{ v.model }}</div>
+          <div class="dsh-plate">{{ v.plateNumber }}</div>
+          <div class="dsh-model">{{ v.model }}</div>
 
-          <div class="dds-meta">
+          <div class="dsh-meta">
             <span class="vs-dot" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">●</span>
-            <span class="dds-status-text">{{ getVehicleStatusLabel(v.vehicleStatus) }}</span>
+            <span class="dsh-status-text">{{ getVehicleStatusLabel(v.vehicleStatus) }}</span>
           </div>
 
-          <div class="dds-odometer" *ngIf="v.odometerKm">
+          <div class="dsh-odometer" *ngIf="v.odometerKm">
             <i class="material-icons">speed</i> {{ v.odometerKm }} км
           </div>
 
-          <div class="dds-service-due" *ngIf="v.nextServiceDueDate">
-            <i class="material-icons" [class.dds-urgent]="isExpired(v.nextServiceDueDate)">build</i>
-            <span [class.dds-urgent]="isExpired(v.nextServiceDueDate)">
+          <div class="dsh-service-due" *ngIf="v.nextServiceDueDate">
+            <i class="material-icons" [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">build</i>
+            <span [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">
               {{ formatDate(v.nextServiceDueDate) }}
             </span>
           </div>

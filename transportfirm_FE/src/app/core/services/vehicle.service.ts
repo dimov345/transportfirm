@@ -66,6 +66,10 @@ export class VehicleService {
     return this.http.get<VehicleInfo[]>(this.apiUrl);
   }
 
+  getByGroup(groupId: string): Observable<VehicleInfo[]> {
+    return this.http.get<VehicleInfo[]>(`${this.apiUrl}/group/${groupId}`);
+  }
+
   getById(id: string): Observable<VehicleInfo> {
     return this.http.get<VehicleInfo>(`${this.apiUrl}/${id}`);
   }

@@ -2,12 +2,13 @@ import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angu
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { catchError, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 
 import { MechanicService } from '../../../core/services/mechanic.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { TruckGroup } from '../../../core/services/truck-group.service';
 import { EmployeeDocument } from '../../../core/models/employee/employee-document.model';
+import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
 @Component({
   selector: 'app-mechanic-details',
@@ -19,6 +20,7 @@ import { EmployeeDocument } from '../../../core/models/employee/employee-documen
 export class MechanicDetailsComponent implements OnInit {
   employee: Employee | null = null;
   groups: TruckGroup[] = [];
+  groupVehicles = new Map<string, VehicleInfo[]>();
   documents: EmployeeDocument[] = [];
 
   loading = true;
@@ -36,6 +38,7 @@ export class MechanicDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private mechanicService: MechanicService,
+    private vehicleService: VehicleService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -86,12 +89,28 @@ export class MechanicDetailsComponent implements OnInit {
       next: groups => {
         this.groups = groups;
         this.cdr.detectChanges();
+        this.loadVehiclesForGroups(groups);
       },
       error: () => {
         this.groups = [];
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private loadVehiclesForGroups(groups: TruckGroup[]) {
+    if (groups.length === 0) return;
+    const requests = groups.map(g =>
+      this.vehicleService.getByGroup(g.id).pipe(catchError(() => of([] as VehicleInfo[])))
+    );
+    forkJoin(requests).subscribe(results => {
+      results.forEach((vehicles, i) => this.groupVehicles.set(groups[i].id, vehicles));
+      this.cdr.detectChanges();
+    });
+  }
+
+  goToVehicle(vehicleId: string) {
+    this.router.navigate(['/vehicles', vehicleId]);
   }
 
   loadDocuments() {

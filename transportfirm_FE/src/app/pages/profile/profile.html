@@ -1,36 +1,105 @@
-<div class="profile-page">
-  <div class="profile-card">
+<div class="pf-page">
+  <div class="pf-wrap">
 
-    <!-- Avatar -->
-    <div class="profile-avatar">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="44" height="44">
-        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-      </svg>
-    </div>
-
-    <!-- Name + role badge -->
-    <h1 class="profile-email">{{ email }}</h1>
-    <span class="profile-role-badge">{{ roleLabel }}</span>
-
-    <!-- Info grid -->
-    <div class="profile-info-grid">
-      <div class="info-row">
-        <span class="info-label">Имейл</span>
-        <span class="info-value">{{ email }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Роля</span>
-        <span class="info-value">{{ roleLabel }}</span>
+    <!-- ===== HERO CARD ===== -->
+    <div class="pf-hero" [style.--role-color]="roleColor">
+      <div class="pf-avatar">{{ initials }}</div>
+      <div class="pf-hero-info">
+        <h1 class="pf-email">{{ email }}</h1>
+        <div class="pf-role-badge">
+          <i class="material-icons">{{ roleIcon }}</i>
+          {{ roleLabel }}
+        </div>
+        <p class="pf-role-desc">{{ roleDescription }}</p>
       </div>
     </div>
 
-    <!-- Logout -->
-    <button class="btn-logout" (click)="logout()">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
-        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-      </svg>
-      Изход
-    </button>
+    <!-- ===== INFO GRID ===== -->
+    <div class="pf-sections">
+
+      <!-- Account info -->
+      <div class="pf-section">
+        <div class="pf-section-header">
+          <i class="material-icons">account_circle</i>
+          <span>Акаунт</span>
+        </div>
+        <div class="pf-rows">
+          <div class="pf-row">
+            <span class="pf-row-label">Имейл</span>
+            <span class="pf-row-value">{{ email }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-row-label">Роля</span>
+            <span class="pf-row-value">{{ roleLabel }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-row-label">Права</span>
+            <span class="pf-row-value pf-row-desc">{{ roleDescription }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session info -->
+      <div class="pf-section">
+        <div class="pf-section-header">
+          <i class="material-icons">security</i>
+          <span>Сесия</span>
+        </div>
+        <div class="pf-rows">
+          <div class="pf-row">
+            <span class="pf-row-label">Влязъл на</span>
+            <span class="pf-row-value">{{ tokenIssuedAt }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-row-label">Изтича на</span>
+            <span class="pf-row-value">{{ tokenExpiresAt }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-row-label">Статус</span>
+            <span class="pf-token-status" [ngClass]="tokenStatusClass">
+              <ng-container *ngIf="tokenDaysLeft === null || tokenDaysLeft > 1">
+                <i class="material-icons">check_circle</i>
+                Активна
+              </ng-container>
+              <ng-container *ngIf="tokenDaysLeft !== null && tokenDaysLeft === 1">
+                <i class="material-icons">warning</i>
+                Изтича скоро
+              </ng-container>
+              <ng-container *ngIf="tokenDaysLeft !== null && tokenDaysLeft <= 0">
+                <i class="material-icons">cancel</i>
+                Изтекла
+              </ng-container>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== QUICK LINKS ===== -->
+    <div class="pf-links-section" *ngIf="links.length > 0">
+      <div class="pf-section-header">
+        <i class="material-icons">apps</i>
+        <span>Бърз достъп</span>
+      </div>
+      <div class="pf-links">
+        <a
+          class="pf-link-card"
+          *ngFor="let l of links"
+          [routerLink]="l.route">
+          <i class="material-icons">{{ l.icon }}</i>
+          <span>{{ l.label }}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="pf-footer">
+      <button class="btn-logout" (click)="logout()">
+        <i class="material-icons">logout</i>
+        Изход от системата
+      </button>
+    </div>
 
   </div>
 </div>

@@ -1,1 +1,51 @@
-<p>home works!</p>
+<div class="home-page">
+
+  <!-- ===== WELCOME BANNER ===== -->
+  <div class="home-banner">
+    <div class="home-banner-left">
+      <div class="home-banner-avatar">{{ initials }}</div>
+      <div>
+        <h1 class="home-greeting">{{ greeting }},</h1>
+        <p class="home-email">{{ email }}</p>
+      </div>
+    </div>
+    <div class="home-banner-right">
+      <span class="home-role-chip">
+        <i class="material-icons">verified_user</i>
+        {{ roleLabel }}
+      </span>
+      <span class="home-date">{{ todayLabel }}</span>
+    </div>
+  </div>
+
+  <!-- ===== QUICK ACCESS ===== -->
+  <section class="home-section" *ngIf="cards.length > 0">
+    <h2 class="home-section-title">
+      <i class="material-icons">apps</i>
+      Бърз достъп
+    </h2>
+    <div class="home-cards">
+      <a
+        class="home-card"
+        *ngFor="let c of cards"
+        [routerLink]="c.route"
+        [style.--accent]="c.accent">
+        <div class="hc-icon-wrap">
+          <i class="material-icons">{{ c.icon }}</i>
+        </div>
+        <div class="hc-body">
+          <span class="hc-label">{{ c.label }}</span>
+          <span class="hc-subtitle">{{ c.subtitle }}</span>
+        </div>
+        <i class="material-icons hc-arrow">chevron_right</i>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER INFO ===== -->
+  <div class="home-footer">
+    <i class="material-icons">info_outline</i>
+    <span>TransportFirm — система за управление на транспорт</span>
+  </div>
+
+</div>

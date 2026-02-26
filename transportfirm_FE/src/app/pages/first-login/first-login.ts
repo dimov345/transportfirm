@@ -13,29 +13,22 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrl: './first-login.scss',
 })
 export class FirstLogin {
-  private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
+  private fb    = inject(FormBuilder);
+  private http  = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private auth = inject(AuthService);
+  private auth  = inject(AuthService);
 
   private readonly baseUrl = 'http://localhost:8080/api';
 
-  loading = false;
+  loading  = false;
   errorMsg = '';
-  infoMsg = history?.state?.message || '';
-
-  // Resend OTP state
-  resendLoading = false;
-  resendInfo = '';
-  resendError = '';
-  resendCooldown = 0;
-  private resendTimer?: any;
+  infoMsg  = history?.state?.message || '';
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    otp: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
-    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+    email:           ['', [Validators.required, Validators.email]],
+    otp:             ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
+    newPassword:     ['', [Validators.required, Validators.minLength(6)]],
     confirmPassword: ['', [Validators.required]]
   });
 
@@ -44,23 +37,17 @@ export class FirstLogin {
     if (email) this.form.patchValue({ email });
   }
 
-  ngOnDestroy() {
-    if (this.resendTimer) clearInterval(this.resendTimer);
-  }
-
   submit() {
     this.errorMsg = '';
-    this.resendInfo = '';
-    this.resendError = '';
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const email = this.form.value.email!.trim();
-    const otp = this.form.value.otp!;
-    const newPassword = this.form.value.newPassword!;
+    const email           = this.form.value.email!.trim();
+    const otp             = this.form.value.otp!;
+    const newPassword     = this.form.value.newPassword!;
     const confirmPassword = this.form.value.confirmPassword!;
 
     if (newPassword !== confirmPassword) {
@@ -70,78 +57,31 @@ export class FirstLogin {
 
     this.loading = true;
 
-    // 1) first-login: сменяме паролата
-    this.http.post<void>(`${this.baseUrl}/auth/first-login`, {
-      email,
-      otp,
-      newPassword
-    }).subscribe({
-      next: () => {
-        // 2) след успех: логваме с новата парола
-        this.auth.login({ email, password: newPassword }).subscribe({
-          next: () => this.router.navigateByUrl('/'),
-          error: (err: HttpErrorResponse) => {
-            this.errorMsg =
-              err?.error?.message ||
-              'Паролата е сменена, но login не успя. Опитай от /login.';
-            this.router.navigate(['/login'], { queryParams: { email } });
-          },
-          complete: () => (this.loading = false)
-        });
-      },
-      error: (err: HttpErrorResponse) => {
-        this.errorMsg =
-          err?.error?.message ||
-          'Неуспешна смяна на парола (OTP грешен/изтекъл).';
-        this.loading = false;
-      }
-    });
+    this.http.post<void>(`${this.baseUrl}/auth/first-login`, { email, otp, newPassword })
+      .subscribe({
+        next: () => {
+          this.auth.login({ email, password: newPassword }).subscribe({
+            next: () => this.router.navigateByUrl('/'),
+            error: (err: HttpErrorResponse) => {
+              this.errorMsg =
+                err?.error?.message ||
+                'Паролата е сменена, но входът не успя. Опитай от /login.';
+              this.router.navigate(['/login'], { queryParams: { email } });
+            },
+            complete: () => (this.loading = false)
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMsg =
+            err?.error?.message ||
+            'Неуспешна смяна на парола — OTP е грешен.';
+          this.loading = false;
+        }
+      });
   }
 
-  resendOtp() {
-    this.resendError = '';
-    this.resendInfo = '';
-
-    const email = this.form.value.email?.trim();
-    if (!email) {
-      this.resendError = 'Моля, въведи email, за да изпратим нов OTP.';
-      return;
-    }
-
-    if (this.resendCooldown > 0 || this.resendLoading) return;
-
-    this.resendLoading = true;
-
-    // /send-reset-otp?email=...
-    this.http.post<void>(`${this.baseUrl}/send-reset-otp`, null, {
-      params: { email }
-    }).subscribe({
-      next: () => {
-        this.resendInfo = 'Изпратихме нов OTP код.';
-        this.startCooldown(60);
-        this.resendLoading = false;
-      },
-      error: (err: HttpErrorResponse) => {
-        this.resendError =
-          err?.error?.message || 'Неуспешно изпращане на OTP. Опитай пак.';
-        this.resendLoading = false;
-      }
-    });
-  }
-
-  private startCooldown(seconds: number) {
-    this.resendCooldown = seconds;
-
-    if (this.resendTimer) clearInterval(this.resendTimer);
-
-    this.resendTimer = setInterval(() => {
-      this.resendCooldown -= 1;
-
-      if (this.resendCooldown <= 0) {
-        this.resendCooldown = 0;
-        clearInterval(this.resendTimer);
-        this.resendTimer = undefined;
-      }
-    }, 1000);
+  get passwordMismatch(): boolean {
+    const { newPassword, confirmPassword } = this.form.value;
+    return !!(newPassword && confirmPassword && newPassword !== confirmPassword);
   }
 }

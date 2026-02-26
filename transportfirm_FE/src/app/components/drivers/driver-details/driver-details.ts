@@ -10,6 +10,7 @@ import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 import { DriverVehicleAssignment } from '../../assignment/driver-vehicle-assignment/driver-vehicle-assignment';
 import { VehicleInfo, VehicleService } from '../../../core/services/vehicle.service';
 import { AssignmentService } from '../../../core/services/assignment.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-driver-details',
@@ -37,6 +38,11 @@ export class DriverDetails implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private auth = inject(AuthService);
+
+  get isAdminOrManager(): boolean {
+    return this.auth.hasRole('ADMIN', 'MANAGER');
+  }
 
   constructor(
     private route: ActivatedRoute,

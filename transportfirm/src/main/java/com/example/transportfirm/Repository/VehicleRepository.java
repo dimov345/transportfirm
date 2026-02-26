@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface VehicleRepository extends JpaRepository<VehicleRecord, UUID> {
     List<VehicleRecord> findByDriverIsNull();
+    List<VehicleRecord> findByMechanicGroup_IdOrDispatcherGroup_Id(UUID mechanicGroupId, UUID dispatcherGroupId);
 }

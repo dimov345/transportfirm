@@ -49,6 +49,10 @@ public class VehicleService {
         return vehicleRepository.findAll();
     }
 
+    public List<VehicleRecord> getByGroupId(UUID groupId) {
+        return vehicleRepository.findByMechanicGroup_IdOrDispatcherGroup_Id(groupId, groupId);
+    }
+
     public VehicleRecord getByPlate(UUID id) {
         return vehicleRepository.findById(id)
                 .orElseThrow(() ->

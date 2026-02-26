@@ -1,115 +1,278 @@
-.profile-page {
+// =============================================
+// Profile Page
+// =============================================
+$surface: #ffffff;
+$bg:      #f5f7fb;
+$border:  #e5e7eb;
+$text:    #111827;
+$muted:   #6b7280;
+$radius:  14px;
+$shadow:  0 2px 12px rgba(17, 24, 39, 0.07);
+
+.pf-page {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: $bg;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 56px 24px;
+  padding: 48px 24px 64px;
   box-sizing: border-box;
 }
 
-.profile-card {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.08);
-  padding: 44px 40px;
+.pf-wrap {
   width: 100%;
-  max-width: 440px;
+  max-width: 680px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 16px;
 }
 
-// ---- Avatar ----
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  background: #ebf4ff;
+// =============================================
+// Hero card
+// =============================================
+.pf-hero {
+  background: $surface;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  border: 1px solid $border;
+  padding: 28px 28px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--role-color, #3182ce);
+    border-radius: 4px 0 0 4px;
+  }
+}
+
+.pf-avatar {
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
+  background: var(--role-color, #3182ce);
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3182ce;
-  margin-bottom: 18px;
+  letter-spacing: 1px;
 }
 
-// ---- Name / Email ----
-.profile-email {
-  margin: 0 0 10px;
-  font-size: 17px;
+.pf-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pf-email {
+  margin: 0 0 8px;
+  font-size: 18px;
   font-weight: 700;
-  color: #111827;
-  text-align: center;
+  color: $text;
   word-break: break-all;
 }
 
-// ---- Role badge ----
-.profile-role-badge {
-  display: inline-block;
-  padding: 4px 16px;
-  background: #ebf4ff;
-  color: #2b6cb0;
+.pf-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 14px;
+  background: color-mix(in srgb, var(--role-color, #3182ce) 12%, transparent);
+  color: var(--role-color, #3182ce);
+  border: 1px solid color-mix(in srgb, var(--role-color, #3182ce) 22%, transparent);
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 32px;
-}
-
-// ---- Info grid ----
-.profile-info-grid {
-  width: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 32px;
-}
-
-.info-row {
-  display: flex;
-  padding: 13px 16px;
-  gap: 16px;
-  background: #fff;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid #e5e7eb;
-  }
-}
-
-.info-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #6b7280;
-  text-transform: uppercase;
   letter-spacing: 0.4px;
-  min-width: 72px;
-  padding-top: 1px;
+  margin-bottom: 8px;
+
+  .material-icons { font-size: 14px; }
 }
 
-.info-value {
-  font-size: 14px;
-  color: #111827;
-  word-break: break-all;
+.pf-role-desc {
+  margin: 0;
+  font-size: 13px;
+  color: $muted;
 }
 
-// ---- Logout button ----
-.btn-logout {
+// =============================================
+// Info sections grid
+// =============================================
+.pf-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pf-section {
+  background: $surface;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+.pf-section-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 24px;
-  background: #fff5f5;
-  color: #c53030;
-  border: 1px solid #fed7d7;
-  border-radius: 8px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid $border;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+
+  .material-icons { font-size: 17px; color: #9ca3af; }
+}
+
+.pf-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 16px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { border-bottom: none; }
+}
+
+.pf-row-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.pf-row-value {
+  font-size: 14px;
+  color: $text;
+  font-weight: 500;
+  word-break: break-all;
+
+  &.pf-row-desc {
+    font-size: 13px;
+    font-weight: 400;
+    color: $muted;
+  }
+}
+
+// =============================================
+// Token status
+// =============================================
+.pf-token-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 2px;
+
+  .material-icons { font-size: 15px; }
+
+  &.token-ok      { color: #059669; }
+  &.token-warn    { color: #d97706; }
+  &.token-expired { color: #dc2626; }
+}
+
+// =============================================
+// Quick links
+// =============================================
+.pf-links-section {
+  background: $surface;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+.pf-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+}
+
+.pf-link-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #f9fafb;
+  border: 1px solid $border;
+  border-radius: 10px;
+  text-decoration: none;
+  color: $text;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  .material-icons { font-size: 18px; color: #9ca3af; transition: color 0.15s; }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+    .material-icons { color: #3b82f6; }
+  }
+}
+
+// =============================================
+// Footer
+// =============================================
+.pf-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 0;
+}
+
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: $surface;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 
+  .material-icons { font-size: 18px; }
+
   &:hover {
-    background: #fed7d7;
-    border-color: #fc8181;
+    background: #fef2f2;
+    border-color: #f87171;
   }
+}
+
+// =============================================
+// Responsive
+// =============================================
+@media (max-width: 600px) {
+  .pf-sections { grid-template-columns: 1fr; }
+
+  .pf-hero {
+    flex-direction: column;
+    text-align: center;
+    &::before { display: none; }
+  }
+
+  .pf-footer { justify-content: center; }
 }

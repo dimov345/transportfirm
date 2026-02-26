@@ -100,12 +100,27 @@
 
           <div class="groups-list" *ngIf="groups.length > 0">
             <div class="group-item" *ngFor="let g of groups">
-              <div class="group-icon">
-                <i class="material-icons">local_shipping</i>
+              <div class="group-main">
+                <div class="group-icon">
+                  <i class="material-icons">local_shipping</i>
+                </div>
+                <div class="group-info">
+                  <span class="group-name">{{ g.groupName }}</span>
+                  <span class="group-type">{{ g.groupType }}</span>
+                </div>
               </div>
-              <div class="group-info">
-                <span class="group-name">{{ g.groupName }}</span>
-                <span class="group-type">{{ g.groupType }}</span>
+              <div class="group-vehicles">
+                <span class="vehicle-chip"
+                      *ngFor="let v of groupVehicles.get(g.id)"
+                      (click)="goToVehicle(v.id)"
+                      title="{{ v.model }}">
+                  <i class="material-icons">local_shipping</i>
+                  {{ v.plateNumber }}
+                </span>
+                <span class="no-vehicles-text"
+                      *ngIf="groupVehicles.has(g.id) && groupVehicles.get(g.id)!.length === 0">
+                  Няма назначени ППС
+                </span>
               </div>
             </div>
           </div>

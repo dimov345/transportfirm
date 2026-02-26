@@ -39,6 +39,11 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getByPlate(id));
     }
 
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<VehicleRecord>> getVehiclesByGroup(@PathVariable UUID groupId) {
+        return ResponseEntity.ok(vehicleService.getByGroupId(groupId));
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public VehicleRecord createVehicle(@RequestBody VehicleRecord vehicle) {

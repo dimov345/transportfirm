@@ -188,7 +188,7 @@ export class MechanicDashboardComponent implements OnInit {
 
   formatMoney(val?: number): string {
     if (val == null) return '—';
-    return val.toFixed(2) + ' лв.';
+    return '€' + (val / 1.95583).toFixed(2);
   }
 
   isExpired(dateStr?: string): boolean {

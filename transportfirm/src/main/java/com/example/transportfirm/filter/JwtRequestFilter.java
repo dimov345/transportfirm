@@ -8,6 +8,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +23,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
 
     private final AppUserDetailsService appUserDetailsService;
     private final JwtUtil jwtUtil;
@@ -81,7 +85,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.warn("JWT authentication failed for request [{}]: {}", request.getServletPath(), ex.getMessage());
         }
 
         // 8️⃣ Продължаваме по веригата

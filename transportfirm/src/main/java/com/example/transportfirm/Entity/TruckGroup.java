@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "dispatcher", "mechanic"})
 @Table(name = "truck_groups")
 public class TruckGroup {
 

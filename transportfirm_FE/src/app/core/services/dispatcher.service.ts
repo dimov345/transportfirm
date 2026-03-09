@@ -5,11 +5,13 @@ import { Observable } from 'rxjs';
 import { Employee } from '../models/employee/employee.model';
 import { DispatcherInfo } from '../models/dispatcher/dispatcher-info.model';
 import { TruckGroup } from './truck-group.service';
+
 import { EmployeeDocument } from '../models/employee/employee-document.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DispatcherService {
-  private apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

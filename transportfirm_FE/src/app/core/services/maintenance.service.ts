@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type MaintenanceType = 'REPAIR' | 'SERVICE' | 'INSPECTION' | 'TIRE_CHANGE' | 'BREAKDOWN' | 'ACCIDENT' | 'OTHER';
 export type MaintenanceStatus = 'OPEN' | 'CLOSED' | 'CANCELED';
@@ -43,7 +44,7 @@ export interface PageResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class MaintenanceService {
-  private apiUrl = 'http://localhost:8080/api/maintenance';
+  private readonly apiUrl = environment.apiUrl + '/maintenance';
 
   constructor(private http: HttpClient) {}
 

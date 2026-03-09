@@ -51,6 +51,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
         icon: 'lorry',
         route: '/vehicles',
         roles: ['ADMIN', 'DISPATCHER', 'MECHANIC']
+      },
+      {
+        label: 'Курсове',
+        icon: 'truck',
+        route: '/freight-trips',
+        roles: ['ADMIN', 'MANAGER', 'DISPATCHER']
       }
     ]
   },
@@ -58,7 +64,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     label: 'Счетоводство',
     icon: 'chart',
     route: '/reports',
-    roles: ['ADMIN', 'ACCOUNTANT']
+    roles: ['ADMIN', 'MANAGER', 'ACCOUNTANT']
   },
   {
     label: 'Профил',

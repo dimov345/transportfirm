@@ -72,6 +72,62 @@ public class EmailService {
     }
 
     /**
+     * Reminder за изтекли/изтичащи документи на шофьор — изпраща се на самия шофьор
+     */
+    public void sendDriverDocumentReminderEmail(String toEmail, String driverName, java.util.List<String[]> items) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("TransTrack – Напомняне за документи на шофьор");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Здравей, ").append(driverName).append(",\n\n");
+        sb.append("Следните твои документи изтичат или са вече изтекли:\n\n");
+        for (String[] item : items) {
+            // item: {docType, status, days, expiryDate}
+            String status = "expired".equals(item[1])
+                    ? "ИЗТЕКЪЛ преди " + item[2] + " дни (изтекъл на " + item[3] + ")"
+                    : (Long.parseLong(item[2]) == 0
+                        ? "изтича ДНЕС (" + item[3] + ")"
+                        : "изтича след " + item[2] + " дни (" + item[3] + ")");
+            sb.append("  • ").append(item[0]).append(": ").append(status).append("\n");
+        }
+        sb.append("\nМоля, подновете документите навреме.\n\n");
+        sb.append("Поздрави,\nЕкипът на TransTrack");
+
+        message.setText(sb.toString());
+        mailSender.send(message);
+    }
+
+    /**
+     * Reminder за изтекли/изтичащи документи на ППС — изпраща се на спедитора (и/или admin)
+     */
+    public void sendVehicleDocumentReminderEmail(String toEmail, String vehiclePlate, java.util.List<String[]> items) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("TransTrack – Напомняне за документи на ППС " + vehiclePlate);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Здравейте,\n\n");
+        sb.append("Следните документи за ППС ").append(vehiclePlate).append(" изтичат или са вече изтекли:\n\n");
+        for (String[] item : items) {
+            // item: {docType, status, days, expiryDate}
+            String status = "expired".equals(item[1])
+                    ? "ИЗТЕКЪЛ преди " + item[2] + " дни (изтекъл на " + item[3] + ")"
+                    : (Long.parseLong(item[2]) == 0
+                        ? "изтича ДНЕС (" + item[3] + ")"
+                        : "изтича след " + item[2] + " дни (" + item[3] + ")");
+            sb.append("  • ").append(item[0]).append(": ").append(status).append("\n");
+        }
+        sb.append("\nМоля, предприемете необходимите действия.\n\n");
+        sb.append("Поздрави,\nЕкипът на TransTrack");
+
+        message.setText(sb.toString());
+        mailSender.send(message);
+    }
+
+    /**
      * Имейл за първоначална верификация на акаунт
      */
     public void sendOtpEmail(String toEmail, String otp) {

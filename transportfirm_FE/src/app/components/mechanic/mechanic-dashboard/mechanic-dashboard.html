@@ -96,8 +96,8 @@
               <span class="ms-label">Всичко записи</span>
             </div>
             <div class="ms-badge ms-cost">
-              <span class="ms-num">{{ totalCost().toFixed(2) }}</span>
-              <span class="ms-label">Общо разходи (лв.)</span>
+              <span class="ms-num">{{ formatMoney(totalCost()) }}</span>
+              <span class="ms-label">Общо разходи</span>
             </div>
 
             <button class="btn-new-maint" (click)="newMaintenance()">

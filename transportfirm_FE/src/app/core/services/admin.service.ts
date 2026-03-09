@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 import { Employee } from '../models/employee/employee.model';
+import { environment } from '../../../environments/environment';
 
 export interface CreateEmployeeRequest {
   // лични
@@ -64,7 +66,7 @@ export enum ContractType {
 export class AdminService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   createEmployee(payload: CreateEmployeeRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/auth/admin/create-employee`, payload);

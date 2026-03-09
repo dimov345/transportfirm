@@ -2,6 +2,7 @@ import {
   Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 import { TruckGroupService, TruckGroup } from '../../../core/services/truck-group.service';
@@ -24,6 +25,7 @@ export class DispatcherDashboardComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   loading = true;
   error = '';
@@ -145,7 +147,7 @@ export class DispatcherDashboardComponent implements OnInit {
 
   formatMoney(val?: number): string {
     if (val == null) return '—';
-    return val.toFixed(2) + ' лв.';
+    return '€' + (val / 1.95583).toFixed(2);
   }
 
   isExpired(dateStr?: string): boolean {
@@ -179,5 +181,13 @@ export class DispatcherDashboardComponent implements OnInit {
 
   totalCost(): number {
     return this.maintenanceRecords.reduce((sum, r) => sum + (r.totalGross ?? 0), 0);
+  }
+
+  goToFreightTrips(): void {
+    this.router.navigate(['/freight-trips']);
+  }
+
+  addTripForVehicle(vehicleId: string): void {
+    this.router.navigate(['/freight-trips/new'], { queryParams: { vehicleId } });
   }
 }

@@ -4,11 +4,13 @@ import { Observable } from 'rxjs';
 
 import { Employee } from '../models/employee/employee.model';
 import { DriverInfo } from '../models/driver/driver-info.model';
+
 import { DriverDocument } from '../models/driver/driver-document.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DriverService {
-  private apiUrl = 'http://localhost:8080/api/drivers';
+  private readonly apiUrl = environment.apiUrl + '/drivers';
 
   constructor(private http: HttpClient) {}
 

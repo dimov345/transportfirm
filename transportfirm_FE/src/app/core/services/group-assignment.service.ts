@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 import { GroupType } from './truck-group.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GroupAssignmentService {
-  private apiUrl = 'http://localhost:8080/api/assignments';
+  private readonly apiUrl = environment.apiUrl + '/assignments';
 
   constructor(private http: HttpClient) {}
 

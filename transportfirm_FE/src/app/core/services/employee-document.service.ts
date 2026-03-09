@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EmployeeDocument } from '../models/employee/employee-document.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeDocumentService {
-  // ако при теб е без /api -> смени URL-то
-  private apiUrl = 'http://localhost:8080/api/employee-documents';
+  private readonly apiUrl = environment.apiUrl + '/employee-documents';
 
   constructor(private http: HttpClient) {}
 

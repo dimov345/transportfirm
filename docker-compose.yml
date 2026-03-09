@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-Transport}
+      POSTGRES_USER: ${DB_USERNAME:-transportOwner}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-transportOwner} -d ${DB_NAME:-Transport}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./transportfirm
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-Transport}
+      DB_USERNAME: ${DB_USERNAME:-transportOwner}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    expose:
+      - "8080"
+
+  frontend:
+    build:
+      context: ./transportfirm_FE
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    expose:
+      - "4000"
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  postgres_data:

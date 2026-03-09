@@ -108,6 +108,7 @@ export class VehicleFormComponent implements OnInit {
       leasingEndDate: [null],
       leasingCompany: [''],
       leasingContractNumber: [''],
+      leasingMonthlyPaymentEur: [null],
 
       kaskoOt: [null],
       kaskoDo: [null],

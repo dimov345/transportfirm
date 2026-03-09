@@ -1,0 +1,69 @@
+@use 'details' as *;
+
+.value-eur {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.value-expense {
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.finance-separator {
+  border-top: 2px solid #e5e7eb !important;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.net-profit-row {
+  border-top: 2px solid #e5e7eb;
+  padding-top: 6px;
+
+  label {
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .value-net {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  &.profit-positive .value-net {
+    color: #16a34a;
+  }
+
+  &.profit-negative .value-net {
+    color: #dc2626;
+  }
+}
+
+.notes-item span {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(220, 38, 38, 0.16);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

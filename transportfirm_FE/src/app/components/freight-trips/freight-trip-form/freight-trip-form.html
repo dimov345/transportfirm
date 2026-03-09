@@ -1,0 +1,222 @@
+<div class="tf-form">
+
+  <!-- Header -->
+  <div class="tf-header">
+    <div class="tf-header-main">
+      <div class="tf-icon">
+        <svg class="tf-svg" viewBox="0 0 24 24" fill="none">
+          <path d="M4 7h12l2 5v7H4V7Z" fill="currentColor" opacity=".2"/>
+          <path d="M4 7h12l2 5v7H4V7Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <circle cx="6.5" cy="17.5" r="2" fill="currentColor"/>
+          <circle cx="15.5" cy="17.5" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <h1>{{ isEdit ? 'Редактирай курс' : 'Нов курс' }}</h1>
+        <p class="tf-subtitle">
+          {{ isEdit ? 'Промяна на данните за съществуващ курс' : 'Въведете данните за новия курс' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="tf-body">
+
+    <div *ngIf="loading" class="tf-loading">Зареждане...</div>
+
+    <form *ngIf="!loading && form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- 01 Маршрут -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">01</div>
+          <h2>Маршрут</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">От (начална точка) <span class="tf-required">*</span></label>
+            <input type="text" formControlName="originCity" class="tf-input" [class.tf-error]="hasError('originCity')" placeholder="напр. София">
+            <span class="tf-error-msg" *ngIf="hasError('originCity')">Задължително поле</span>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">До (крайна точка) <span class="tf-required">*</span></label>
+            <input type="text" formControlName="destinationCity" class="tf-input" [class.tf-error]="hasError('destinationCity')" placeholder="напр. Берлин">
+            <span class="tf-error-msg" *ngIf="hasError('destinationCity')">Задължително поле</span>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Дата тръгване <span class="tf-required">*</span></label>
+            <input type="date" formControlName="departureDate" class="tf-input" [class.tf-error]="hasError('departureDate')">
+            <span class="tf-error-msg" *ngIf="hasError('departureDate')">Задължително поле</span>
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Дата пристигане</label>
+            <input type="date" formControlName="arrivalDate" class="tf-input">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Разстояние (км)</label>
+            <input type="number" formControlName="distanceKm" class="tf-input" min="0" placeholder="0">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Клиент</label>
+            <input type="text" formControlName="clientName" class="tf-input" placeholder="Наименование на клиента">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Статус <span class="tf-required">*</span></label>
+            <select formControlName="status" class="tf-input">
+              <option value="PLANNED">Планиран</option>
+              <option value="IN_TRANSIT" [disabled]="vehicleInTransit">В движение</option>
+              <option value="COMPLETED">Завършен</option>
+            </select>
+            <span class="tf-in-transit-note" *ngIf="vehicleInTransit">
+              ⚠️ Това ППС е вече в активен курс — може само <strong>Планиран</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 Камион -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">02</div>
+          <h2>Камион</h2>
+        </div>
+
+        <div class="tf-grid">
+          <!-- Locked vehicle (from dispatcher dashboard) -->
+          <div class="tf-group tf-group-wide" *ngIf="lockedVehicleId">
+            <label class="tf-label">ППС</label>
+            <div class="tf-locked-vehicle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="opacity:.6">
+                <path d="M4 7h12l2 5v7H4V7Z"/>
+                <circle cx="6.5" cy="17.5" r="2"/>
+                <circle cx="15.5" cy="17.5" r="2"/>
+              </svg>
+              <span class="tf-locked-plate">{{ lockedVehicle?.plateNumber ?? lockedVehicleId }}</span>
+              <span class="tf-locked-model" *ngIf="lockedVehicle?.model">— {{ lockedVehicle!.model }}</span>
+            </div>
+          </div>
+
+          <!-- Normal vehicle select (edit or no locked vehicle) -->
+          <div class="tf-group tf-group-wide" *ngIf="!lockedVehicleId">
+            <label class="tf-label">Изберете ППС <span class="tf-required">*</span></label>
+            <select formControlName="vehicleId" class="tf-input" [class.tf-error]="hasError('vehicleId')">
+              <option value="">— Изберете камион —</option>
+              <option *ngFor="let v of vehicles" [value]="v.id">
+                {{ v.plateNumber }} — {{ v.model }}
+              </option>
+            </select>
+            <span class="tf-error-msg" *ngIf="hasError('vehicleId')">Изберете ППС</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 Финанси -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">03</div>
+          <h2>Финанси (всичко в EUR)</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Приходи (€)</label>
+            <input type="number" formControlName="revenueEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">ДДС (€)</label>
+            <input type="number" formControlName="vatEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Пътни такси (€)</label>
+            <input type="number" formControlName="tollFeesEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Гориво (литри)</label>
+            <input type="number" formControlName="fuelLiters" class="tf-input" min="0" step="0.1" placeholder="0.0">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Разход гориво (€)</label>
+            <input type="number" formControlName="fuelCostEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Такси граница (€)</label>
+            <input type="number" formControlName="borderFeesEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Паркинг / нощувки (€)</label>
+            <input type="number" formControlName="parkingAccommodationEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Други разходи (€)</label>
+            <input type="number" formControlName="otherExpensesEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 Товар -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">04</div>
+          <h2>Товар</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group tf-group-wide">
+            <label class="tf-label">Описание на товара</label>
+            <input type="text" formControlName="cargoDescription" class="tf-input" placeholder="напр. Хранителни стоки, строителни материали...">
+          </div>
+
+          <div class="tf-group">
+            <label class="tf-label">Тегло (тона)</label>
+            <input type="number" formControlName="cargoWeightTons" class="tf-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+      </div>
+
+      <!-- 05 Бележки -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">05</div>
+          <h2>Бележки</h2>
+        </div>
+
+        <div class="tf-grid">
+          <div class="tf-group tf-group-full">
+            <label class="tf-label">Бележки</label>
+            <textarea formControlName="notes" class="tf-input tf-textarea" rows="4" placeholder="Допълнителна информация за курса..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="tf-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          Отказ
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="loading || saving || form.invalid"
+        >
+          {{ saving ? 'Запазване...' : (isEdit ? 'Запази промените' : 'Добави курс') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

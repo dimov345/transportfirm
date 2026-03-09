@@ -1,0 +1,122 @@
+<div class="list-container">
+
+  <!-- HEADER -->
+  <div class="list-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Курсове на камиони</h1>
+        <p class="subtitle">Общо {{ totalElements }} курса</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="search-bar-container filters-bar">
+    <input
+      type="text"
+      placeholder="Търси по маршрут, клиент или камион..."
+      class="search-input"
+      [(ngModel)]="filters.search"
+      (input)="applyFilters()"
+    />
+
+    <select [(ngModel)]="filters.status" (change)="applyFilters()">
+      <option value="">Всички статуси</option>
+      <option value="PLANNED">Планиран</option>
+      <option value="IN_TRANSIT">В движение</option>
+      <option value="COMPLETED">Завършен</option>
+    </select>
+
+    <select [(ngModel)]="filters.vehicleId" (change)="applyFilters()">
+      <option value="">Всички камиони</option>
+      <option *ngFor="let v of vehicles" [value]="v.id">{{ v.plateNumber }} — {{ v.model }}</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-container">
+    <div *ngIf="loading" class="loading-state">Зареждане...</div>
+
+    <div *ngIf="!loading && error" class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <h3>{{ error }}</h3>
+    </div>
+
+    <table *ngIf="!loading && !error && trips.length > 0">
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Маршрут</th>
+          <th>Камион</th>
+          <th>Група</th>
+          <th>Клиент</th>
+          <th>КМ</th>
+          <th>Приходи</th>
+          <th>Нетна печалба</th>
+          <th>Статус</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let t of trips; trackBy: trackById"
+          class="driver-row"
+          (click)="openTrip(t.id)"
+          style="cursor: pointer;"
+        >
+          <td>{{ formatDate(t.departureDate) }}</td>
+          <td>
+            <span class="route-text">{{ t.originCity }} → {{ t.destinationCity }}</span>
+          </td>
+          <td>{{ t.vehicle?.plateNumber ?? '—' }}</td>
+          <td>{{ t.vehicle?.dispatcherGroup?.groupName || '—' }}</td>
+          <td>{{ t.clientName || '—' }}</td>
+          <td>{{ t.distanceKm != null ? (t.distanceKm + ' км') : '—' }}</td>
+          <td>{{ formatEur(t.revenueEur) }}</td>
+          <td [class.profit-positive]="netProfit(t) > 0" [class.profit-negative]="netProfit(t) < 0">
+            {{ formatEur(netProfit(t)) }}
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="statusClasses[t.status]">
+              {{ statusLabels[t.status] }}
+            </span>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <div class="actions-group">
+              <button
+                type="button"
+                class="btn-action btn-edit"
+                (click)="openTrip(t.id)"
+                title="Детайли"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 10c-1.93 0-3.5-1.57-3.5-3.5S10.07 8 12 8s3.5 1.57 3.5 3.5S13.93 15 12 15z"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="btn-secondary" [disabled]="page === 0" (click)="goToPage(page - 1)">‹</button>
+      <button
+        *ngFor="let p of pages"
+        class="btn-page"
+        [class.active]="p === page"
+        (click)="goToPage(p)"
+      >{{ p + 1 }}</button>
+      <button class="btn-secondary" [disabled]="page >= totalPages - 1" (click)="goToPage(page + 1)">›</button>
+    </div>
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="!loading && !error && trips.length === 0">
+      <div class="empty-icon">🚛</div>
+      <h3>Няма намерени курсове</h3>
+      <p>Курсовете се добавят от таблото на спедитора.</p>
+    </div>
+  </div>
+
+</div>

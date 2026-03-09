@@ -211,6 +211,10 @@ export class DispatcherDetailsComponent implements OnInit {
     this.router.navigate(['/dispatchers']);
   }
 
+  goToEdit() {
+    this.router.navigate(['/employees/edit', this.employeeId]);
+  }
+
   getStatusLabel(status: string | null): string {
     const map: Record<string, string> = {
       ACTIVE: 'Активен',

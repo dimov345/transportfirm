@@ -1,0 +1,548 @@
+<div class="acc-container">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <div class="acc-header">
+    <div class="acc-header-icon">
+      <i class="material-icons">account_balance</i>
+    </div>
+    <div>
+      <h1 class="acc-title">Счетоводство</h1>
+      <p class="acc-subtitle">Детайлен финансов преглед и отчети по период</p>
+    </div>
+  </div>
+
+  <!-- ── Period selector ────────────────────────────────── -->
+  <div class="acc-period-card">
+    <div class="acc-tabs">
+      <button class="acc-tab" [class.acc-tab--active]="activePeriod === 'WEEKLY'"
+              type="button" (click)="setPeriod('WEEKLY')">
+        <i class="material-icons">date_range</i> Седмица
+      </button>
+      <button class="acc-tab" [class.acc-tab--active]="activePeriod === 'MONTHLY'"
+              type="button" (click)="setPeriod('MONTHLY')">
+        <i class="material-icons">calendar_month</i> Месец
+      </button>
+      <button class="acc-tab" [class.acc-tab--active]="activePeriod === 'YEARLY'"
+              type="button" (click)="setPeriod('YEARLY')">
+        <i class="material-icons">calendar_today</i> Година
+      </button>
+    </div>
+
+    <div class="acc-controls">
+      <!-- Weekly -->
+      <ng-container *ngIf="activePeriod === 'WEEKLY'">
+        <div class="acc-ctrl-group">
+          <label class="acc-ctrl-label">Седмица №</label>
+          <input type="number" class="acc-ctrl-input" [(ngModel)]="selectedWeek" min="1" max="53">
+        </div>
+        <div class="acc-ctrl-group">
+          <label class="acc-ctrl-label">Година</label>
+          <input type="number" class="acc-ctrl-input" [(ngModel)]="selectedYear" min="2020" max="2099">
+        </div>
+      </ng-container>
+
+      <!-- Monthly -->
+      <ng-container *ngIf="activePeriod === 'MONTHLY'">
+        <div class="acc-ctrl-group">
+          <label class="acc-ctrl-label">Месец</label>
+          <select class="acc-ctrl-select" [(ngModel)]="selectedMonth">
+            <option *ngFor="let m of months" [value]="m.value">{{ m.label }}</option>
+          </select>
+        </div>
+        <div class="acc-ctrl-group">
+          <label class="acc-ctrl-label">Година</label>
+          <input type="number" class="acc-ctrl-input" [(ngModel)]="selectedYear" min="2020" max="2099">
+        </div>
+      </ng-container>
+
+      <!-- Yearly -->
+      <ng-container *ngIf="activePeriod === 'YEARLY'">
+        <div class="acc-ctrl-group">
+          <label class="acc-ctrl-label">Година</label>
+          <input type="number" class="acc-ctrl-input" [(ngModel)]="selectedYear" min="2020" max="2099">
+        </div>
+      </ng-container>
+
+      <div class="acc-period-summary">
+        <i class="material-icons">info_outline</i>
+        <span>{{ periodSummary }}</span>
+      </div>
+
+      <button class="acc-load-btn" type="button" [disabled]="loading" (click)="loadData()">
+        <span class="acc-spinner acc-spinner--sm" *ngIf="loading"></span>
+        <i class="material-icons" *ngIf="!loading">refresh</i>
+        {{ loading ? 'Зарежда...' : 'Зареди отчетите' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Load error ─────────────────────────────────────── -->
+  <div class="acc-error-bar" *ngIf="loadError">
+    <i class="material-icons">error_outline</i>
+    <span>Грешка при зареждане на данните. Моля, опитайте отново.</span>
+  </div>
+
+  <!-- ── Summary cards ──────────────────────────────────── -->
+  <div class="acc-summary-grid" *ngIf="dashboard && !loading">
+
+    <!-- Income -->
+    <div class="acc-summary-card acc-summary-card--income">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">trending_up</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Приходи от курсове</div>
+        <div class="acc-summary-card__value income-value">{{ fmtEur(dashboard.summary.tripRevenueEur) }}</div>
+        <div class="acc-summary-card__sub">{{ dashboard.summary.tripCount }} курса</div>
+      </div>
+    </div>
+
+    <!-- Trip expenses -->
+    <div class="acc-summary-card acc-summary-card--expense">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">local_shipping</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Разходи от курсове</div>
+        <div class="acc-summary-card__value expense-value">{{ fmtExpEur(dashboard.summary.tripExpensesEur) }}</div>
+        <div class="acc-summary-card__sub">
+          вкл. ДДС {{ fmtExpEur(dashboard.summary.vatTotalEur) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Salaries -->
+    <div class="acc-summary-card acc-summary-card--expense">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">badge</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Заплати (бруто)</div>
+        <div class="acc-summary-card__value expense-value">{{ fmtExpEur(dashboard.summary.totalSalaryBrutoEur) }}</div>
+        <div class="acc-summary-card__sub">
+          {{ dashboard.summary.employeeCount }} служители · осигуровки {{ fmtExpEur(dashboard.summary.salaryTaxesEur) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="acc-summary-card acc-summary-card--expense">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">build</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Поддръжка на ППС</div>
+        <div class="acc-summary-card__value expense-value">{{ fmtExpEur(dashboard.summary.maintenanceCostsEur) }}</div>
+        <div class="acc-summary-card__sub">{{ dashboard.summary.maintenanceCount }} записа</div>
+      </div>
+    </div>
+
+    <!-- Leasing -->
+    <div class="acc-summary-card acc-summary-card--leasing">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">euro</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Лизинг</div>
+        <div class="acc-summary-card__value leasing-value">{{ fmtExpEur(dashboard.summary.leasingTotalEur) }}</div>
+        <div class="acc-summary-card__sub">{{ dashboard.summary.leasedVehicleCount }} ППС на лизинг</div>
+      </div>
+    </div>
+
+    <!-- Net balance (full width) -->
+    <div class="acc-summary-card acc-summary-card--balance"
+         [class.acc-summary-card--positive]="isNetPositive()"
+         [class.acc-summary-card--negative]="!isNetPositive()">
+      <div class="acc-summary-card__icon">
+        <i class="material-icons">account_balance_wallet</i>
+      </div>
+      <div class="acc-summary-card__body">
+        <div class="acc-summary-card__label">Нетен баланс за периода</div>
+        <div class="acc-summary-card__value acc-summary-card__value--lg"
+             [class.income-value]="isNetPositive()"
+             [class.expense-value]="!isNetPositive()">
+          {{ fmtSignedEur(dashboard.summary.netBalanceEur) }}
+        </div>
+        <div class="acc-summary-card__sub">
+          Приходи&nbsp;−&nbsp;(Курсове + Заплати + Поддръжка + Лизинг)
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Expense breakdown bar ───────────────────────────── -->
+  <div class="acc-breakdown-card" *ngIf="dashboard && !loading && totalExpensesEur > 0">
+    <div class="acc-breakdown-title">
+      <i class="material-icons">pie_chart</i>
+      Структура на разходите — {{ periodSummary }}
+    </div>
+    <div class="acc-breakdown-bar">
+      <div class="acc-breakdown-seg acc-breakdown-seg--salary"
+           [style.width.%]="expenseShare(dashboard.summary.totalSalaryBrutoEur)"
+           title="Заплати">
+      </div>
+      <div class="acc-breakdown-seg acc-breakdown-seg--trips"
+           [style.width.%]="expenseShare(dashboard.summary.tripExpensesEur)"
+           title="Разходи курсове">
+      </div>
+      <div class="acc-breakdown-seg acc-breakdown-seg--maint"
+           [style.width.%]="expenseShare(dashboard.summary.maintenanceCostsEur)"
+           title="Поддръжка">
+      </div>
+      <div class="acc-breakdown-seg acc-breakdown-seg--leasing"
+           [style.width.%]="expenseShare(dashboard.summary.leasingTotalEur)"
+           title="Лизинг">
+      </div>
+    </div>
+    <div class="acc-breakdown-legend">
+      <span class="acc-bdl-item">
+        <span class="acc-bdl-dot acc-bdl-dot--salary"></span>
+        Заплати {{ expenseShare(dashboard.summary.totalSalaryBrutoEur) }}%
+      </span>
+      <span class="acc-bdl-item">
+        <span class="acc-bdl-dot acc-bdl-dot--trips"></span>
+        Курсове {{ expenseShare(dashboard.summary.tripExpensesEur) }}%
+      </span>
+      <span class="acc-bdl-item">
+        <span class="acc-bdl-dot acc-bdl-dot--maint"></span>
+        Поддръжка {{ expenseShare(dashboard.summary.maintenanceCostsEur) }}%
+      </span>
+      <span class="acc-bdl-item" *ngIf="dashboard.summary.leasingTotalEur > 0">
+        <span class="acc-bdl-dot acc-bdl-dot--leasing"></span>
+        Лизинг {{ expenseShare(dashboard.summary.leasingTotalEur) }}%
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Main data section ───────────────────────────────── -->
+  <div class="acc-data-card">
+
+    <!-- Nav tabs -->
+    <div class="acc-nav-tabs">
+      <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'salary'"
+              (click)="setDataTab('salary')">
+        <i class="material-icons">badge</i>
+        Заплати
+        <span class="acc-nav-tab__badge" *ngIf="dashboard">{{ dashboard.salaries.length }}</span>
+      </button>
+      <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'trips'"
+              (click)="setDataTab('trips')">
+        <i class="material-icons">local_shipping</i>
+        Курсове
+        <span class="acc-nav-tab__badge" *ngIf="dashboard">{{ dashboard.trips.length }}</span>
+      </button>
+      <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'maintenance'"
+              (click)="setDataTab('maintenance')">
+        <i class="material-icons">build</i>
+        Поддръжка
+        <span class="acc-nav-tab__badge" *ngIf="dashboard">{{ dashboard.maintenance.length }}</span>
+      </button>
+      <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'leasing'"
+              (click)="setDataTab('leasing')">
+        <i class="material-icons">euro</i>
+        Лизинг
+        <span class="acc-nav-tab__badge" *ngIf="dashboard">{{ dashboard.leasings.length }}</span>
+      </button>
+      <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'download'"
+              (click)="setDataTab('download')">
+        <i class="material-icons">download</i>
+        Изтегляне XLSX
+      </button>
+    </div>
+
+    <!-- ── SALARY TAB ─────────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'salary'">
+      <div class="acc-tab-loading" *ngIf="loading">
+        <span class="acc-spinner acc-spinner--lg"></span>
+        <span>Зарежда данни...</span>
+      </div>
+      <div class="acc-empty-state" *ngIf="!loading && !dashboard">
+        <i class="material-icons">analytics</i>
+        <p>Натиснете <strong>„Зареди отчетите"</strong> за да видите данните.</p>
+      </div>
+      <ng-container *ngIf="!loading && dashboard">
+        <div class="acc-table-wrapper" *ngIf="dashboard.salaries.length > 0; else noSalaries">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th>Служител</th>
+                <th>Длъжност</th>
+                <th class="text-right">Бруто (€)</th>
+                <th class="text-right">Нето (€)</th>
+                <th class="text-right">Данъци и осигуровки (€)</th>
+                <th class="text-right acc-pct-col">% от разходи</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of dashboard.salaries"
+                  class="acc-table-row acc-table-row--clickable"
+                  (click)="goToEmployee(row.employeeId)">
+                <td><div class="acc-table-name">{{ row.name }}</div></td>
+                <td><span class="acc-chip">{{ row.jobTitle }}</span></td>
+                <td class="text-right expense-value">{{ fmtExpBgn(row.brutoBgn) }}</td>
+                <td class="text-right expense-value">{{ fmtExpBgn(row.netoBgn) }}</td>
+                <td class="text-right expense-value">{{ fmtExpBgn(row.taxesBgn) }}</td>
+                <td class="text-right acc-pct-col">
+                  <span class="acc-pct-bar-wrap">
+                    <span class="acc-pct-bar" [style.width.%]="expenseShare(row.brutoBgn / 1.95583)"></span>
+                    <span class="acc-pct-txt">{{ expenseShare(row.brutoBgn / 1.95583) }}%</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="acc-table-footer">
+                <td colspan="2"><strong>Общо ({{ dashboard.salaries.length }} служители)</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.totalSalaryBrutoEur) }}</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpBgn(dashboard.summary.totalSalaryBrutoBgn - (dashboard.summary.salaryTaxesEur * 1.95583)) }}</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.salaryTaxesEur) }}</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ng-template #noSalaries>
+          <div class="acc-empty-state">
+            <i class="material-icons">people_outline</i>
+            <p>Няма активни служители за периода.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- ── TRIPS TAB ──────────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'trips'">
+      <div class="acc-tab-loading" *ngIf="loading">
+        <span class="acc-spinner acc-spinner--lg"></span>
+        <span>Зарежда данни...</span>
+      </div>
+      <div class="acc-empty-state" *ngIf="!loading && !dashboard">
+        <i class="material-icons">analytics</i>
+        <p>Натиснете <strong>„Зареди отчетите"</strong> за да видите данните.</p>
+      </div>
+      <ng-container *ngIf="!loading && dashboard">
+        <div class="acc-table-wrapper" *ngIf="dashboard.trips.length > 0; else noTrips">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Маршрут</th>
+                <th>Камион</th>
+                <th>Клиент</th>
+                <th>Статус</th>
+                <th class="text-right income-header">Приходи (€)</th>
+                <th class="text-right expense-header">Разходи (€)</th>
+                <th class="text-right">Нетна печалба (€)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of dashboard.trips"
+                  class="acc-table-row acc-table-row--clickable"
+                  (click)="goToTrip(row.tripId)">
+                <td class="acc-table-date">{{ row.departureDate ?? '—' }}</td>
+                <td><div class="acc-table-route">{{ row.route }}</div></td>
+                <td><span class="acc-table-plate">{{ row.vehiclePlate ?? '—' }}</span></td>
+                <td>{{ row.clientName ?? '—' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="tripStatusClass(row.status)">
+                    {{ tripStatusLabel(row.status) }}
+                  </span>
+                </td>
+                <td class="text-right income-value">{{ fmtEur(row.revenueEur) }}</td>
+                <td class="text-right expense-value">{{ fmtExpEur(row.totalExpensesEur) }}</td>
+                <td class="text-right"
+                    [class.income-value]="row.netProfitEur >= 0"
+                    [class.expense-value]="row.netProfitEur < 0">
+                  {{ fmtSignedEur(row.netProfitEur) }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="acc-table-footer">
+                <td colspan="5"><strong>Общо ({{ dashboard.trips.length }} курса)</strong></td>
+                <td class="text-right income-value"><strong>{{ fmtEur(dashboard.summary.tripRevenueEur) }}</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.tripExpensesEur) }}</strong></td>
+                <td class="text-right"
+                    [class.income-value]="dashboard.summary.tripRevenueEur >= dashboard.summary.tripExpensesEur"
+                    [class.expense-value]="dashboard.summary.tripRevenueEur < dashboard.summary.tripExpensesEur">
+                  <strong>{{ fmtSignedEur(dashboard.summary.tripRevenueEur - dashboard.summary.tripExpensesEur) }}</strong>
+                </td>
+              </tr>
+              <tr class="acc-table-footer acc-table-footer--vat">
+                <td colspan="5"><strong>вкл. ДДС от курсове</strong></td>
+                <td></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.vatTotalEur) }}</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ng-template #noTrips>
+          <div class="acc-empty-state">
+            <i class="material-icons">local_shipping</i>
+            <p>Няма курсове за избрания период.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- ── MAINTENANCE TAB ────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'maintenance'">
+      <div class="acc-tab-loading" *ngIf="loading">
+        <span class="acc-spinner acc-spinner--lg"></span>
+        <span>Зарежда данни...</span>
+      </div>
+      <div class="acc-empty-state" *ngIf="!loading && !dashboard">
+        <i class="material-icons">analytics</i>
+        <p>Натиснете <strong>„Зареди отчетите"</strong> за да видите данните.</p>
+      </div>
+      <ng-container *ngIf="!loading && dashboard">
+        <div class="acc-table-wrapper" *ngIf="dashboard.maintenance.length > 0; else noMaintenance">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Камион</th>
+                <th>Тип поддръжка</th>
+                <th>Сервиз / Доставчик</th>
+                <th class="text-right expense-header">Разходи (€)</th>
+                <th class="text-right acc-pct-col">% от разходи</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of dashboard.maintenance"
+                  class="acc-table-row acc-table-row--clickable"
+                  (click)="goToVehicle(row.vehicleId)">
+                <td class="acc-table-date">{{ row.openedAt ?? '—' }}</td>
+                <td><span class="acc-table-plate">{{ row.vehiclePlate ?? '—' }}</span></td>
+                <td><span class="acc-chip acc-chip--orange">{{ row.maintenanceType }}</span></td>
+                <td>{{ row.workshopName ?? '—' }}</td>
+                <td class="text-right expense-value">{{ fmtExpEur(row.totalGrossEur) }}</td>
+                <td class="text-right acc-pct-col">
+                  <span class="acc-pct-bar-wrap">
+                    <span class="acc-pct-bar acc-pct-bar--orange" [style.width.%]="expenseShare(row.totalGrossEur)"></span>
+                    <span class="acc-pct-txt">{{ expenseShare(row.totalGrossEur) }}%</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="acc-table-footer">
+                <td colspan="4"><strong>Общо ({{ dashboard.maintenance.length }} записа)</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.maintenanceCostsEur) }}</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ng-template #noMaintenance>
+          <div class="acc-empty-state">
+            <i class="material-icons">build_circle</i>
+            <p>Няма записи за поддръжка за избрания период.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- ── LEASING TAB ─────────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'leasing'">
+      <div class="acc-tab-loading" *ngIf="loading">
+        <span class="acc-spinner acc-spinner--lg"></span>
+        <span>Зарежда данни...</span>
+      </div>
+      <div class="acc-empty-state" *ngIf="!loading && !dashboard">
+        <i class="material-icons">analytics</i>
+        <p>Натиснете <strong>„Зареди отчетите"</strong> за да видите данните.</p>
+      </div>
+      <ng-container *ngIf="!loading && dashboard">
+        <div class="acc-table-wrapper" *ngIf="(dashboard.leasings?.length || 0) > 0; else noLeasing">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th>Камион</th>
+                <th>Лизинг компания</th>
+                <th>Номер на договор</th>
+                <th>Начало</th>
+                <th>Край</th>
+                <th class="text-right">Месечна вноска (€)</th>
+                <th class="text-right leasing-header">За периода (€)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of dashboard.leasings"
+                  class="acc-table-row acc-table-row--clickable"
+                  (click)="goToVehicle(row.vehicleId)">
+                <td><span class="acc-table-plate">{{ row.vehiclePlate ?? '—' }}</span></td>
+                <td><div class="acc-table-name">{{ row.leasingCompany ?? '—' }}</div></td>
+                <td><span class="acc-chip acc-chip--purple">{{ row.contractNumber ?? '—' }}</span></td>
+                <td class="acc-table-date">{{ row.startDate ?? '—' }}</td>
+                <td class="acc-table-date">{{ row.endDate ?? '—' }}</td>
+                <td class="text-right">{{ fmtEur(row.monthlyPaymentEur) }}</td>
+                <td class="text-right leasing-value">{{ fmtExpEur(row.totalForPeriodEur) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="acc-table-footer">
+                <td colspan="6"><strong>Общо ({{ dashboard.leasings.length }} ППС на лизинг)</strong></td>
+                <td class="text-right leasing-value"><strong>{{ fmtExpEur(dashboard.summary.leasingTotalEur) }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ng-template #noLeasing>
+          <div class="acc-empty-state">
+            <i class="material-icons">euro_symbol</i>
+            <p>Няма активни лизингови договори за периода.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- ── DOWNLOAD TAB ───────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'download'">
+      <p class="acc-dl-hint">
+        <i class="material-icons">info_outline</i>
+        Изтеглете финансовия отчет за <strong>{{ periodSummary }}</strong> в Excel формат.
+      </p>
+      <div class="acc-grid">
+        <div class="acc-card" [ngClass]="card.color" *ngFor="let card of reportCards">
+          <div class="acc-card-icon">
+            <i class="material-icons">{{ card.icon }}</i>
+          </div>
+          <div class="acc-card-body">
+            <h2 class="acc-card-title">{{ card.title }}</h2>
+            <p class="acc-card-desc">{{ card.description }}</p>
+          </div>
+          <button class="acc-download-btn" type="button"
+                  [disabled]="downloading[card.type]"
+                  (click)="download(card.type)">
+            <ng-container *ngIf="!downloading[card.type]">
+              <i class="material-icons">download</i> Изтегли XLSX
+            </ng-container>
+            <ng-container *ngIf="downloading[card.type]">
+              <span class="acc-spinner acc-spinner--sm"></span> Генериране...
+            </ng-container>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Info bar ────────────────────────────────────────── -->
+  <div class="acc-info-bar">
+    <i class="material-icons">info_outline</i>
+    <span>
+      Заплатите за период „Седмица" са приблизителни (месечна заплата ÷ 4.33).
+      Кликнете върху ред от таблицата за да отворите детайлите.
+      Лизинговите разходи се изчисляват на база месечна вноска за съответния период.
+    </span>
+  </div>
+
+</div>

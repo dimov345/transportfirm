@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+
 import { AuthService } from '../../core/auth/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-first-login',
@@ -19,7 +21,7 @@ export class FirstLogin {
   private router = inject(Router);
   private auth  = inject(AuthService);
 
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   loading  = false;
   errorMsg = '';

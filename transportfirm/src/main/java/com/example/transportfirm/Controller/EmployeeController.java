@@ -6,6 +6,7 @@ import com.example.transportfirm.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
 public class EmployeeController {
 
     private final EmployeeService employeeService;

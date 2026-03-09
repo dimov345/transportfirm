@@ -1,0 +1,197 @@
+<div class="details-container">
+
+  <!-- LOADING -->
+  <div class="loading-state" *ngIf="loading">
+    <span>Зареждане...</span>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-state" *ngIf="!loading && error">
+    <i class="material-icons">error_outline</i>
+    <h3>Грешка</h3>
+    <p>{{ error }}</p>
+    <button type="button" class="btn-primary" (click)="goBack()">
+      <i class="material-icons">arrow_back</i>
+      Назад
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <ng-container *ngIf="!loading && !error && trip">
+
+    <!-- HEADER -->
+    <div class="details-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1>{{ trip.originCity }} → {{ trip.destinationCity }}</h1>
+          <div class="subtitle">
+            {{ formatDate(trip.departureDate) }}
+            <span *ngIf="trip.arrivalDate"> — {{ formatDate(trip.arrivalDate) }}</span>
+            &nbsp;|&nbsp;
+            <span class="status-badge" [ngClass]="statusClasses[trip.status]">
+              {{ statusLabels[trip.status] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">
+            <i class="material-icons">arrow_back_ios</i>
+            Назад
+          </button>
+          <button type="button" class="btn-primary" (click)="edit()">
+            <i class="material-icons">edit</i>
+            Редактирай
+          </button>
+          <button
+            *ngIf="isAdminOrManager"
+            type="button"
+            class="btn-danger"
+            (click)="delete()"
+            [disabled]="deleting"
+          >
+            <i class="material-icons">delete</i>
+            Изтрий
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS GRID -->
+    <div class="details-content">
+      <div class="details-grid">
+
+        <!-- Маршрут -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">route</i>
+            <h2>Маршрут</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>От</label>
+              <span>{{ trip.originCity }}</span>
+            </div>
+            <div class="info-item">
+              <label>До</label>
+              <span>{{ trip.destinationCity }}</span>
+            </div>
+            <div class="info-item">
+              <label>Дата тръгване</label>
+              <span>{{ formatDate(trip.departureDate) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Дата пристигане</label>
+              <span>{{ formatDate(trip.arrivalDate) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Разстояние</label>
+              <span>{{ trip.distanceKm != null ? (trip.distanceKm + ' км') : '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Камион</label>
+              <span>{{ trip.vehicle ? (trip.vehicle.plateNumber + (trip.vehicle.model ? ' — ' + trip.vehicle.model : '')) : '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Спедиторска група</label>
+              <span>{{ trip.vehicle?.dispatcherGroup?.groupName || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Клиент</label>
+              <span>{{ trip.clientName || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Статус</label>
+              <span class="status-badge" [ngClass]="statusClasses[trip.status]">
+                {{ statusLabels[trip.status] }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Финанси -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">euro</i>
+            <h2>Финанси (EUR)</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Приходи</label>
+              <span class="value-eur">{{ formatEur(trip.revenueEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>ДДС</label>
+              <span>{{ formatEur(trip.vatEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Пътни такси</label>
+              <span>{{ formatEur(trip.tollFeesEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Гориво (литри)</label>
+              <span>{{ trip.fuelLiters != null ? (trip.fuelLiters + ' л') : '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Разход гориво</label>
+              <span>{{ formatEur(trip.fuelCostEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Такси граница</label>
+              <span>{{ formatEur(trip.borderFeesEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Паркинг / нощувки</label>
+              <span>{{ formatEur(trip.parkingAccommodationEur) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Други разходи</label>
+              <span>{{ formatEur(trip.otherExpensesEur) }}</span>
+            </div>
+            <div class="info-item finance-separator">
+              <label>Общо разходи</label>
+              <span class="value-expense">{{ formatEur(totalExpenses()) }}</span>
+            </div>
+            <div class="info-item net-profit-row" [class.profit-positive]="netProfit() > 0" [class.profit-negative]="netProfit() < 0">
+              <label>Нетна печалба</label>
+              <span class="value-net">{{ formatEur(netProfit()) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Товар -->
+        <div class="info-card" *ngIf="trip.cargoDescription || trip.cargoWeightTons != null">
+          <div class="card-header">
+            <i class="material-icons">inventory_2</i>
+            <h2>Товар</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item" *ngIf="trip.cargoDescription">
+              <label>Описание</label>
+              <span>{{ trip.cargoDescription }}</span>
+            </div>
+            <div class="info-item" *ngIf="trip.cargoWeightTons != null">
+              <label>Тегло</label>
+              <span>{{ trip.cargoWeightTons }} т</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Бележки -->
+        <div class="info-card" *ngIf="trip.notes">
+          <div class="card-header">
+            <i class="material-icons">sticky_note_2</i>
+            <h2>Бележки</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item notes-item">
+              <span>{{ trip.notes }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

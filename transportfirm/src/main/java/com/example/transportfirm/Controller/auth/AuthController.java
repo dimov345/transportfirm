@@ -19,9 +19,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,19 +34,20 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
             authenticate(request.getEmail(), request.getPassword());
 
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
-            // first login required -> 409 Conflict (или 403 ако предпочиташ)
+            // first login required -> 403 с firstLoginRequired:true (фронтендът го очаква точно така)
             if (Boolean.TRUE.equals(user.getFirstLogin())) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "First login password change required"
-                );
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of(
+                                "firstLoginRequired", true,
+                                "message", "Първо влизане: трябва да смените паролата."
+                        ));
             }
 
             var userDetails = appUserDetailsService.loadUserByUsername(request.getEmail());
@@ -64,9 +65,11 @@ public class AuthController {
                     .body(new AuthResponse(request.getEmail(), jwtToken));
 
         } catch (BadCredentialsException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("status", 401, "message", "Грешен email или парола."));
         } catch (DisabledException ex) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is disabled");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", 403, "message", "Акаунтът е деактивиран."));
         }
     }
 

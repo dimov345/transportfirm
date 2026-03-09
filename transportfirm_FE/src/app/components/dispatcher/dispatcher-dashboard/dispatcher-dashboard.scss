@@ -1,1 +1,75 @@
 @use 'dashboard' as *;
+
+.dash-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dvc-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dvc-transit-note {
+  font-size: 12px;
+  color: #b45309;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+
+.dvc-add-trip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+  background: rgba(22, 163, 74, 0.08);
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: rgba(22, 163, 74, 0.16);
+    border-color: rgba(22, 163, 74, 0.5);
+  }
+}
+
+.dash-trips-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(49, 130, 206, 0.3);
+  background: rgba(49, 130, 206, 0.08);
+  color: #2b6cb0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: rgba(49, 130, 206, 0.16);
+    border-color: rgba(49, 130, 206, 0.5);
+  }
+}

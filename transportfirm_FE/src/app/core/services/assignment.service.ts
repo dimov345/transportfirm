@@ -3,11 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { DriverInfo } from '../models/driver/driver-info.model';
+
 import { VehicleInfo } from './vehicle.service'; 
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AssignmentService {
-  private apiUrl = 'http://localhost:8080/api/assignments';
+  private readonly apiUrl = environment.apiUrl + '/assignments';
 
   constructor(private http: HttpClient) {}
 

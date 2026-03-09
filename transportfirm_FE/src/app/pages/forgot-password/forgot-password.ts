@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 type Step = 1 | 2 | 3 | 4;   // 1=email  2=OTP  3=new password  4=success
 
@@ -18,7 +19,7 @@ export class ForgotPassword implements OnDestroy {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   step = signal<Step>(1);
 

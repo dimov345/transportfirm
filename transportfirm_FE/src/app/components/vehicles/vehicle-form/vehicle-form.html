@@ -222,32 +222,62 @@
           <h2>Лизинг</h2>
         </div>
 
-        <div class="tf-grid">
-          <div class="tf-group">
-            <label class="tf-label">
-              <input type="checkbox" formControlName="leased" />
-              На лизинг
-            </label>
-          </div>
+        <!-- Leasing toggle card -->
+        <div class="tf-leasing-toggle">
+          <label class="tf-leasing-toggle__label">
+            <div class="tf-leasing-toggle__switch">
+              <input type="checkbox" formControlName="leased" class="tf-leasing-toggle__input" />
+              <span class="tf-leasing-toggle__track"></span>
+              <span class="tf-leasing-toggle__thumb"></span>
+            </div>
+            <div class="tf-leasing-toggle__text">
+              <span class="tf-leasing-toggle__title">На лизинг</span>
+              <span class="tf-leasing-toggle__sub">Превозното средство е придобито чрез лизинг</span>
+            </div>
+          </label>
+        </div>
 
-          <div class="tf-group" *ngIf="vehicleForm.get('leased')?.value">
-            <label class="tf-label">Лизинг компания</label>
-            <input class="tf-input" type="text" formControlName="leasingCompany" />
-          </div>
+        <!-- Leasing details (shown only when leased = true) -->
+        <div class="tf-leasing-details" *ngIf="vehicleForm.get('leased')?.value">
+          <div class="tf-leasing-card">
+            <div class="tf-leasing-card__header">
+              <i class="tf-leasing-icon">€</i>
+              <span>Данни за лизинговия договор</span>
+            </div>
+            <div class="tf-grid">
+              <div class="tf-group">
+                <label class="tf-label">Лизинг компания</label>
+                <input class="tf-input" type="text" formControlName="leasingCompany"
+                       placeholder="Напр. Unicredit Leasing, Raiffeisen Leasing..." />
+              </div>
 
-          <div class="tf-group" *ngIf="vehicleForm.get('leased')?.value">
-            <label class="tf-label">Номер на договор</label>
-            <input class="tf-input" type="text" formControlName="leasingContractNumber" />
-          </div>
+              <div class="tf-group">
+                <label class="tf-label">Номер на договор</label>
+                <input class="tf-input" type="text" formControlName="leasingContractNumber"
+                       placeholder="Напр. LC-2024-001234" />
+              </div>
 
-          <div class="tf-group" *ngIf="vehicleForm.get('leased')?.value">
-            <label class="tf-label">Начало</label>
-            <input class="tf-input" type="date" formControlName="leasingStartDate" />
-          </div>
+              <div class="tf-group">
+                <label class="tf-label">Месечна вноска (€)</label>
+                <div class="tf-input-with-prefix">
+                  <span class="tf-input-prefix">€</span>
+                  <input class="tf-input tf-input--prefixed" type="number"
+                         formControlName="leasingMonthlyPaymentEur"
+                         min="0" step="0.01"
+                         placeholder="0.00" />
+                </div>
+              </div>
 
-          <div class="tf-group" *ngIf="vehicleForm.get('leased')?.value">
-            <label class="tf-label">Край</label>
-            <input class="tf-input" type="date" formControlName="leasingEndDate" />
+              <div class="tf-group">
+                <label class="tf-label">Начало на лизинга</label>
+                <input class="tf-input" type="date" formControlName="leasingStartDate" />
+              </div>
+
+              <div class="tf-group">
+                <label class="tf-label">Край на лизинга</label>
+                <input class="tf-input" type="date" formControlName="leasingEndDate" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

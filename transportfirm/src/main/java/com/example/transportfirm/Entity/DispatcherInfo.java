@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "dispatchers_info")
+@Table(name = "dispatchers_info", indexes = {
+    @Index(name = "idx_dispatcher_emp_id", columnList = "employee_id")
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Data
 public class DispatcherInfo {

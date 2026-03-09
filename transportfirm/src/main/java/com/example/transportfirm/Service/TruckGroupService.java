@@ -9,8 +9,8 @@ import com.example.transportfirm.repository.DispatcherRepository;
 import com.example.transportfirm.repository.MechanicRepository;
 import com.example.transportfirm.repository.TruckGroupRepository;
 import com.example.transportfirm.repository.VehicleRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;

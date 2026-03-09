@@ -13,7 +13,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "vehicle_records")
+@Table(name = "vehicle_records", indexes = {
+    @Index(name = "idx_vehicle_model",     columnList = "model"),
+    @Index(name = "idx_vehicle_tech_cond", columnList = "technicalCondition"),
+    @Index(name = "idx_vehicle_type_pps",  columnList = "typePps"),
+    @Index(name = "idx_vehicle_status",    columnList = "vehicleStatus"),
+    @Index(name = "idx_vehicle_disp_grp",  columnList = "dispatcher_group_id"),
+    @Index(name = "idx_vehicle_mech_grp",  columnList = "mechanic_group_id")
+})
 @Data
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class VehicleRecord {
@@ -87,6 +94,7 @@ public class VehicleRecord {
 
     private String leasingCompany;
     private String leasingContractNumber;
+    private BigDecimal leasingMonthlyPaymentEur;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

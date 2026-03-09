@@ -92,10 +92,6 @@ export class DispatcherListComponent implements OnInit {
     this.router.navigate(['/dispatchers', employeeId]);
   }
 
-  viewDocuments(employeeId: string) {
-    this.router.navigate(['/dispatcher-documents', employeeId]);
-  }
-
   trackByEmployeeId(index: number, d: DispatcherRow) {
     return d.employeeId;
   }

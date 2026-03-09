@@ -26,9 +26,15 @@
           </span>
         </div>
       </div>
-      <div class="dash-readonly-badge">
-        <i class="material-icons">visibility</i>
-        Само за преглед
+      <div class="dash-header-right">
+        <button class="dash-trips-btn" type="button" (click)="goToFreightTrips()">
+          <i class="material-icons">receipt_long</i>
+          Курсове на камиони
+        </button>
+        <div class="dash-readonly-badge">
+          <i class="material-icons">visibility</i>
+          Само за преглед
+        </div>
       </div>
     </div>
 
@@ -87,6 +93,16 @@
               <i class="material-icons">sticky_note_2</i>
               <span>{{ v.notesForMechanic }}</span>
             </div>
+
+            <div class="dvc-actions">
+              <span class="dvc-transit-note" *ngIf="v.vehicleStatus === 'ON_ROUTE'">
+                ⚠️ На активен курс — само Планиран
+              </span>
+              <button class="dvc-add-trip-btn" type="button" (click)="addTripForVehicle(v.id)">
+                <i class="material-icons">add_circle_outline</i>
+                Добави курс
+              </button>
+            </div>
           </div>
 
           <!-- Maintenance summary badges (read-only — no open count) -->
@@ -96,8 +112,8 @@
               <span class="ms-label">Всичко записи</span>
             </div>
             <div class="ms-badge ms-cost">
-              <span class="ms-num">{{ totalCost().toFixed(2) }}</span>
-              <span class="ms-label">Общо разходи (лв.)</span>
+              <span class="ms-num">{{ formatMoney(totalCost()) }}</span>
+              <span class="ms-label">Общо разходи</span>
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthResponse, LoginRequest } from './auth.models';
+import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'auth_token';
 const EMAIL_KEY = 'auth_email';
@@ -10,7 +11,7 @@ const ROLE_KEY  = 'auth_role';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);

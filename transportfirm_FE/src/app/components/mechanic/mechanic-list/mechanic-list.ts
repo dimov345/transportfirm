@@ -94,10 +94,6 @@ export class MechanicListComponent implements OnInit {
     this.router.navigate(['/mechanics', employeeId]);
   }
 
-  viewDocuments(employeeId: string) {
-    this.router.navigate(['/mechanic-documents', employeeId]);
-  }
-
   trackByEmployeeId(index: number, m: MechanicRow) {
     return m.employeeId;
   }

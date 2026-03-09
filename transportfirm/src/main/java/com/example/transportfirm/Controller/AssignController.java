@@ -7,6 +7,7 @@ import com.example.transportfirm.service.TruckGroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +29,7 @@ public class AssignController {
     // =========================
 
     // PUT /api/assignments/drivers/{driverInfoId}/vehicle/{vehicleId}
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/drivers/{driverInfoId}/vehicle/{vehicleId}")
     public DriverInfo assignVehicleToDriver(@PathVariable UUID driverInfoId,
                                             @PathVariable UUID vehicleId) {
@@ -46,6 +48,7 @@ public class AssignController {
     }
 
     // DELETE /api/assignments/drivers/{driverInfoId}/vehicle
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/drivers/{driverInfoId}/vehicle")
     public DriverInfo unassignVehicleFromDriver(@PathVariable UUID driverInfoId) {
         try {
@@ -98,24 +101,28 @@ public class AssignController {
 
 
     // PUT /assign/dispatcher-group/{groupId}/vehicle/{vehicleId}
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/dispatcher-group/{groupId}/vehicle/{vehicleId}")
     public void assignVehicleToDispatcherGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
         truckGroupService.assignVehicleToDispatcherGroup(groupId, vehicleId);
     }
 
     // DELETE /assign/dispatcher-group/{groupId}/vehicle/{vehicleId}
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/dispatcher-group/{groupId}/vehicle/{vehicleId}")
     public void removeVehicleFromDispatcherGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
         truckGroupService.removeVehicleFromDispatcherGroup(groupId, vehicleId);
     }
 
     // PUT /assign/mechanic-group/{groupId}/vehicle/{vehicleId}
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/mechanic-group/{groupId}/vehicle/{vehicleId}")
     public void assignVehicleToMechanicGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
         truckGroupService.assignVehicleToMechanicGroup(groupId, vehicleId);
     }
 
     // DELETE /assign/mechanic-group/{groupId}/vehicle/{vehicleId}
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/mechanic-group/{groupId}/vehicle/{vehicleId}")
     public void removeVehicleFromMechanicGroup(@PathVariable UUID groupId, @PathVariable UUID vehicleId) {
         truckGroupService.removeVehicleFromMechanicGroup(groupId, vehicleId);

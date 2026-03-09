@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface VehicleInfo {
   id: string;
@@ -38,6 +39,7 @@ export interface VehicleInfo {
   leasingEndDate?: string;
   leasingCompany?: string;
   leasingContractNumber?: string;
+  leasingMonthlyPaymentEur?: number | null;
 
   // Assignments / groups (optional; used mainly in details screens)
   dispatcherGroup?: { id: string; groupName?: string } | null;
@@ -53,7 +55,7 @@ export interface VehicleDocument {
 
 @Injectable({ providedIn: 'root' })
 export class VehicleService {
-  private apiUrl = 'http://localhost:8080/api/vehicles';
+  private readonly apiUrl = environment.apiUrl + '/vehicles';
 
   constructor(private http: HttpClient) {}
 

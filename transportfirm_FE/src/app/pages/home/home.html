@@ -1,51 +1,335 @@
 <div class="home-page">
 
-  <!-- ===== WELCOME BANNER ===== -->
-  <div class="home-banner">
-    <div class="home-banner-left">
-      <div class="home-banner-avatar">{{ initials }}</div>
-      <div>
-        <h1 class="home-greeting">{{ greeting }},</h1>
-        <p class="home-email">{{ email }}</p>
+  <!-- ═══════════════════════════════════════════════════════
+       WELCOME BANNER
+  ═══════════════════════════════════════════════════════ -->
+  <div class="banner">
+    <div class="banner-avatar">{{ initials }}</div>
+    <div class="banner-info">
+      <div class="banner-greeting">{{ greeting }},</div>
+      <div class="banner-email">{{ email }}</div>
+      <div class="banner-meta">
+        <span class="role-chip">{{ roleLabel }}</span>
+        <span class="banner-date">{{ todayLabel }}</span>
       </div>
-    </div>
-    <div class="home-banner-right">
-      <span class="home-role-chip">
-        <i class="material-icons">verified_user</i>
-        {{ roleLabel }}
-      </span>
-      <span class="home-date">{{ todayLabel }}</span>
     </div>
   </div>
 
-  <!-- ===== QUICK ACCESS ===== -->
-  <section class="home-section" *ngIf="cards.length > 0">
-    <h2 class="home-section-title">
-      <i class="material-icons">apps</i>
+  <!-- ═══════════════════════════════════════════════════════
+       STATS ROW (ADMIN / MANAGER / ACCOUNTANT only)
+  ═══════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="showFinancials">
+    <div class="stats-row" *ngIf="!statsLoading && stats">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <i class="material-icons">people</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">{{ stats.activeEmployeesCount }}</div>
+          <div class="stat-card__label">Активни служители</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--teal">
+          <i class="material-icons">directions_car</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">{{ stats.activeVehiclesCount }}</div>
+          <div class="stat-card__label">Активни ППС</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--violet">
+          <i class="material-icons">local_shipping</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">{{ stats.tripsThisMonthCount }}</div>
+          <div class="stat-card__label">Курсове този месец</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <i class="material-icons">euro</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">{{ fmtEur(stats.revenueThisMonthEur) }}</div>
+          <div class="stat-card__label">Приходи този месец</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--indigo">
+          <i class="material-icons">badge</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">{{ fmtSalaryEur(stats.salaryBrutoEur) }}</div>
+          <div class="stat-card__label">Заплати (€) този месец</div>
+        </div>
+      </div>
+      <div class="stat-card" *ngIf="stats.expiredDocsCount > 0 || stats.expiringDocsCount > 0">
+        <div class="stat-card__icon stat-card__icon--red">
+          <i class="material-icons">warning_amber</i>
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__value">
+            <span class="badge-exp" *ngIf="stats.expiredDocsCount > 0">{{ stats.expiredDocsCount }} изтекли</span>
+            <span class="badge-warn" *ngIf="stats.expiringDocsCount > 0">{{ stats.expiringDocsCount }} изтичат</span>
+          </div>
+          <div class="stat-card__label">Документи</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-row" *ngIf="statsLoading">
+      <div class="stat-card stat-card--skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CHARTS + NOTIFICATIONS GRID
+  ═══════════════════════════════════════════════════════ -->
+  <div class="dash-grid">
+
+    <!-- ── Charts column ── -->
+    <div class="charts-col" *ngIf="showFinancials">
+
+      <!-- === Chart 1: Detailed expenses donut === -->
+      <div class="chart-card" *ngIf="stats">
+        <div class="chart-card__header">
+          <i class="material-icons">donut_large</i>
+          <span>Разходи по категории (текущ месец)</span>
+          <span class="chart-total">{{ fmtEur(totalExpensesEur) }}</span>
+        </div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" class="donut-svg">
+            <g *ngFor="let seg of expenseSegments">
+              <path [attr.d]="seg.path" [attr.fill]="seg.color" class="donut-segment"/>
+            </g>
+            <text x="100" y="96"  text-anchor="middle" class="donut-center-label">Разходи</text>
+            <text x="100" y="112" text-anchor="middle" class="donut-center-value">{{ fmtEur(totalExpensesEur) }}</text>
+            <circle *ngIf="expenseSegments.length === 0" cx="100" cy="100" r="78" fill="#f1f5f9"/>
+            <text   *ngIf="expenseSegments.length === 0" x="100" y="104" text-anchor="middle" class="donut-empty">Без данни</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-legend-item" *ngFor="let seg of expenseSegments">
+              <span class="donut-legend-dot" [style.background]="seg.color"></span>
+              <span class="donut-legend-name">{{ seg.label }}</span>
+              <span class="donut-legend-pct">{{ seg.pct }}%</span>
+              <span class="donut-legend-val expense-val">-{{ fmtEur(seg.value) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Chart 2: Detailed income bar chart (last 6 months) === -->
+      <div class="chart-card" *ngIf="stats && stats.monthlyStats?.length">
+        <div class="chart-card__header">
+          <i class="material-icons">bar_chart</i>
+          <span>Приходи — последни 6 месеца</span>
+        </div>
+        <div class="bar-chart-wrap">
+          <svg [attr.viewBox]="'0 0 ' + INC_W + ' ' + (INC_H + 30)" class="bar-svg">
+            <text x="0" y="10" class="bar-axis-label">{{ incomeMaxLabel }}</text>
+            <ng-container *ngFor="let g of incomeBarGroups">
+              <rect [attr.x]="g.revX" [attr.y]="g.revY" [attr.width]="g.barW" [attr.height]="g.revH"
+                    fill="#16a34a" rx="3" class="bar-rect">
+                <title>{{ g.monthLabel }}: {{ fmtEur(g.revenueEur) }}</title>
+              </rect>
+              <text [attr.x]="g.x" [attr.y]="INC_H + 18" text-anchor="middle" class="bar-month-label">
+                {{ g.monthLabel }}
+              </text>
+            </ng-container>
+          </svg>
+          <div class="bar-legend">
+            <span class="bar-legend-item"><span class="bar-legend-dot" style="background:#16a34a"></span>Приходи от курсове</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Chart 3: Income vs Expenses combined === -->
+      <div class="chart-card" *ngIf="stats && stats.monthlyStats?.length">
+        <div class="chart-card__header">
+          <i class="material-icons">compare_arrows</i>
+          <span>Приходи vs Разходи — последни 6 месеца</span>
+        </div>
+        <div class="bar-chart-wrap">
+          <svg [attr.viewBox]="'0 0 ' + BAR_W + ' ' + (BAR_H + 30)" class="bar-svg">
+            <text x="0" y="10" class="bar-axis-label">{{ barMaxLabel }}</text>
+            <ng-container *ngFor="let g of barGroups">
+              <rect [attr.x]="g.revX" [attr.y]="g.revY" [attr.width]="g.barW" [attr.height]="g.revH"
+                    fill="#16a34a" rx="2" class="bar-rect">
+                <title>Приходи {{ g.monthLabel }}: {{ fmtEur(g.netProfit + (g.expH > 0 ? g.expH : 0)) }}</title>
+              </rect>
+              <rect [attr.x]="g.expX" [attr.y]="g.expY" [attr.width]="g.barW" [attr.height]="g.expH"
+                    fill="#dc2626" rx="2" class="bar-rect">
+              </rect>
+              <text [attr.x]="g.x" [attr.y]="BAR_H + 18" text-anchor="middle" class="bar-month-label">
+                {{ g.monthLabel }}
+              </text>
+            </ng-container>
+          </svg>
+          <div class="bar-legend">
+            <span class="bar-legend-item"><span class="bar-legend-dot" style="background:#16a34a"></span>Приходи</span>
+            <span class="bar-legend-item"><span class="bar-legend-dot" style="background:#dc2626"></span>Разходи</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Chart 4: VAT & social insurance donut === -->
+      <div class="chart-card" *ngIf="stats">
+        <div class="chart-card__header">
+          <i class="material-icons">receipt_long</i>
+          <span>ДДС и Осигуровки (текущ месец)</span>
+          <span class="chart-total">{{ fmtEur(totalTaxEur) }}</span>
+        </div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" class="donut-svg">
+            <g *ngFor="let seg of taxSegments">
+              <path [attr.d]="seg.path" [attr.fill]="seg.color" class="donut-segment"/>
+            </g>
+            <text x="100" y="96"  text-anchor="middle" class="donut-center-label">Удръжки</text>
+            <text x="100" y="112" text-anchor="middle" class="donut-center-value">{{ fmtEur(totalTaxEur) }}</text>
+            <circle *ngIf="taxSegments.length === 0" cx="100" cy="100" r="78" fill="#f1f5f9"/>
+            <text   *ngIf="taxSegments.length === 0" x="100" y="104" text-anchor="middle" class="donut-empty">Без данни</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-legend-item" *ngFor="let seg of taxSegments">
+              <span class="donut-legend-dot" [style.background]="seg.color"></span>
+              <span class="donut-legend-name">{{ seg.label }}</span>
+              <span class="donut-legend-pct">{{ seg.pct }}%</span>
+              <span class="donut-legend-val expense-val">{{ fmtEur(seg.value) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="tax-detail-row" *ngIf="stats">
+          <div class="tax-detail-item">
+            <span class="tax-detail-label">ДДС от курсове</span>
+            <span class="tax-detail-val" style="color:#f59e0b">{{ fmtEur(stats.vatThisMonthEur) }}</span>
+          </div>
+          <div class="tax-detail-item">
+            <span class="tax-detail-label">Осигуровки и данъци</span>
+            <span class="tax-detail-val" style="color:#ef4444">{{ fmtEur(stats.salaryTaxesEur) }}</span>
+          </div>
+          <div class="tax-detail-item">
+            <span class="tax-detail-label">Нето заплати</span>
+            <span class="tax-detail-val" style="color:#7c3aed">{{ fmtSalaryEur(stats.salaryNetoEur) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Net profit trend line === -->
+      <div class="chart-card" *ngIf="stats && linePoints.length >= 2">
+        <div class="chart-card__header">
+          <i class="material-icons">show_chart</i>
+          <span>Нетна печалба — тенденция (6 месеца)</span>
+        </div>
+        <div class="line-chart-wrap">
+          <svg [attr.viewBox]="'0 0 ' + LINE_W + ' ' + (LINE_H + 28)" class="line-svg">
+            <line x1="0" [attr.y1]="lineZeroY" [attr.x2]="LINE_W" [attr.y2]="lineZeroY"
+                  stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+            <path [attr.d]="linePath + ' L' + linePoints[linePoints.length-1].x + ',' + LINE_H + ' L' + linePoints[0].x + ',' + LINE_H + ' Z'"
+                  fill="rgba(79,70,229,0.08)"/>
+            <path [attr.d]="linePath" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+            <g *ngFor="let pt of linePoints">
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4"
+                      [attr.fill]="pt.value >= 0 ? '#16a34a' : '#dc2626'"
+                      stroke="#fff" stroke-width="2"/>
+              <text [attr.x]="pt.x" [attr.y]="LINE_H + 20" text-anchor="middle" class="bar-month-label">
+                {{ pt.monthLabel }}
+              </text>
+            </g>
+          </svg>
+          <div class="line-hint">
+            <span class="income-val">● Положителна печалба</span>
+            <span class="expense-val">● Загуба</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /charts-col -->
+
+    <!-- ── Notifications column ── -->
+    <div class="notif-col">
+      <div class="notif-card">
+        <div class="notif-card__header">
+          <i class="material-icons">notifications_active</i>
+          <span>Нотификации за документи</span>
+          <span class="notif-count" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+        </div>
+
+        <div class="notif-loading" *ngIf="notifLoading">
+          <div class="mini-spinner"></div>
+          <span>Зарежда...</span>
+        </div>
+
+        <div class="notif-empty" *ngIf="!notifLoading && notifications.length === 0">
+          <i class="material-icons">check_circle_outline</i>
+          <p>Всички документи са валидни.</p>
+        </div>
+
+        <ng-container *ngIf="expiredNotifs.length > 0">
+          <div class="notif-section-label notif-section-label--expired">
+            <i class="material-icons">error</i> Изтекли
+          </div>
+          <div class="notif-item notif-item--expired"
+               *ngFor="let n of expiredNotifs"
+               (click)="goTo(n.navigateTo)" title="Отвори детайли">
+            <div class="notif-item__icon"><i class="material-icons">{{ notifIcon(n) }}</i></div>
+            <div class="notif-item__body">
+              <div class="notif-item__doc">{{ n.documentType }}</div>
+              <div class="notif-item__entity">{{ n.entityName }}</div>
+              <div class="notif-item__days">{{ notifDaysLabel(n) }} · {{ n.expiryDate | date:'dd.MM.yyyy' }}</div>
+            </div>
+            <i class="material-icons notif-item__arrow">chevron_right</i>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="expiringNotifs.length > 0">
+          <div class="notif-section-label notif-section-label--expiring">
+            <i class="material-icons">warning_amber</i> Изтичат скоро
+          </div>
+          <div class="notif-item notif-item--expiring"
+               *ngFor="let n of expiringNotifs"
+               (click)="goTo(n.navigateTo)" title="Отвори детайли">
+            <div class="notif-item__icon"><i class="material-icons">{{ notifIcon(n) }}</i></div>
+            <div class="notif-item__body">
+              <div class="notif-item__doc">{{ n.documentType }}</div>
+              <div class="notif-item__entity">{{ n.entityName }}</div>
+              <div class="notif-item__days">{{ notifDaysLabel(n) }} · {{ n.expiryDate | date:'dd.MM.yyyy' }}</div>
+            </div>
+            <i class="material-icons notif-item__arrow">chevron_right</i>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+  </div><!-- /dash-grid -->
+
+  <!-- ═══════════════════════════════════════════════════════
+       QUICK ACCESS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="quick-access" *ngIf="cards.length > 0">
+    <h2 class="section-title">
+      <i class="material-icons">grid_view</i>
       Бърз достъп
     </h2>
-    <div class="home-cards">
-      <a
-        class="home-card"
-        *ngFor="let c of cards"
-        [routerLink]="c.route"
-        [style.--accent]="c.accent">
-        <div class="hc-icon-wrap">
+    <div class="cards-grid">
+      <a class="nav-card" *ngFor="let c of cards"
+         [routerLink]="c.route"
+         [style.--accent]="c.accent">
+        <div class="nav-card__icon-wrap">
           <i class="material-icons">{{ c.icon }}</i>
         </div>
-        <div class="hc-body">
-          <span class="hc-label">{{ c.label }}</span>
-          <span class="hc-subtitle">{{ c.subtitle }}</span>
+        <div class="nav-card__text">
+          <span class="nav-card__label">{{ c.label }}</span>
+          <span class="nav-card__sub">{{ c.subtitle }}</span>
         </div>
-        <i class="material-icons hc-arrow">chevron_right</i>
+        <i class="material-icons nav-card__arrow">chevron_right</i>
       </a>
     </div>
   </section>
 
-  <!-- ===== FOOTER INFO ===== -->
-  <div class="home-footer">
-    <i class="material-icons">info_outline</i>
-    <span>TransportFirm — система за управление на транспорт</span>
-  </div>
+  <!-- Footer -->
+  <footer class="home-footer">
+    TransportFirm &copy; {{ todayLabel.slice(-4) }} &mdash; Вътрешна система
+  </footer>
 
 </div>

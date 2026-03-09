@@ -12,7 +12,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "drivers_info")
+@Table(name = "drivers_info", indexes = {
+    @Index(name = "idx_driver_emp_id",    columnList = "employee_id"),
+    @Index(name = "idx_driver_lic_exp",   columnList = "driverLicenseExpiresOn"),
+    @Index(name = "idx_driver_qual_exp",  columnList = "qualificationCardExpiresOn"),
+    @Index(name = "idx_driver_psych_exp", columnList = "psychologicalExamExpiresOn"),
+    @Index(name = "idx_driver_dig_exp",   columnList = "digitalCardExpiresOn")
+})
 @Data
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DriverInfo {

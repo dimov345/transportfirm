@@ -19,9 +19,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +42,7 @@ public class EmployeeService {
     private final TruckGroupRepository truckGroupRepository;
     private final VehicleRepository vehicleRepository;
 
+    @Transactional
     public Employee createEmployee(Employee employee) {
         Employee saved = employeeRepository.save(employee);
 
@@ -61,6 +67,7 @@ public class EmployeeService {
         return saved;
     }
 
+    @Transactional
     public Employee update(UUID id, Employee updated) {
         Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
@@ -176,5 +183,31 @@ public class EmployeeService {
     public Employee getByEgn(String egn) {
         return employeeRepository.findByEgn(egn)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
+    // --- Paginated queries ---
+
+    public Page<Employee> getDriversPaged(String search, String status, int expiryDays, int page, int size) {
+        int days = expiryDays > 0 ? expiryDays : 30;
+        LocalDate expiryDate = LocalDate.now().plusDays(days);
+        return employeeRepository.searchDriversWithStatus(
+                JobTitle.DRIVER,
+                search != null ? search.trim() : "",
+                status != null ? status.trim() : "",
+                expiryDate,
+                PageRequest.of(page, size, Sort.by("name").ascending()));
+    }
+
+    public Page<Employee> getByJobTitlePaged(JobTitle jobTitle, String search, int page, int size) {
+        return employeeRepository.searchByJobTitle(
+                jobTitle,
+                search != null ? search.trim() : "",
+                PageRequest.of(page, size, Sort.by("name").ascending()));
+    }
+
+    public Page<Employee> getAllPaged(String search, int page, int size) {
+        return employeeRepository.searchAll(
+                search != null ? search.trim() : "",
+                PageRequest.of(page, size, Sort.by("name").ascending()));
     }
 }

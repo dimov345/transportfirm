@@ -211,6 +211,10 @@ export class MechanicDetailsComponent implements OnInit {
     this.router.navigate(['/mechanics']);
   }
 
+  goToEdit() {
+    this.router.navigate(['/employees/edit', this.employeeId]);
+  }
+
   getStatusLabel(status: string | null): string {
     const map: Record<string, string> = {
       ACTIVE: 'Активен',

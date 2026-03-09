@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -45,5 +46,21 @@ public class ApiExceptionHandler {
         body.put("status", 404);
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Map<String, Object>> handleNoSuchElement(NoSuchElementException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 404);
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 500);
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

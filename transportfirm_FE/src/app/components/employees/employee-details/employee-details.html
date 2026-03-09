@@ -226,18 +226,13 @@
             </div>
 
             <div class="info-item">
-              <label>Заплата</label>
-              <span class="value">{{ e.salary || '—' }}</span>
+              <label>Заплата бруто</label>
+              <span class="value">{{ fmtEur(e.salary) }}</span>
             </div>
 
             <div class="info-item">
               <label>Заплата нето</label>
-              <span class="value">{{ e.salaryNeto || '—' }}</span>
-            </div>
-
-            <div class="info-item">
-              <label>Валута</label>
-              <span class="value">{{ e.salaryCurrency || '—' }}</span>
+              <span class="value">{{ fmtEur(e.salaryNeto) }}</span>
             </div>
           </div>
         </div>

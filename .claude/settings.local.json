@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell -Command \"Get-Content ''C:/transportfirm/transportfirm_FE/src/app/core/services/driver.service.ts'' | Select-Object -First 12\")",
+      "Bash(powershell -Command \"Get-Content ''C:/transportfirm/transportfirm_FE/src/app/core/services/driver.service.ts''\")",
+      "Bash(powershell -File /tmp/validate.ps1)",
+      "Bash(powershell -File:*)",
+      "Bash(/tmp/spotcheck.ps1:*)",
+      "Bash(/tmp/fix_comment.ps1:*)",
+      "Bash(/tmp/write_empldoc.ps1:*)",
+      "Bash(/tmp/write_empldoc2.ps1:*)",
+      "Bash(find . -maxdepth 1 -name \"package.json\" -exec head -30 {} ;)",
+      "Bash(ls -la \"C:\\\\transportfirm\\\\transportfirm\\\\src\\\\main\\\\resources\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(find /c/transportfirm/transportfirm/src/main/java/com/example/transportfirm/controller -name \"*.java\" -exec basename {} ;)",
+      "Bash(ls -la \"C:\\\\transportfirm\\\\transportfirm\\\\src\\\\main\\\\java\\\\com\\\\example\\\\transportfirm\\\\io\"\" 2>/dev/null || find \"C:transportfirmtransportfirmsrcmainjavacomexampletransportfirmio \" -type f)",
+      "Bash(xargs grep -l -iE \"\\(leasing|лизинг\\)\")",
+      "Bash(xargs grep -l -iE \"\\(salary|заплат|wage|payment\\)\")",
+      "Bash(xargs grep -l \"accounting\\\\|leasing\\\\|salary\")",
+      "Bash(xargs grep -li \"leasing\\\\|Leasing\")"
+    ]
+  }
+}

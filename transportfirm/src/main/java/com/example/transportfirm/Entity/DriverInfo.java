@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -43,6 +45,8 @@ public class DriverInfo {
             "driver", "documents", "truckGroup",
             "hibernateLazyInitializer", "handler"
     })
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private VehicleRecord vehicle;
 
     // Дати на документи

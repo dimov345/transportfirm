@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -126,6 +128,8 @@ public class VehicleRecord {
 
     @OneToOne(mappedBy = "vehicle")
     @JsonIgnoreProperties({"vehicle", "employee", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private DriverInfo driver;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)

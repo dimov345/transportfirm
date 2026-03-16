@@ -20,14 +20,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Ежедневен scheduler за напомняния по имейл за изтекли/изтичащи документи.
- *
- * Логика:
- *  - Документи на шофьор  → имейл до самия шофьор
- *  - Документи на ППС     → имейл до спедитора на групата + всички ADMIN и MANAGER
- *  - ППС без спедиторска група → имейл само до ADMIN и MANAGER
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,8 +33,8 @@ public class DocumentReminderScheduler {
     private final EmailService emailService;
 
     /** Изпълнява се всеки ден в 08:00 сутринта. */
-    @Scheduled(cron = "0 33 12 * * *")
-    @Transactional(readOnly = true)
+    @Scheduled(cron = "0 00 8 * * *")
+    @Transactional
     public void sendDocumentReminders() {
         LocalDate today       = LocalDate.now();
         LocalDate warningDate = today.plusDays(WARNING_DAYS);
@@ -51,6 +43,9 @@ public class DocumentReminderScheduler {
 
         List<String> notifyEmails = getNotifyEmails();
         log.info("Намерени {} имейла за нотификации (ADMIN/MANAGER)", notifyEmails.size());
+        if (notifyEmails.isEmpty()) {
+            log.warn("Няма намерени имейли за ADMIN/MANAGER — нотификациите за ППС може да не достигнат!");
+        }
 
         sendDriverReminders(today, warningDate);
         sendVehicleReminders(today, warningDate, notifyEmails);
@@ -63,7 +58,14 @@ public class DocumentReminderScheduler {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void sendDriverReminders(LocalDate today, LocalDate warningDate) {
-        List<DriverInfo> drivers = driverRepository.findAllWithEmployee();
+        List<DriverInfo> drivers;
+        try {
+            drivers = driverRepository.findAllWithEmployee();
+        } catch (Exception e) {
+            log.error("Грешка при зареждане на шофьори от базата данни: {}", e.getMessage(), e);
+            return;
+        }
+
         log.info("Намерени {} шофьора за проверка", drivers.size());
 
         for (DriverInfo driver : drivers) {
@@ -81,9 +83,9 @@ public class DocumentReminderScheduler {
 
             List<String[]> items = new ArrayList<>();
             checkDate(driver.getDriverLicenseExpiresOn(),     "Шофьорска книжка",       today, warningDate, items);
-            checkDate(driver.getQualificationCardExpiresOn(), "Карта за квалификация",   today, warningDate, items);
+            checkDate(driver.getQualificationCardExpiresOn(), "Квалификационна карта",   today, warningDate, items);
             checkDate(driver.getPsychologicalExamExpiresOn(), "Психологически преглед",  today, warningDate, items);
-            checkDate(driver.getDigitalCardExpiresOn(),       "Цифрова карта",           today, warningDate, items);
+            checkDate(driver.getDigitalCardExpiresOn(),       "Дигитална карта",           today, warningDate, items);
 
             if (items.isEmpty()) continue;
 
@@ -91,7 +93,7 @@ public class DocumentReminderScheduler {
                 emailService.sendDriverDocumentReminderEmail(email, name, items);
                 log.info("Изпратен reminder до шофьор '{}' ({}): {} документа", name, email, items.size());
             } catch (Exception e) {
-                log.error("Грешка при изпращане на reminder до шофьор '{}' ({}): {}", name, email, e.getMessage());
+                log.error("Грешка при изпращане на reminder до шофьор '{}' ({}): {}", name, email, e.getMessage(), e);
             }
         }
     }
@@ -101,8 +103,14 @@ public class DocumentReminderScheduler {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void sendVehicleReminders(LocalDate today, LocalDate warningDate, List<String> notifyEmails) {
-        // Uses JOIN FETCH query — no lazy loading required
-        List<VehicleRecord> vehicles = vehicleRepository.findAllForReminders();
+        List<VehicleRecord> vehicles;
+        try {
+            vehicles = vehicleRepository.findAllForReminders();
+        } catch (Exception e) {
+            log.error("Грешка при зареждане на ППС от базата данни: {}", e.getMessage(), e);
+            return;
+        }
+
         log.info("Намерени {} ППС за проверка", vehicles.size());
 
         for (VehicleRecord vehicle : vehicles) {
@@ -118,20 +126,20 @@ public class DocumentReminderScheduler {
 
             // Send to the dispatcher of the group (if the vehicle has one)
             boolean sentToDispatcher = false;
-            if (vehicle.getDispatcherGroup() != null
-                    && vehicle.getDispatcherGroup().getDispatcher() != null
-                    && vehicle.getDispatcherGroup().getDispatcher().getEmployee() != null) {
+            try {
+                if (vehicle.getDispatcherGroup() != null
+                        && vehicle.getDispatcherGroup().getDispatcher() != null
+                        && vehicle.getDispatcherGroup().getDispatcher().getEmployee() != null) {
 
-                String dispEmail = vehicle.getDispatcherGroup().getDispatcher().getEmployee().getEmail();
-                if (dispEmail != null && !dispEmail.isBlank()) {
-                    try {
+                    String dispEmail = vehicle.getDispatcherGroup().getDispatcher().getEmployee().getEmail();
+                    if (dispEmail != null && !dispEmail.isBlank()) {
                         emailService.sendVehicleDocumentReminderEmail(dispEmail, plate, items);
                         log.info("Изпратен reminder за ППС '{}' до спедитор ({})", plate, dispEmail);
                         sentToDispatcher = true;
-                    } catch (Exception e) {
-                        log.error("Грешка при изпращане до спедитор '{}' за ППС '{}': {}", dispEmail, plate, e.getMessage());
                     }
                 }
+            } catch (Exception e) {
+                log.error("Грешка при изпращане до спедитор за ППС '{}': {}", plate, e.getMessage(), e);
             }
 
             if (!sentToDispatcher) {
@@ -142,10 +150,9 @@ public class DocumentReminderScheduler {
             for (String notifyEmail : notifyEmails) {
                 try {
                     emailService.sendVehicleDocumentReminderEmail(notifyEmail, plate, items);
-                    log.info("Изпратен reminder за ППС '{}' до {} ({})", plate,
-                            sentToDispatcher ? "admin/manager" : "admin/manager (без спедитор)", notifyEmail);
+                    log.info("Изпратен reminder за ППС '{}' до {} (ADMIN/MANAGER)", plate, notifyEmail);
                 } catch (Exception e) {
-                    log.error("Грешка при изпращане до '{}' за ППС '{}': {}", notifyEmail, plate, e.getMessage());
+                    log.error("Грешка при изпращане до '{}' за ППС '{}': {}", notifyEmail, plate, e.getMessage(), e);
                 }
             }
         }
@@ -155,14 +162,19 @@ public class DocumentReminderScheduler {
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** Returns emails of all ADMIN and MANAGER employees who have an email set. */
+    /**
+     * Returns distinct emails of all ADMIN and MANAGER employees.
+     * Uses a direct JPQL projection to avoid loading unnecessary entity data.
+     */
     private List<String> getNotifyEmails() {
-        return employeeRepository.findAll().stream()
-                .filter(e -> (e.getRole() == Role.ADMIN || e.getRole() == Role.MANAGER)
-                        && e.getEmail() != null && !e.getEmail().isBlank())
-                .map(Employee::getEmail)
-                .distinct()
-                .toList();
+        try {
+            List<String> emails = employeeRepository.findEmailsByRoles(List.of(Role.ADMIN, Role.MANAGER));
+            log.debug("Заредени {} имейла за ADMIN/MANAGER", emails.size());
+            return emails;
+        } catch (Exception e) {
+            log.error("Грешка при зареждане на ADMIN/MANAGER имейли: {}", e.getMessage(), e);
+            return List.of();
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ package com.example.transportfirm.repository;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.enums.JobTitle;
+import com.example.transportfirm.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +19,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByEgn(String egn);
     List<Employee> findByJobTitle(JobTitle jobTitle);
     Optional<Employee> findByEmail(String email);
+
+    /** Returns distinct emails of employees with the given roles, excluding null/blank emails. */
+    @Query("SELECT DISTINCT e.email FROM Employee e WHERE e.role IN :roles AND e.email IS NOT NULL AND e.email <> ''")
+    List<String> findEmailsByRoles(@Param("roles") List<Role> roles);
 
     // Paginated driver list — supports text search + document-status filter
     @Query("SELECT e FROM Employee e LEFT JOIN e.driverInfo d WHERE e.jobTitle = :jobTitle " +

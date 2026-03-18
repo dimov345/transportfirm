@@ -1,8 +1,9 @@
 package com.example.transportfirm.service;
 
-import com.example.transportfirm.entity.Employee;
+import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.VehicleFreightTrip;
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
+import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.enums.EmploymentStatus;
 import com.example.transportfirm.enums.VehicleStatus;
 import com.example.transportfirm.io.DashboardStatsDto;
@@ -13,6 +14,7 @@ import com.example.transportfirm.repository.EmployeeRepository;
 import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.VehicleFreightTripRepository;
 import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.util.FinancialConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +32,6 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class DashboardService {
 
-    private static final BigDecimal BGN_TO_EUR = BigDecimal.ONE
-            .divide(new BigDecimal("1.95583"), 6, RoundingMode.HALF_UP);
-
     private final EmployeeRepository employeeRepository;
     private final VehicleRepository vehicleRepository;
     private final VehicleFreightTripRepository tripRepository;
@@ -46,20 +45,22 @@ public class DashboardService {
     public DashboardStatsDto getStats() {
         LocalDate today        = LocalDate.now();
         YearMonth currentMonth = YearMonth.now();
-        LocalDate monthStart   = currentMonth.atDay(1);
         LocalDate monthEnd     = currentMonth.atEndOfMonth();
 
-        // ── Counts ────────────────────────────────────────────────────────────
-        List<Employee> allEmployees = employeeRepository.findAll();
-        long activeEmployees = allEmployees.stream()
-                .filter(e -> e.getEmploymentStatus() == EmploymentStatus.ACTIVE).count();
+        // ── Counts via single targeted queries (no findAll) ───────────────────
+        long activeEmployees = employeeRepository.countByEmploymentStatus(EmploymentStatus.ACTIVE);
+        long activeVehicles  = vehicleRepository.countByVehicleStatusNot(VehicleStatus.IN_SERVICE);
 
-        long activeVehicles = vehicleRepository.findAll().stream()
-                .filter(v -> v.getVehicleStatus() != VehicleStatus.IN_SERVICE).count();
+        // ── Fetch 6 months of trips ONCE and derive current-month subset ──────
+        LocalDate rangeStart = currentMonth.minusMonths(5).atDay(1);
+        List<VehicleFreightTrip> allTrips =
+                tripRepository.findByDepartureDateBetweenWithVehicle(rangeStart, monthEnd);
 
-        // ── Current month trips ───────────────────────────────────────────────
-        List<VehicleFreightTrip> monthTrips =
-                tripRepository.findByDepartureDateBetweenWithVehicle(monthStart, monthEnd);
+        List<VehicleFreightTrip> monthTrips = allTrips.stream()
+                .filter(t -> t.getDepartureDate() != null &&
+                             YearMonth.from(t.getDepartureDate()).equals(currentMonth))
+                .toList();
+
         int tripCount = monthTrips.size();
 
         BigDecimal revThisMonth = monthTrips.stream()
@@ -74,44 +75,34 @@ public class DashboardService {
                         .add(orZero(t.getOtherExpensesEur())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal vatThisMonth = monthTrips.stream()
+                .map(t -> orZero(t.getVatEur())).reduce(BigDecimal.ZERO, BigDecimal::add);
+
         // ── Current month maintenance ─────────────────────────────────────────
+        LocalDate monthStart = currentMonth.atDay(1);
         List<VehicleMaintenanceRecord> monthMaint = maintenanceRepository.findByPeriodWithVehicle(
                 monthStart.atStartOfDay(), monthEnd.atTime(LocalTime.MAX));
         BigDecimal maintBgn = monthMaint.stream()
                 .map(r -> orZero(r.getTotalGross())).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal maintEur = maintBgn.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal maintEur = maintBgn.multiply(FinancialConstants.BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
 
-        // ── Current month VAT from trips ──────────────────────────────────────
-        BigDecimal vatThisMonth = monthTrips.stream()
-                .map(t -> orZero(t.getVatEur())).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // ── Current month salary (active employees) ───────────────────────────
-        List<Employee> activeEmpList = allEmployees.stream()
-                .filter(e -> e.getEmploymentStatus() == EmploymentStatus.ACTIVE).toList();
-        BigDecimal salaryBgn = activeEmpList.stream()
-                .map(e -> orZero(e.getSalary()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal salaryEur = salaryBgn.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal salaryNetoBgn = activeEmpList.stream()
-                .map(e -> orZero(e.getSalaryNeto()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal salaryNetoEur  = salaryNetoBgn.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+        // ── Salary via aggregate queries (no findAll) ─────────────────────────
+        BigDecimal salaryEur      = employeeRepository.sumSalaryByEmploymentStatus(EmploymentStatus.ACTIVE);
+        BigDecimal salaryNetoEur  = employeeRepository.sumSalaryNetoByEmploymentStatus(EmploymentStatus.ACTIVE);
         BigDecimal salaryTaxesEur = salaryEur.subtract(salaryNetoEur);
 
-        // ── Document expiry counts ────────────────────────────────────────────
-        List<NotificationDto> notifications = buildNotifications(today);
-        long expiredCount  = notifications.stream().filter(n -> "expired".equals(n.getStatus())).count();
-        long expiringCount = notifications.stream().filter(n -> "expiring".equals(n.getStatus())).count();
+        // ── Document expiry counts (lightweight — no notification objects) ─────
+        long[] docCounts = countDocExpiry(today);
 
-        // ── Last 6 months stats ───────────────────────────────────────────────
-        List<MonthlyStatDto> monthlyStats = buildMonthlyStats(currentMonth);
+        // ── Monthly stats from pre-fetched trip data ──────────────────────────
+        List<MonthlyStatDto> monthlyStats = buildMonthlyStats(currentMonth, allTrips);
 
         return new DashboardStatsDto(
                 activeEmployees, activeVehicles, tripCount,
                 revThisMonth, maintBgn,
                 salaryEur, salaryNetoEur, salaryTaxesEur,
                 tripExpThisMonth, vatThisMonth, maintEur,
-                expiredCount, expiringCount,
+                docCounts[0], docCounts[1],
                 monthlyStats);
     }
 
@@ -127,25 +118,68 @@ public class DashboardService {
     // Private helpers
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Lightweight expiry counting used by getStats().
+     * Avoids building full NotificationDto objects and avoids calling
+     * buildNotifications() twice (once for counts, once for the notifications endpoint).
+     * Vehicle date fields are primitive — no lazy-load risk. Driver query uses JOIN FETCH.
+     */
+    private long[] countDocExpiry(LocalDate today) {
+        LocalDate warningDate = today.plusDays(30);
+        long expired = 0, expiring = 0;
+
+        for (VehicleRecord v : vehicleRepository.findAll()) {
+            LocalDate[] dates = {
+                v.getKaskoDo(), v.getGrazhdanskaOtgovornostDo(),
+                v.getGtpDo(),   v.getVinetkaDo()
+            };
+            for (LocalDate d : dates) {
+                if (d == null) continue;
+                if (d.isBefore(today))           expired++;
+                else if (!d.isAfter(warningDate)) expiring++;
+            }
+        }
+
+        for (DriverInfo d : driverRepository.findAllWithEmployee()) {
+            if (d.getEmployee() == null ||
+                    d.getEmployee().getEmploymentStatus() != EmploymentStatus.ACTIVE) continue;
+            LocalDate[] dates = {
+                d.getDriverLicenseExpiresOn(),     d.getQualificationCardExpiresOn(),
+                d.getPsychologicalExamExpiresOn(), d.getDigitalCardExpiresOn()
+            };
+            for (LocalDate dt : dates) {
+                if (dt == null) continue;
+                if (dt.isBefore(today))           expired++;
+                else if (!dt.isAfter(warningDate)) expiring++;
+            }
+        }
+
+        return new long[]{ expired, expiring };
+    }
+
+    /**
+     * Builds full notification list for the /notifications endpoint.
+     * Uses JOIN FETCH queries to avoid N+1 lazy-loading.
+     */
     private List<NotificationDto> buildNotifications(LocalDate today) {
         LocalDate warningDate = today.plusDays(30);
         List<NotificationDto> result = new ArrayList<>();
 
-        // ── Vehicle documents ─────────────────────────────────────────────────
-        vehicleRepository.findAll().forEach(v -> {
+        // Vehicle docs — JOIN FETCH dispatcher group + dispatcher + employee in one query
+        vehicleRepository.findAllForReminders().forEach(v -> {
             String plate = v.getPlateNumber() != null ? v.getPlateNumber() : "—";
             String id    = v.getId() != null ? v.getId().toString() : "";
             String nav   = "/vehicles/" + id;
-            addIfExpiry(result, v.getKaskoDo(),                  "Каско",                   plate, id, nav, "vehicle", today, warningDate);
+            addIfExpiry(result, v.getKaskoDo(),                  "Каско",                  plate, id, nav, "vehicle", today, warningDate);
             addIfExpiry(result, v.getGrazhdanskaOtgovornostDo(), "Гражданска отговорност",  plate, id, nav, "vehicle", today, warningDate);
-            addIfExpiry(result, v.getGtpDo(),                    "ГТП",                     plate, id, nav, "vehicle", today, warningDate);
-            addIfExpiry(result, v.getVinetkaDo(),                "Винетка",                 plate, id, nav, "vehicle", today, warningDate);
+            addIfExpiry(result, v.getGtpDo(),                    "ГТП",                    plate, id, nav, "vehicle", today, warningDate);
+            addIfExpiry(result, v.getVinetkaDo(),                "Винетка",                plate, id, nav, "vehicle", today, warningDate);
         });
 
-        // ── Driver document dates ─────────────────────────────────────────────
-        driverRepository.findAll().forEach(d -> {
-            if (d.getEmployee() == null
-                    || d.getEmployee().getEmploymentStatus() != EmploymentStatus.ACTIVE) return;
+        // Driver docs — JOIN FETCH employee in one query
+        driverRepository.findAllWithEmployee().forEach(d -> {
+            if (d.getEmployee() == null ||
+                    d.getEmployee().getEmploymentStatus() != EmploymentStatus.ACTIVE) return;
 
             String name  = d.getEmployee().getName() != null ? d.getEmployee().getName() : "—";
             String empId = d.getEmployee().getId() != null ? d.getEmployee().getId().toString() : "";
@@ -153,11 +187,10 @@ public class DashboardService {
 
             addIfExpiry(result, d.getDriverLicenseExpiresOn(),     "Шофьорска книжка",      name, empId, nav, "driver", today, warningDate);
             addIfExpiry(result, d.getQualificationCardExpiresOn(), "Карта за квалификация", name, empId, nav, "driver", today, warningDate);
-            addIfExpiry(result, d.getPsychologicalExamExpiresOn(), "Психологически преглед",name, empId, nav, "driver", today, warningDate);
-            addIfExpiry(result, d.getDigitalCardExpiresOn(),       "Дигитална карта",         name, empId, nav, "driver", today, warningDate);
+            addIfExpiry(result, d.getPsychologicalExamExpiresOn(), "Психологически преглед", name, empId, nav, "driver", today, warningDate);
+            addIfExpiry(result, d.getDigitalCardExpiresOn(),       "Дигитална карта",        name, empId, nav, "driver", today, warningDate);
         });
 
-        // Sort: most expired (most negative days) first, then expiring soonest
         result.sort(Comparator.comparingLong(NotificationDto::getDaysUntilExpiry));
         return result;
     }
@@ -177,13 +210,10 @@ public class DashboardService {
         }
     }
 
-    private List<MonthlyStatDto> buildMonthlyStats(YearMonth currentMonth) {
-        LocalDate rangeStart = currentMonth.minusMonths(5).atDay(1);
-        LocalDate rangeEnd   = currentMonth.atEndOfMonth();
-
-        List<VehicleFreightTrip> allTrips =
-                tripRepository.findByDepartureDateBetweenWithVehicle(rangeStart, rangeEnd);
-
+    /**
+     * Builds last-6-months stats from a pre-fetched trip list (no extra DB query).
+     */
+    private List<MonthlyStatDto> buildMonthlyStats(YearMonth currentMonth, List<VehicleFreightTrip> allTrips) {
         Map<YearMonth, List<VehicleFreightTrip>> byMonth = allTrips.stream()
                 .filter(t -> t.getDepartureDate() != null)
                 .collect(Collectors.groupingBy(t -> YearMonth.from(t.getDepartureDate())));

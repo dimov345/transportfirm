@@ -2,9 +2,9 @@ export interface SalaryRow {
   employeeId: string;
   name: string;
   jobTitle: string;
-  brutoBgn: number;
-  netoBgn: number;
-  taxesBgn: number;
+  brutoEur: number;
+  netoEur: number;
+  taxesEur: number;
 }
 
 export interface TripRow {
@@ -27,7 +27,6 @@ export interface MaintenanceRow {
   maintenanceType: string;
   workshopName: string | null;
   openedAt: string | null;
-  totalGrossBgn: number;
   totalGrossEur: number;
 }
 
@@ -44,10 +43,8 @@ export interface LeasingRow {
 
 export interface AccountingSummary {
   tripRevenueEur: number;
-  totalSalaryBrutoBgn: number;
   totalSalaryBrutoEur: number;
   tripExpensesEur: number;
-  maintenanceCostsBgn: number;
   maintenanceCostsEur: number;
   netBalanceEur: number;
   employeeCount: number;
@@ -57,6 +54,7 @@ export interface AccountingSummary {
   leasedVehicleCount: number;
   vatTotalEur: number;
   salaryTaxesEur: number;
+  totalSalaryNetoEur: number;
 }
 
 export interface AccountingDashboard {

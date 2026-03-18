@@ -85,7 +85,7 @@
             <label class="tf-label">Длъжност *</label>
             <select class="tf-input" formControlName="jobTitle">
               <option value="">-- избери --</option>
-              <option *ngFor="let j of jobTitleOptions" [value]="j">{{ j }}</option>
+              <option *ngFor="let j of jobTitleOptions" [value]="j">{{ jobTitleLabels[j] ?? j }}</option>
             </select>
             <div class="tf-error" *ngIf="field('jobTitle')?.touched && field('jobTitle')?.invalid">
               <small>Длъжността е задължителна.</small>
@@ -96,7 +96,7 @@
             <label class="tf-label">Роля *</label>
             <select class="tf-input" formControlName="role">
               <option value="">-- избери --</option>
-              <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+              <option *ngFor="let r of roleOptions" [value]="r">{{ roleLabels[r] ?? r }}</option>
             </select>
             <div class="tf-error" *ngIf="field('role')?.touched && field('role')?.invalid">
               <small>Ролята е задължителна.</small>
@@ -115,7 +115,7 @@
             <label class="tf-label">Вид договор *</label>
             <select class="tf-input" formControlName="contractType">
               <option value="">-- избери --</option>
-              <option *ngFor="let c of contractTypeOptions" [value]="c">{{ c }}</option>
+              <option *ngFor="let c of contractTypeOptions" [value]="c">{{ contractTypeLabels[c] ?? c }}</option>
             </select>
             <div class="tf-error" *ngIf="field('contractType')?.touched && field('contractType')?.invalid">
               <small>Вид договор е задължителен.</small>
@@ -123,23 +123,21 @@
           </div>
 
           <div class="tf-group">
-            <label class="tf-label">Брутна заплата *</label>
-            <input class="tf-input" formControlName="salary" type="number" step="0.01" />
+            <label class="tf-label">Брутна заплата (€) *</label>
+            <div class="tf-input-with-prefix">
+              <span class="tf-prefix">€</span>
+              <input class="tf-input" formControlName="salary" type="number" step="0.01" min="0" />
+            </div>
             <div class="tf-error" *ngIf="field('salary')?.touched && field('salary')?.invalid">
               <small>Заплатата е задължителна.</small>
             </div>
           </div>
 
           <div class="tf-group">
-            <label class="tf-label">Нетна заплата</label>
-            <input class="tf-input" formControlName="salaryNeto" type="number" step="0.01" />
-          </div>
-
-          <div class="tf-group">
-            <label class="tf-label">Валута *</label>
-            <input class="tf-input" formControlName="salaryCurrency" type="text" placeholder="BGN, EUR" />
-            <div class="tf-error" *ngIf="field('salaryCurrency')?.touched && field('salaryCurrency')?.invalid">
-              <small>Валутата е задължителна.</small>
+            <label class="tf-label">Нетна заплата (€)</label>
+            <div class="tf-input-with-prefix">
+              <span class="tf-prefix">€</span>
+              <input class="tf-input" formControlName="salaryNeto" type="number" step="0.01" min="0" />
             </div>
           </div>
 

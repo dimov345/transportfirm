@@ -1,11 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { environment } from '../../../environments/environment';
+
+function strongPassword(control: AbstractControl): ValidationErrors | null {
+  const p: string = control.value ?? '';
+  const ok = p.length >= 8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /\d/.test(p);
+  return ok ? null : { weakPassword: true };
+}
 
 @Component({
   selector: 'app-first-login',
@@ -30,7 +36,7 @@ export class FirstLogin {
   form = this.fb.group({
     email:           ['', [Validators.required, Validators.email]],
     otp:             ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
-    newPassword:     ['', [Validators.required, Validators.minLength(6)]],
+    newPassword:     ['', [Validators.required, strongPassword]],
     confirmPassword: ['', [Validators.required]]
   });
 
@@ -85,5 +91,29 @@ export class FirstLogin {
   get passwordMismatch(): boolean {
     const { newPassword, confirmPassword } = this.form.value;
     return !!(newPassword && confirmPassword && newPassword !== confirmPassword);
+  }
+
+  get pwdStrength() {
+    return this.calcStrength(this.form.get('newPassword')?.value ?? '');
+  }
+
+  private calcStrength(password: string) {
+    const hasLength  = password.length >= 8;
+    const hasUpper   = /[A-Z]/.test(password);
+    const hasLower   = /[a-z]/.test(password);
+    const hasDigit   = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()\-_=+[\]{};':"\\|,.<>/?`~]/.test(password);
+
+    let score = 0;
+    if (hasLength)  score++;
+    if (hasUpper)   score++;
+    if (hasLower)   score++;
+    if (hasDigit)   score++;
+    if (hasSpecial) score++;
+
+    const segs = score <= 0 ? 0 : score <= 2 ? 1 : score - 1;
+    const labels = ['', 'Много слаба', 'Слаба', 'Средна', 'Силна', 'Много силна'];
+
+    return { score, label: labels[score] ?? '', segs, hasLength, hasUpper, hasLower, hasDigit, hasSpecial };
   }
 }

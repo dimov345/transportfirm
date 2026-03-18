@@ -79,7 +79,7 @@
   <!-- ── Load error ─────────────────────────────────────── -->
   <div class="acc-error-bar" *ngIf="loadError">
     <i class="material-icons">error_outline</i>
-    <span>Грешка при зареждане на данните. Моля, опитайте отново.</span>
+    <span>{{ loadError }}</span>
   </div>
 
   <!-- ── Summary cards ──────────────────────────────────── -->
@@ -285,13 +285,13 @@
                   (click)="goToEmployee(row.employeeId)">
                 <td><div class="acc-table-name">{{ row.name }}</div></td>
                 <td><span class="acc-chip">{{ row.jobTitle }}</span></td>
-                <td class="text-right expense-value">{{ fmtExpBgn(row.brutoBgn) }}</td>
-                <td class="text-right expense-value">{{ fmtExpBgn(row.netoBgn) }}</td>
-                <td class="text-right expense-value">{{ fmtExpBgn(row.taxesBgn) }}</td>
+                <td class="text-right expense-value">{{ fmtExpEur(row.brutoEur) }}</td>
+                <td class="text-right expense-value">{{ fmtExpEur(row.netoEur) }}</td>
+                <td class="text-right expense-value">{{ fmtExpEur(row.taxesEur) }}</td>
                 <td class="text-right acc-pct-col">
                   <span class="acc-pct-bar-wrap">
-                    <span class="acc-pct-bar" [style.width.%]="expenseShare(row.brutoBgn / 1.95583)"></span>
-                    <span class="acc-pct-txt">{{ expenseShare(row.brutoBgn / 1.95583) }}%</span>
+                    <span class="acc-pct-bar" [style.width.%]="expenseShare(row.brutoEur)"></span>
+                    <span class="acc-pct-txt">{{ expenseShare(row.brutoEur) }}%</span>
                   </span>
                 </td>
               </tr>
@@ -300,7 +300,7 @@
               <tr class="acc-table-footer">
                 <td colspan="2"><strong>Общо ({{ dashboard.salaries.length }} служители)</strong></td>
                 <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.totalSalaryBrutoEur) }}</strong></td>
-                <td class="text-right expense-value"><strong>{{ fmtExpBgn(dashboard.summary.totalSalaryBrutoBgn - (dashboard.summary.salaryTaxesEur * 1.95583)) }}</strong></td>
+                <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.totalSalaryNetoEur) }}</strong></td>
                 <td class="text-right expense-value"><strong>{{ fmtExpEur(dashboard.summary.salaryTaxesEur) }}</strong></td>
                 <td></td>
               </tr>
@@ -506,6 +506,10 @@
 
     <!-- ── DOWNLOAD TAB ───────────────────────────────────── -->
     <div class="acc-tab-content" *ngIf="activeDataTab === 'download'">
+      <div class="acc-error-bar" *ngIf="downloadError">
+        <i class="material-icons">error_outline</i>
+        <span>{{ downloadError }}</span>
+      </div>
       <p class="acc-dl-hint">
         <i class="material-icons">info_outline</i>
         Изтеглете финансовия отчет за <strong>{{ periodSummary }}</strong> в Excel формат.

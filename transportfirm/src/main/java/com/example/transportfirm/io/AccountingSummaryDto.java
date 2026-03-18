@@ -11,10 +11,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class AccountingSummaryDto {
     private BigDecimal tripRevenueEur;
-    private BigDecimal totalSalaryBrutoBgn;
     private BigDecimal totalSalaryBrutoEur;
     private BigDecimal tripExpensesEur;
-    private BigDecimal maintenanceCostsBgn;
     private BigDecimal maintenanceCostsEur;
     private BigDecimal netBalanceEur;
     private int employeeCount;
@@ -24,4 +22,5 @@ public class AccountingSummaryDto {
     private int leasedVehicleCount;
     private BigDecimal vatTotalEur;
     private BigDecimal salaryTaxesEur;
+    private BigDecimal totalSalaryNetoEur;
 }

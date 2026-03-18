@@ -432,6 +432,33 @@ $expense:   #dc2626;
   span { display: flex; align-items: center; gap: 4px; }
 }
 
+// ─── Load error banner (stats + notifications) ──────────────────────────────
+.load-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: $radius;
+  color: $expense;
+  font-size: 13px;
+  font-weight: 500;
+
+  .material-icons { font-size: 18px; flex-shrink: 0; }
+}
+
+.notif-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  color: $expense;
+  font-size: 13px;
+
+  .material-icons { font-size: 18px; flex-shrink: 0; }
+}
+
 // ─── Notifications column ───────────────────────────────────────────────────
 .notif-col { position: sticky; top: 20px; }
 

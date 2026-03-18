@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
 import { FreightTripService } from '../../../core/services/freight-trip.service';
+import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 import { FreightTrip, TripStatus } from '../../../core/models/freight-trip.model';
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 
@@ -176,6 +177,7 @@ export class FreightTripFormComponent implements OnInit {
       this.tripService.update(this.tripId, trip, vehicleId).subscribe({
         next: (saved) => {
           this.saving = false;
+          invalidateCache();
           this.router.navigate(['/freight-trips', saved.id]);
         },
         error: (err) => {
@@ -190,6 +192,7 @@ export class FreightTripFormComponent implements OnInit {
       this.tripService.create(trip, vehicleId).subscribe({
         next: (saved) => {
           this.saving = false;
+          invalidateCache();
           this.router.navigate(['/freight-trips', saved.id]);
         },
         error: (err) => {

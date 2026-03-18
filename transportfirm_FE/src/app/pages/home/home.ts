@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, EMPTY } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardStats, DashboardNotification } from '../../core/models/dashboard.model';
@@ -32,6 +34,8 @@ export class Home implements OnInit {
   notifications: DashboardNotification[] = [];
   statsLoading   = false;
   notifLoading   = false;
+  statsError     = '';
+  notifError     = '';
 
   private readonly numFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -75,18 +79,43 @@ export class Home implements OnInit {
 
   private loadStats(): void {
     this.statsLoading = true;
-    this.dashSvc.getStats().subscribe({
-      next:  s  => { this.stats = s; this.statsLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.statsLoading = false; this.cdr.detectChanges(); }
+    this.statsError   = '';
+    this.dashSvc.getStats().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.statsError   = this.httpErrorMessage(err);
+        this.statsLoading = false;
+        this.cdr.detectChanges();
+        return EMPTY;
+      })
+    ).subscribe(s => {
+      this.stats        = s;
+      this.statsLoading = false;
+      this.cdr.detectChanges();
     });
   }
 
   private loadNotifications(): void {
     this.notifLoading = true;
-    this.dashSvc.getNotifications().subscribe({
-      next:  n  => { this.notifications = n; this.notifLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.notifLoading = false; this.cdr.detectChanges(); }
+    this.notifError   = '';
+    this.dashSvc.getNotifications().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.notifError   = this.httpErrorMessage(err);
+        this.notifLoading = false;
+        this.cdr.detectChanges();
+        return EMPTY;
+      })
+    ).subscribe(n => {
+      this.notifications = n;
+      this.notifLoading  = false;
+      this.cdr.detectChanges();
     });
+  }
+
+  private httpErrorMessage(err: HttpErrorResponse): string {
+    if (err.status === 0)   return 'Сървърът е недостъпен';
+    if (err.status === 401) return 'Сесията е изтекла — пренасочване към вход...';
+    if (err.status === 403) return 'Нямате права за тази операция';
+    return `Грешка при зареждане (${err.status})`;
   }
 
   // ── Auth helpers ──────────────────────────────────────────────────────────
@@ -118,7 +147,7 @@ export class Home implements OnInit {
 
   // ── Formatters ────────────────────────────────────────────────────────────
   fmtEur(v: number | null | undefined): string { return '€' + this.numFmt.format(v ?? 0); }
-  fmtBgn(v: number | null | undefined): string { return '€' + this.numFmt.format((v ?? 0) / 1.95583); }
+  fmtBgn(v: number | null | undefined): string { return '€' + this.numFmt.format(v ?? 0); }
   fmtSalaryEur(v: number | null | undefined): string { return '€' + this.numFmt.format(v ?? 0); }
 
   // ── Notification helpers ──────────────────────────────────────────────────

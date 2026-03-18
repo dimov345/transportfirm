@@ -266,8 +266,8 @@ export class EmployeeDetails implements OnInit {
   }
 
   private readonly numFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  fmtEur(bgn: number | null | undefined): string {
-    return '€' + this.numFmt.format((bgn ?? 0) / 1.95583);
+  fmtEur(eur: number | null | undefined): string {
+    return '€' + this.numFmt.format(eur ?? 0);
   }
 
   editEmployee(employeeId: string) {

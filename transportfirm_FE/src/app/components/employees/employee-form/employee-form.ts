@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 
 import {
   AdminService,
@@ -51,6 +52,22 @@ export class EmployeeForm implements OnInit {
   roleOptions = Object.values(Role);
   contractTypeOptions = Object.values(ContractType);
 
+  readonly jobTitleLabels: Record<string, string | undefined> = {
+    DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ADMINISTRATOR: 'Администратор'
+  };
+
+  readonly roleLabels: Record<string, string | undefined> = {
+    ADMIN: 'Администратор', MANAGER: 'Мениджър', DISPATCHER: 'Спедитор',
+    ACCOUNTANT: 'Счетоводител', DRIVER: 'Шофьор', MECHANIC: 'Механик'
+  };
+
+  readonly contractTypeLabels: Record<string, string | undefined> = {
+    FULL_TIME: 'Пълен работен ден', PART_TIME: 'Непълен работен ден',
+    TEMPORARY: 'Временен', INTERNSHIP: 'Стаж', CIVIL_CONTRACT: 'Граждански договор'
+  };
+
   ngOnInit(): void {
     this.initForm();
 
@@ -79,7 +96,6 @@ export class EmployeeForm implements OnInit {
       contractType: ['', Validators.required],
       salary: [null, Validators.required],
       salaryNeto: [null],
-      salaryCurrency: ['', Validators.required],
       workingHours: ['', Validators.required],
 
       bankName: ['', Validators.required],
@@ -131,7 +147,6 @@ export class EmployeeForm implements OnInit {
 
             salary: emp.salary ?? null,
             salaryNeto: emp.salaryNeto ?? null,
-            salaryCurrency: emp.salaryCurrency ?? '',
             workingHours: emp.workingHours ?? '',
 
             bankName: emp.bankName ?? '',
@@ -187,7 +202,7 @@ export class EmployeeForm implements OnInit {
 
       salary: v.salary != null && v.salary !== '' ? Number(v.salary) : 0,
       salaryNeto: v.salaryNeto != null && v.salaryNeto !== '' ? Number(v.salaryNeto) : undefined,
-      salaryCurrency: v.salaryCurrency,
+      salaryCurrency: 'EUR',
       workingHours: v.workingHours,
 
       bankName: v.bankName,
@@ -220,7 +235,7 @@ export class EmployeeForm implements OnInit {
 
       salary: v.salary != null && v.salary !== '' ? Number(v.salary) : 0,
       salaryNeto: v.salaryNeto != null && v.salaryNeto !== '' ? Number(v.salaryNeto) : null,
-      salaryCurrency: v.salaryCurrency,
+      salaryCurrency: 'EUR',
       workingHours: v.workingHours,
 
       bankName: v.bankName,
@@ -260,7 +275,7 @@ export class EmployeeForm implements OnInit {
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: () => this.router.navigate(['/employees']),
+        next: () => { invalidateCache(); this.router.navigate(['/employees']); },
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message ||

@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DriverService } from '../../../core/services/driver.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { DriverInfo } from '../../../core/models/driver/driver-info.model';
+import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 
 @Component({
   selector: 'app-driver-form',
@@ -113,6 +114,7 @@ export class DriverFormComponent implements OnInit {
     this.driverService.updateDriverInfo(this.driverInfoId, payload).subscribe({
       next: () => {
         this.saving = false;
+        invalidateCache();
         this.router.navigate(['/drivers']);
       },
       error: (err: unknown) => {

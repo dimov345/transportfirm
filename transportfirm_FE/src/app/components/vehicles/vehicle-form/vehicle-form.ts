@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { finalize } from 'rxjs/operators';
 
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
+import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -214,7 +215,7 @@ export class VehicleFormComponent implements OnInit {
         })
       )
       .subscribe({
-        next: () => this.router.navigate(['/vehicles']),
+        next: () => { invalidateCache(); this.router.navigate(['/vehicles']); },
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message || `Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`;

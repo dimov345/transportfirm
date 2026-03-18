@@ -536,6 +536,49 @@ $ease: 0.15s ease;
   100% { background-position: 0% 50%; }
 }
 
+/* ========= Input with prefix (e.g. € symbol) ========= */
+.tf-input-with-prefix {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $surface;
+  transition: border-color $ease, box-shadow $ease;
+
+  &:focus-within {
+    border-color: rgba($accent, 0.75);
+    box-shadow: 0 0 0 3px rgba($accent, 0.12);
+  }
+
+  .tf-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: #f3f4f6;
+    border-right: 1px solid $border;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 14px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  input.tf-input {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    flex: 1;
+    min-width: 0;
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+      outline: none;
+    }
+  }
+}
+
 /* ========= Responsive ========= */
 @media (max-width: 768px) {
   .tf-form {

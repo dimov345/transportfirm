@@ -10,6 +10,7 @@ import com.example.transportfirm.enums.ReportPeriod;
 import com.example.transportfirm.io.*;
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.repository.EmployeeRepository;
+import com.example.transportfirm.util.FinancialConstants;
 import com.example.transportfirm.repository.VehicleFreightTripRepository;
 import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.VehicleRepository;
@@ -32,9 +33,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportService {
 
-    private static final BigDecimal BGN_TO_EUR = BigDecimal.ONE
-            .divide(new BigDecimal("1.95583"), 6, RoundingMode.HALF_UP);
-
     private final EmployeeRepository employeeRepository;
     private final VehicleFreightTripRepository tripRepository;
     private final VehicleMaintenanceRecordRepository maintenanceRepository;
@@ -46,8 +44,9 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public byte[] generateSalaryReport(ReportPeriod period, int year, Integer month, Integer week) {
+        List<Employee> employees = employeeRepository.findByEmploymentStatus(EmploymentStatus.ACTIVE);
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
-            buildSalarySheet(wb, wb.createSheet("Заплати"), period, year, month, week);
+            buildSalarySheet(wb, wb.createSheet("Заплати"), employees, period, year, month, week);
             return toBytes(wb);
         } catch (IOException e) {
             throw new RuntimeException("Грешка при генериране на отчета", e);
@@ -81,16 +80,17 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public byte[] generateCombinedReport(ReportPeriod period, int year, Integer month, Integer week) {
+        List<Employee> employees = employeeRepository.findByEmploymentStatus(EmploymentStatus.ACTIVE);
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
             LocalDate[] range = getDateRange(period, year, month, week);
             List<VehicleFreightTrip> trips = tripRepository.findByDepartureDateBetweenWithVehicle(range[0], range[1]);
             List<VehicleMaintenanceRecord> records = maintenanceRepository.findByOpenedAtBetweenWithVehicle(
                     range[0].atStartOfDay(), range[1].atTime(LocalTime.MAX));
 
-            buildSalarySheet(wb, wb.createSheet("Заплати"), period, year, month, week);
+            buildSalarySheet(wb, wb.createSheet("Заплати"), employees, period, year, month, week);
             buildTripsSheet(wb, wb.createSheet("Курсове"), trips);
             buildMaintenanceSheet(wb, wb.createSheet("Поддръжка"), records);
-            buildSummarySheet(wb, wb.createSheet("Обобщение"), trips, records, period, year, month, week);
+            buildSummarySheet(wb, wb.createSheet("Обобщение"), employees, trips, records, period, year, month, week);
 
             return toBytes(wb);
         } catch (IOException e) {
@@ -108,9 +108,7 @@ public class ReportService {
         String label = periodLabel(period, year, month, week);
 
         // ── Salaries ─────────────────────────────────────────────────
-        List<Employee> employees = employeeRepository.findAll().stream()
-                .filter(e -> e.getEmploymentStatus() == EmploymentStatus.ACTIVE)
-                .toList();
+        List<Employee> employees = employeeRepository.findByEmploymentStatus(EmploymentStatus.ACTIVE);
         BigDecimal factor = salaryFactor(period);
 
         List<SalaryRowDto> salaries = employees.stream().map(emp -> {
@@ -151,8 +149,7 @@ public class ReportService {
                 range[0].atStartOfDay(), range[1].atTime(LocalTime.MAX));
 
         List<MaintenanceRowDto> mainRows = mainRecords.stream().map(r -> {
-            BigDecimal gross    = orZero(r.getTotalGross());
-            BigDecimal grossEur = gross.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal grossEur = orZero(r.getTotalGross()).setScale(2, RoundingMode.HALF_UP);
             return new MaintenanceRowDto(
                     r.getId(),
                     r.getVehicle() != null ? r.getVehicle().getId() : null,
@@ -160,25 +157,14 @@ public class ReportService {
                     maintenanceTypeLabel(r.getType()),
                     r.getWorkshopName(),
                     r.getOpenedAt() != null ? r.getOpenedAt().toLocalDate().toString() : null,
-                    gross, grossEur);
+                    grossEur);
         }).toList();
 
         // ── Leasing ───────────────────────────────────────────────────
-        List<VehicleRecord> leasedVehicles = vehicleRepository.findAll().stream()
-                .filter(v -> v.isLeased() && v.getLeasingMonthlyPaymentEur() != null
-                        && v.getLeasingMonthlyPaymentEur().compareTo(BigDecimal.ZERO) > 0)
-                .filter(v -> {
-                    LocalDate start = v.getLeasingStartDate();
-                    LocalDate end   = v.getLeasingEndDate();
-                    // lease overlaps with the report period if: start <= rangeEnd && end >= rangeStart
-                    boolean startOk = start == null || !start.isAfter(range[1]);
-                    boolean endOk   = end   == null || !end.isBefore(range[0]);
-                    return startOk && endOk;
-                })
-                .toList();
+        List<VehicleRecord> leasedVehicles = vehicleRepository.findAllLeasedInPeriod(range[0], range[1]);
 
         BigDecimal periodMonths = switch (period) {
-            case WEEKLY  -> BigDecimal.ONE.divide(new BigDecimal("4.33"), 6, RoundingMode.HALF_UP);
+            case WEEKLY  -> BigDecimal.ONE.divide(FinancialConstants.WEEKS_PER_MONTH, 6, RoundingMode.HALF_UP);
             case MONTHLY -> BigDecimal.ONE;
             case YEARLY  -> new BigDecimal("12");
         };
@@ -201,12 +187,10 @@ public class ReportService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // ── Summary ───────────────────────────────────────────────────
-        BigDecimal totalBruto    = salaries.stream().map(SalaryRowDto::getBrutoBgn)
-                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalBrutoEur = totalBruto.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal totalNetoEur  = salaries.stream().map(SalaryRowDto::getNetoBgn)
-                                            .reduce(BigDecimal.ZERO, BigDecimal::add)
-                                            .multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalBrutoEur = salaries.stream().map(SalaryRowDto::getBrutoEur)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalNetoEur  = salaries.stream().map(SalaryRowDto::getNetoEur)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
         BigDecimal salaryTaxes   = totalBrutoEur.subtract(totalNetoEur);
         BigDecimal tripRevenue   = tripRows.stream().map(TripRowDto::getRevenueEur)
                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -214,8 +198,6 @@ public class ReportService {
                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal vatTotal      = trips.stream().map(t -> orZero(t.getVatEur()))
                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal maintBgn      = mainRows.stream().map(MaintenanceRowDto::getTotalGrossBgn)
-                                           .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal maintEur      = mainRows.stream().map(MaintenanceRowDto::getTotalGrossEur)
                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal netBalance    = tripRevenue.subtract(tripExpenses)
@@ -224,10 +206,11 @@ public class ReportService {
                                               .subtract(leasingTotal);
 
         AccountingSummaryDto summary = new AccountingSummaryDto(
-                tripRevenue, totalBruto, totalBrutoEur,
-                tripExpenses, maintBgn, maintEur, netBalance,
+                tripRevenue, totalBrutoEur,
+                tripExpenses, maintEur, netBalance,
                 employees.size(), trips.size(), mainRecords.size(),
-                leasingTotal, leasedVehicles.size(), vatTotal, salaryTaxes);
+                leasingTotal, leasedVehicles.size(), vatTotal, salaryTaxes,
+                totalNetoEur);
 
         return new AccountingDashboardResponse(label, summary, salaries, tripRows, mainRows, leasingRows);
     }
@@ -237,6 +220,7 @@ public class ReportService {
     // =================================================================
 
     private void buildSalarySheet(XSSFWorkbook wb, Sheet sheet,
+                                   List<Employee> employees,
                                    ReportPeriod period, int year, Integer month, Integer week) {
         CellStyle hStyle  = makeHeaderStyle(wb);
         CellStyle money   = makeMoneyStyle(wb);
@@ -249,10 +233,6 @@ public class ReportService {
         };
         writeHeader(sheet, hStyle, headers);
 
-        List<Employee> employees = employeeRepository.findAll().stream()
-                .filter(e -> e.getEmploymentStatus() == EmploymentStatus.ACTIVE)
-                .toList();
-
         BigDecimal factor = salaryFactor(period);
         String label      = periodLabel(period, year, month, week);
         BigDecimal totalB = BigDecimal.ZERO;
@@ -260,8 +240,8 @@ public class ReportService {
 
         int rowNum = 1;
         for (Employee emp : employees) {
-            BigDecimal bruto = orZero(emp.getSalary()).multiply(factor).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal neto  = orZero(emp.getSalaryNeto()).multiply(factor).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal bruto = orZero(emp.getSalary()).multiply(factor).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal neto  = orZero(emp.getSalaryNeto()).multiply(factor).setScale(2, RoundingMode.HALF_UP);
             BigDecimal taxes = bruto.subtract(neto);
 
             Row row = sheet.createRow(rowNum++);
@@ -362,18 +342,18 @@ public class ReportService {
 
         int rowNum = 1;
         for (VehicleMaintenanceRecord r : records) {
-            BigDecimal grossEur = orZero(r.getTotalGross()).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal grossEur = orZero(r.getTotalGross()).setScale(2, RoundingMode.HALF_UP);
 
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(r.getOpenedAt() != null ? r.getOpenedAt().toLocalDate().toString() : "");
             row.createCell(1).setCellValue(r.getVehicle() != null ? r.getVehicle().getPlateNumber() : "");
             row.createCell(2).setCellValue(maintenanceTypeLabel(r.getType()));
             row.createCell(3).setCellValue(r.getWorkshopName() != null ? r.getWorkshopName() : "");
-            setMoney(row, 4, orZero(r.getPartsNet()).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP),  money);
-            setMoney(row, 5, orZero(r.getPartsVat()).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP),  money);
-            setMoney(row, 6, orZero(r.getOtherNet()).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP),  money);
-            setMoney(row, 7, orZero(r.getOtherVat()).multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP),  money);
-            setMoney(row, 8, grossEur,                                                                         money);
+            setMoney(row, 4, orZero(r.getPartsNet()).setScale(2, RoundingMode.HALF_UP),  money);
+            setMoney(row, 5, orZero(r.getPartsVat()).setScale(2, RoundingMode.HALF_UP),  money);
+            setMoney(row, 6, orZero(r.getOtherNet()).setScale(2, RoundingMode.HALF_UP),  money);
+            setMoney(row, 7, orZero(r.getOtherVat()).setScale(2, RoundingMode.HALF_UP),  money);
+            setMoney(row, 8, grossEur,                                                    money);
 
             totalEur = totalEur.add(grossEur);
         }
@@ -388,6 +368,7 @@ public class ReportService {
     }
 
     private void buildSummarySheet(XSSFWorkbook wb, Sheet sheet,
+                                    List<Employee> employees,
                                     List<VehicleFreightTrip> trips,
                                     List<VehicleMaintenanceRecord> records,
                                     ReportPeriod period, int year, Integer month, Integer week) {
@@ -396,13 +377,10 @@ public class ReportService {
         CellStyle money = makeMoneyStyle(wb);
         CellStyle normal = wb.createCellStyle();
 
-        List<Employee> employees = employeeRepository.findAll().stream()
-                .filter(e -> e.getEmploymentStatus() == EmploymentStatus.ACTIVE).toList();
-
         BigDecimal factor    = salaryFactor(period);
-        BigDecimal totalB    = employees.stream().map(e -> orZero(e.getSalary()).multiply(factor).multiply(BGN_TO_EUR))
+        BigDecimal totalB    = employees.stream().map(e -> orZero(e.getSalary()).multiply(factor))
                                         .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal totalN    = employees.stream().map(e -> orZero(e.getSalaryNeto()).multiply(factor).multiply(BGN_TO_EUR))
+        BigDecimal totalN    = employees.stream().map(e -> orZero(e.getSalaryNeto()).multiply(factor))
                                         .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
         BigDecimal tripRev   = trips.stream().map(t -> orZero(t.getRevenueEur())).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal tripVat   = trips.stream().map(t -> orZero(t.getVatEur())).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -414,8 +392,7 @@ public class ReportService {
         BigDecimal tripProfit = tripRev.subtract(tripVat).subtract(tripFuel)
                                         .subtract(tripTolls).subtract(tripBord)
                                         .subtract(tripPark).subtract(tripOther);
-        BigDecimal maintBgn = records.stream().map(r -> orZero(r.getTotalGross())).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal maintEur = maintBgn.multiply(BGN_TO_EUR).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal maintEur = records.stream().map(r -> orZero(r.getTotalGross())).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
 
         String label = periodLabel(period, year, month, week);
 
@@ -491,7 +468,7 @@ public class ReportService {
 
     private BigDecimal salaryFactor(ReportPeriod period) {
         return switch (period) {
-            case WEEKLY  -> BigDecimal.ONE.divide(new BigDecimal("4.33"), 6, RoundingMode.HALF_UP);
+            case WEEKLY  -> BigDecimal.ONE.divide(FinancialConstants.WEEKS_PER_MONTH, 6, RoundingMode.HALF_UP);
             case MONTHLY -> BigDecimal.ONE;
             case YEARLY  -> new BigDecimal("12");
         };

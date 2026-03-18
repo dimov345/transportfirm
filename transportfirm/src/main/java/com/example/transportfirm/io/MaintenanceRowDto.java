@@ -17,6 +17,5 @@ public class MaintenanceRowDto {
     private String maintenanceType;
     private String workshopName;
     private String openedAt;
-    private BigDecimal totalGrossBgn;
     private BigDecimal totalGrossEur;
 }

@@ -3,7 +3,9 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { EMPTY, catchError } from 'rxjs';
 import { ReportService, ReportType, ReportPeriod } from '../../core/services/report.service';
 import { AccountingDashboard } from '../../core/models/accounting.model';
 
@@ -32,9 +34,10 @@ export class AccountingComponent implements OnInit {
   selectedWeek:  number = this.currentIsoWeek();
 
   // ── Data state ────────────────────────────────────────────────
-  dashboard: AccountingDashboard | null = null;
-  loading   = false;
-  loadError = false;
+  dashboard:  AccountingDashboard | null = null;
+  loading     = false;
+  loadError   = '';
+  downloadError = '';
 
   // ── UI state ──────────────────────────────────────────────────
   activeDataTab: DataTab = 'salary';
@@ -92,7 +95,7 @@ export class AccountingComponent implements OnInit {
   loadData(): void {
     if (!this.isBrowser) return;
     this.loading   = true;
-    this.loadError = false;
+    this.loadError = '';
     this.cdr.detectChanges();
 
     this.reportSvc.getData(
@@ -100,17 +103,17 @@ export class AccountingComponent implements OnInit {
       this.selectedYear,
       this.activePeriod === 'MONTHLY' ? this.selectedMonth : undefined,
       this.activePeriod === 'WEEKLY'  ? this.selectedWeek  : undefined
-    ).subscribe({
-      next: (data) => {
-        this.dashboard = data;
+    ).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.loadError = this.httpErrorMessage(err);
         this.loading   = false;
         this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loadError = true;
-        this.loading   = false;
-        this.cdr.detectChanges();
-      }
+        return EMPTY;
+      })
+    ).subscribe(data => {
+      this.dashboard = data;
+      this.loading   = false;
+      this.cdr.detectChanges();
     });
   }
 
@@ -136,6 +139,7 @@ export class AccountingComponent implements OnInit {
   download(type: ReportType): void {
     if (this.downloading[type]) return;
     this.downloading[type] = true;
+    this.downloadError = '';
     this.cdr.detectChanges();
 
     this.reportSvc.download(
@@ -144,10 +148,24 @@ export class AccountingComponent implements OnInit {
       this.selectedYear,
       this.activePeriod === 'MONTHLY' ? this.selectedMonth : undefined,
       this.activePeriod === 'WEEKLY'  ? this.selectedWeek  : undefined
-    ).subscribe({
-      next:  () => { this.downloading[type] = false; this.cdr.detectChanges(); },
-      error: () => { this.downloading[type] = false; alert('Грешка при изтегляне на отчета!'); this.cdr.detectChanges(); }
+    ).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.downloading[type]  = false;
+        this.downloadError      = this.httpErrorMessage(err);
+        this.cdr.detectChanges();
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.downloading[type] = false;
+      this.cdr.detectChanges();
     });
+  }
+
+  private httpErrorMessage(err: HttpErrorResponse): string {
+    if (err.status === 0)   return 'Сървърът е недостъпен';
+    if (err.status === 401) return 'Сесията е изтекла — пренасочване към вход...';
+    if (err.status === 403) return 'Нямате права за тази операция';
+    return `Грешка (${err.status})`;
   }
 
   // ── Formatters ────────────────────────────────────────────────
@@ -156,7 +174,7 @@ export class AccountingComponent implements OnInit {
   }
 
   fmtBgn(val: number | null | undefined): string {
-    return '€' + this.numFmt.format((val ?? 0) / 1.95583);
+    return '€' + this.numFmt.format(val ?? 0);
   }
 
   /** Positive → green "+€X", negative → red "-€X" */
@@ -171,7 +189,7 @@ export class AccountingComponent implements OnInit {
   }
 
   fmtExpBgn(val: number | null | undefined): string {
-    return '-€' + this.numFmt.format((val ?? 0) / 1.95583);
+    return '-€' + this.numFmt.format(val ?? 0);
   }
 
   // ── Trip status helpers ───────────────────────────────────────

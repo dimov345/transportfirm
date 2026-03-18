@@ -13,6 +13,7 @@ import {
   MaintenanceDocument,
   MaintenanceDocumentType
 } from '../../../core/services/maintenance.service';
+import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 
 @Component({
   selector: 'app-maintenance-form',
@@ -175,6 +176,7 @@ export class MaintenanceFormComponent implements OnInit {
       next: () => {
         this.success = 'Записът е запазен успешно.';
         this.saving = false;
+        invalidateCache();
         if (!this.documents.length) {
           this.loadDocuments(recordId);
         }

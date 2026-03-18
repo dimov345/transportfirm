@@ -14,7 +14,7 @@ public class SalaryRowDto {
     private UUID employeeId;
     private String name;
     private String jobTitle;
-    private BigDecimal brutoBgn;
-    private BigDecimal netoBgn;
-    private BigDecimal taxesBgn;
+    private BigDecimal brutoEur;
+    private BigDecimal netoEur;
+    private BigDecimal taxesEur;
 }

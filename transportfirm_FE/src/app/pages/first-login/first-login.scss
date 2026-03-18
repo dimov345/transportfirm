@@ -349,6 +349,46 @@ input:focus {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* --------- Password strength bar --------- */
+.pw-strength {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px;
+}
+.pw-segs {
+  display: flex; gap: 4px; flex: 1;
+}
+.pw-seg {
+  flex: 1; height: 4px; border-radius: 3px;
+  background: rgba(255,255,255,.15);
+  transition: background 0.25s ease;
+}
+.pw-segs[data-s="1"] .pw-active,
+.pw-segs[data-s="2"] .pw-active { background: #ef4444; }
+.pw-segs[data-s="3"] .pw-active { background: #f59e0b; }
+.pw-segs[data-s="4"] .pw-active { background: #84cc16; }
+.pw-segs[data-s="5"] .pw-active { background: #22c55e; }
+.pw-label {
+  font-size: 11px; font-weight: 700;
+  min-width: 80px; text-align: right;
+}
+.pw-label[data-s="1"], .pw-label[data-s="2"] { color: #fca5a5; }
+.pw-label[data-s="3"] { color: #fcd34d; }
+.pw-label[data-s="4"] { color: #bef264; }
+.pw-label[data-s="5"] { color: #4ade80; }
+.pw-reqs {
+  list-style: none; margin: 8px 0 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px;
+}
+.pw-reqs li {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: rgba(226,232,240,.55);
+  transition: color 0.2s;
+  .material-icons { font-size: 13px; }
+}
+.pw-reqs li.pw-ok {
+  color: #4ade80;
+  .material-icons { color: #4ade80; }
+}
+
 /* --------- Reduced motion --------- */
 @media (prefers-reduced-motion: reduce) {
   .auth { animation: none !important; }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -17,6 +17,7 @@ export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   loading = false;
   errorMsg = '';
@@ -73,6 +74,7 @@ export class Login {
 
         this.errorMsg = err?.error?.message || 'Грешен email или парола.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
       complete: () => (this.loading = false)
     });

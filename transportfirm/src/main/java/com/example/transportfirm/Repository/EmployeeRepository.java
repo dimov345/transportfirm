@@ -1,6 +1,7 @@
 package com.example.transportfirm.repository;
 
 import com.example.transportfirm.entity.Employee;
+import com.example.transportfirm.enums.EmploymentStatus;
 import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.enums.Role;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +21,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByEgn(String egn);
     List<Employee> findByJobTitle(JobTitle jobTitle);
     Optional<Employee> findByEmail(String email);
+    List<Employee> findByEmploymentStatus(EmploymentStatus status);
 
     /** Returns distinct emails of employees with the given roles, excluding null/blank emails. */
     @Query("SELECT DISTINCT e.email FROM Employee e WHERE e.role IN :roles AND e.email IS NOT NULL AND e.email <> ''")
@@ -68,4 +71,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("SELECT e FROM Employee e WHERE " +
            "(:search = '' OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')) OR e.egn LIKE CONCAT('%', :search, '%'))")
     Page<Employee> searchAll(@Param("search") String search, Pageable pageable);
+
+    // ── Dashboard aggregate queries (avoid findAll for counting/summing) ──────
+
+    long countByEmploymentStatus(EmploymentStatus status);
+
+    @Query("SELECT COALESCE(SUM(e.salary), 0) FROM Employee e WHERE e.employmentStatus = :status")
+    BigDecimal sumSalaryByEmploymentStatus(@Param("status") EmploymentStatus status);
+
+    @Query("SELECT COALESCE(SUM(e.salaryNeto), 0) FROM Employee e WHERE e.employmentStatus = :status")
+    BigDecimal sumSalaryNetoByEmploymentStatus(@Param("status") EmploymentStatus status);
 }

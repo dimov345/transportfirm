@@ -98,4 +98,23 @@ public class VehicleFreightTrip {
             createdAt = LocalDate.now();
         }
     }
+
+    /**
+     * Computes total trip expenses in EUR (sum of all cost components).
+     * Not persisted — derived from existing columns.
+     */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public java.math.BigDecimal getTotalExpensesEur() {
+        java.math.BigDecimal zero = java.math.BigDecimal.ZERO;
+        return nvl(vatEur)
+                .add(nvl(fuelCostEur))
+                .add(nvl(tollFeesEur))
+                .add(nvl(borderFeesEur))
+                .add(nvl(parkingAccommodationEur))
+                .add(nvl(otherExpensesEur));
+    }
+
+    private static java.math.BigDecimal nvl(java.math.BigDecimal v) {
+        return v != null ? v : java.math.BigDecimal.ZERO;
+    }
 }

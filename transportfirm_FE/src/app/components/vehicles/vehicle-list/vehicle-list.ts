@@ -29,6 +29,10 @@ export class VehicleListComponent implements OnInit {
     return this.auth.hasRole('DISPATCHER');
   }
 
+  get isMechanic(): boolean {
+    return this.auth.hasRole('MECHANIC');
+  }
+
   constructor(private vehicleService: VehicleService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {

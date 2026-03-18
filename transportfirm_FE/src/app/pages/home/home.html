@@ -19,7 +19,11 @@
        STATS ROW (ADMIN / MANAGER / ACCOUNTANT only)
   ═══════════════════════════════════════════════════════ -->
   <ng-container *ngIf="showFinancials">
-    <div class="stats-row" *ngIf="!statsLoading && stats">
+    <div class="load-error" *ngIf="statsError && !statsLoading">
+      <i class="material-icons">error_outline</i>
+      <span>{{ statsError }}</span>
+    </div>
+    <div class="stats-row" *ngIf="!statsLoading && !statsError && stats">
       <div class="stat-card">
         <div class="stat-card__icon stat-card__icon--blue">
           <i class="material-icons">people</i>
@@ -92,7 +96,7 @@
     <div class="charts-col" *ngIf="showFinancials">
 
       <!-- === Chart 1: Detailed expenses donut === -->
-      <div class="chart-card" *ngIf="stats">
+      <div class="chart-card" *ngIf="stats && !statsError">
         <div class="chart-card__header">
           <i class="material-icons">donut_large</i>
           <span>Разходи по категории (текущ месец)</span>
@@ -120,7 +124,7 @@
       </div>
 
       <!-- === Chart 2: Detailed income bar chart (last 6 months) === -->
-      <div class="chart-card" *ngIf="stats && stats.monthlyStats?.length">
+      <div class="chart-card" *ngIf="stats && !statsError && stats.monthlyStats?.length">
         <div class="chart-card__header">
           <i class="material-icons">bar_chart</i>
           <span>Приходи — последни 6 месеца</span>
@@ -145,7 +149,7 @@
       </div>
 
       <!-- === Chart 3: Income vs Expenses combined === -->
-      <div class="chart-card" *ngIf="stats && stats.monthlyStats?.length">
+      <div class="chart-card" *ngIf="stats && !statsError && stats.monthlyStats?.length">
         <div class="chart-card__header">
           <i class="material-icons">compare_arrows</i>
           <span>Приходи vs Разходи — последни 6 месеца</span>
@@ -174,7 +178,7 @@
       </div>
 
       <!-- === Chart 4: VAT & social insurance donut === -->
-      <div class="chart-card" *ngIf="stats">
+      <div class="chart-card" *ngIf="stats && !statsError">
         <div class="chart-card__header">
           <i class="material-icons">receipt_long</i>
           <span>ДДС и Осигуровки (текущ месец)</span>
@@ -216,7 +220,7 @@
       </div>
 
       <!-- === Net profit trend line === -->
-      <div class="chart-card" *ngIf="stats && linePoints.length >= 2">
+      <div class="chart-card" *ngIf="stats && !statsError && linePoints.length >= 2">
         <div class="chart-card__header">
           <i class="material-icons">show_chart</i>
           <span>Нетна печалба — тенденция (6 месеца)</span>
@@ -260,12 +264,17 @@
           <span>Зарежда...</span>
         </div>
 
-        <div class="notif-empty" *ngIf="!notifLoading && notifications.length === 0">
+        <div class="notif-error" *ngIf="notifError && !notifLoading">
+          <i class="material-icons">error_outline</i>
+          <span>{{ notifError }}</span>
+        </div>
+
+        <div class="notif-empty" *ngIf="!notifLoading && !notifError && notifications.length === 0">
           <i class="material-icons">check_circle_outline</i>
           <p>Всички документи са валидни.</p>
         </div>
 
-        <ng-container *ngIf="expiredNotifs.length > 0">
+        <ng-container *ngIf="!notifError && expiredNotifs.length > 0">
           <div class="notif-section-label notif-section-label--expired">
             <i class="material-icons">error</i> Изтекли
           </div>
@@ -282,7 +291,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="expiringNotifs.length > 0">
+        <ng-container *ngIf="!notifError && expiringNotifs.length > 0">
           <div class="notif-section-label notif-section-label--expiring">
             <i class="material-icons">warning_amber</i> Изтичат скоро
           </div>

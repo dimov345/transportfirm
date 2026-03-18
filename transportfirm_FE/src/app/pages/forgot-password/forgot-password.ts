@@ -1,9 +1,15 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+
+function strongPassword(control: AbstractControl): ValidationErrors | null {
+  const p: string = control.value ?? '';
+  const ok = p.length >= 8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /\d/.test(p);
+  return ok ? null : { weakPassword: true };
+}
 
 type Step = 1 | 2 | 3 | 4;   // 1=email  2=OTP  3=new password  4=success
 
@@ -51,7 +57,7 @@ export class ForgotPassword implements OnDestroy {
   });
 
   passwordForm = this.fb.group({
-    newPassword:     ['', [Validators.required, Validators.minLength(6)]],
+    newPassword:     ['', [Validators.required, strongPassword]],
     confirmPassword: ['', [Validators.required]]
   });
 
@@ -169,6 +175,30 @@ export class ForgotPassword implements OnDestroy {
   }
 
   goToLogin() { this.router.navigate(['/login']); }
+
+  get pwdStrength() {
+    return this.calcStrength(this.passwordForm.get('newPassword')?.value ?? '');
+  }
+
+  private calcStrength(password: string) {
+    const hasLength  = password.length >= 8;
+    const hasUpper   = /[A-Z]/.test(password);
+    const hasLower   = /[a-z]/.test(password);
+    const hasDigit   = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()\-_=+[\]{};':"\\|,.<>/?`~]/.test(password);
+
+    let score = 0;
+    if (hasLength)  score++;
+    if (hasUpper)   score++;
+    if (hasLower)   score++;
+    if (hasDigit)   score++;
+    if (hasSpecial) score++;
+
+    const segs = score <= 0 ? 0 : score <= 2 ? 1 : score - 1;
+    const labels = ['', 'Много слаба', 'Слаба', 'Средна', 'Силна', 'Много силна'];
+
+    return { score, label: labels[score] ?? '', segs, hasLength, hasUpper, hasLower, hasDigit, hasSpecial };
+  }
 
   private startCountdown(seconds: number) {
     this.clearCountdown();

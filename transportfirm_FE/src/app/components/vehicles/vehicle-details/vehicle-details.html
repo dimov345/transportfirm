@@ -151,7 +151,7 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <label>Статус (VehicleStatus)</label>
+              <label>Статус</label>
               <span class="value status-badge" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">
                 {{ getVehicleStatusLabel(v.vehicleStatus) }}
               </span>
@@ -233,11 +233,11 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <label>Dispatcher group</label>
+              <label>Група спедитор</label>
               <span class="value">{{ v.dispatcherGroup?.groupName || v.dispatcherGroup?.id || '—' }}</span>
             </div>
             <div class="info-item">
-              <label>Mechanic group</label>
+              <label>Група механик</label>
               <span class="value">{{ v.mechanicGroup?.groupName || v.mechanicGroup?.id || '—' }}</span>
             </div>
           </div>

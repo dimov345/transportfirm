@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +19,7 @@ public class EmailService {
     /**
      * Изпраща имейл при създаване на служител от администратор
      */
+    @Async
     public void sendAdminCreatedUserEmail(
             String toEmail,
             String username,
@@ -52,6 +54,7 @@ public class EmailService {
     /**
      * Имейл за възстановяване на парола
      */
+    @Async
     public void sendResetOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -74,6 +77,7 @@ public class EmailService {
     /**
      * Reminder за изтекли/изтичащи документи на шофьор — изпраща се на самия шофьор
      */
+    @Async
     public void sendDriverDocumentReminderEmail(String toEmail, String driverName, java.util.List<String[]> items) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -102,6 +106,7 @@ public class EmailService {
     /**
      * Reminder за изтекли/изтичащи документи на ППС — изпраща се на спедитора (и/или admin)
      */
+    @Async
     public void sendVehicleDocumentReminderEmail(String toEmail, String vehiclePlate, java.util.List<String[]> items) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -130,6 +135,7 @@ public class EmailService {
     /**
      * Имейл за първоначална верификация на акаунт
      */
+    @Async
     public void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://YOUR-APP.railway.app/api'   // ← замени след Railway deploy
+  apiUrl: 'https://transportfirm-backend-production.up.railway.app/api'
 };

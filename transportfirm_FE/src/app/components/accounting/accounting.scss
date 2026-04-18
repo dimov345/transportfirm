@@ -503,6 +503,78 @@ $leasing-border: #e9d5ff;
 
 @keyframes acc-spin { to { transform: rotate(360deg); } }
 
+// ── Invoices tab ──────────────────────────────────────────────
+.acc-inv-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.acc-inv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin-left: 4px;
+
+  .material-icons { font-size: 16px; }
+
+  &--view {
+    color: #1565c0;
+    border-color: #c7d2e2;
+    background: #eef4ff;
+    &:hover:not(:disabled) { background: #1565c0; color: #fff; border-color: #1565c0; }
+    &:disabled { opacity: 0.6; cursor: default; }
+  }
+
+  &--delete {
+    color: #c62828;
+    border-color: #fecaca;
+    background: #fff5f5;
+    &:hover { background: #c62828; color: #fff; border-color: #c62828; }
+  }
+}
+
+.acc-inv-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+
+  button {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: all 0.15s;
+
+    &.active {
+      background: #1565c0;
+      color: #fff;
+      border-color: #1565c0;
+    }
+
+    &:hover:not(.active):not(:disabled) { background: #f3f4f6; }
+    &:disabled { opacity: 0.45; cursor: default; }
+  }
+}
+
+.status-badge--draft     { background: #757575; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-badge--issued    { background: #1565c0; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-badge--paid      { background: #2e7d32; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-badge--cancelled { background: #c62828; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+
 // ── Info bar ──────────────────────────────────────────────────
 .acc-info-bar {
   display: flex; align-items: flex-start; gap: 8px;

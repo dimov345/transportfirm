@@ -17,7 +17,25 @@
       "Bash(xargs grep -l -iE \"\\(leasing|лизинг\\)\")",
       "Bash(xargs grep -l -iE \"\\(salary|заплат|wage|payment\\)\")",
       "Bash(xargs grep -l \"accounting\\\\|leasing\\\\|salary\")",
-      "Bash(xargs grep -li \"leasing\\\\|Leasing\")"
+      "Bash(xargs grep -li \"leasing\\\\|Leasing\")",
+      "Read(//c/Users/Georgi Dimov/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/bbe190de-e82d-4b82-a1c6-73d4767e4317/b0d033f1-df36-4e29-8852-efbbc02f42b0/skills/docx/**)",
+      "Bash(python scripts/office/unpack.py \"C:\\\\Users\\\\Georgi Dimov\\\\Downloads\\\\Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" unpacked/)",
+      "Bash(pip install:*)",
+      "Bash(PYTHONPATH=scripts python scripts/office/unpack.py \"C:\\\\Users\\\\Georgi Dimov\\\\Downloads\\\\Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" unpacked/)",
+      "Bash(python office/unpack.py \"C:\\\\Users\\\\Georgi Dimov\\\\Downloads\\\\Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" ../unpacked/)",
+      "Bash(SKILL_DIR=\"C:/Users/Georgi Dimov/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/bbe190de-e82d-4b82-a1c6-73d4767e4317/b0d033f1-df36-4e29-8852-efbbc02f42b0/skills/docx\")",
+      "Read(//c/transportfirm/$SKILL_DIR/scripts/**)",
+      "Bash(SKILL_DIR=\"/c/Users/Georgi Dimov/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/bbe190de-e82d-4b82-a1c6-73d4767e4317/b0d033f1-df36-4e29-8852-efbbc02f42b0/skills/docx\")",
+      "Read(//c/transportfirm/$SKILL_DIR/**)",
+      "Bash(python office/unpack.py \"/c/Users/Georgi Dimov/Downloads/Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" /tmp/docx_unpacked/)",
+      "Bash(python unpack.py \"/c/Users/Georgi Dimov/Downloads/Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" /tmp/docx_unpacked/)",
+      "Bash(PYTHONPATH=\"$SKILL_DIR/scripts/office\" python unpack.py \"/c/Users/Georgi Dimov/Downloads/Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" /tmp/docx_unpacked/)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, ''C:/Users/Georgi Dimov/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/bbe190de-e82d-4b82-a1c6-73d4767e4317/b0d033f1-df36-4e29-8852-efbbc02f42b0/skills/docx/scripts/office''\\); from helpers.simplify_redlines import simplify_redlines; print\\(''OK''\\)\")",
+      "Bash(python -:*)",
+      "Bash(python scripts/office/unpack.py \"C:\\\\Users\\\\Georgi Dimov\\\\Downloads\\\\Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" \"C:\\\\transportfirm\\\\tmp_docx_unpack\")",
+      "Bash(pandoc \"C:\\\\Users\\\\Georgi Dimov\\\\Downloads\\\\Shablon_na_diplomien_proiekt2025-2026 \\(1\\).docx\" -o \"C:\\\\transportfirm\\\\tmp_template.md\")",
+      "Bash(python -c ':*)",
+      "WebFetch(domain:www.easysendsms.com)"
     ]
   }
 }

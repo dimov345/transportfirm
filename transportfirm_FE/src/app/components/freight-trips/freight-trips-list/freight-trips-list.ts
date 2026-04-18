@@ -7,6 +7,7 @@ import { FreightTripService } from '../../../core/services/freight-trip.service'
 import { FreightTrip, TripStatus } from '../../../core/models/freight-trip.model';
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { InvoiceService } from '../../../core/services/invoice.service';
 
 @Component({
   selector: 'app-freight-trips-list',
@@ -19,11 +20,16 @@ export class FreightTripsListComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-  private tripService = inject(FreightTripService);
+  private tripService    = inject(FreightTripService);
   private vehicleService = inject(VehicleService);
+  private invoiceService = inject(InvoiceService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
+  private cdr    = inject(ChangeDetectorRef);
   auth = inject(AuthService);
+
+  /** Кои курсове в момента генерират фактура (tripId → true) */
+  invoiceLoading: Record<string, boolean> = {};
+  invoiceError = '';
 
   trips: FreightTrip[] = [];
   vehicles: VehicleInfo[] = [];
@@ -142,5 +148,38 @@ export class FreightTripsListComponent implements OnInit {
     return this.auth.hasRole('ADMIN', 'MANAGER');
   }
 
+  get canViewInvoices(): boolean {
+    return this.auth.hasRole('ADMIN', 'MANAGER', 'DISPATCHER');
+  }
+
   trackById = (_: number, t: FreightTrip) => t.id;
+
+  /** Генерира/отваря фактурата за курса в нов таб. */
+  openInvoice(tripId: string | undefined): void {
+    if (!tripId || this.invoiceLoading[tripId]) return;
+    this.invoiceLoading[tripId] = true;
+    this.invoiceError = '';
+    this.cdr.detectChanges();
+
+    this.invoiceService.createOrGetForTrip(tripId).subscribe({
+      next: (inv) => {
+        this.invoiceService.openInvoiceHtml(inv.id).subscribe({
+          next: () => {
+            this.invoiceLoading[tripId] = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.invoiceLoading[tripId] = false;
+            this.invoiceError = err?.message ?? 'Грешка при отваряне на фактурата.';
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => {
+        this.invoiceLoading[tripId] = false;
+        this.invoiceError = 'Грешка при генериране на фактура.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

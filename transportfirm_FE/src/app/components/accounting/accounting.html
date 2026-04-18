@@ -249,6 +249,13 @@
         <span class="acc-nav-tab__badge" *ngIf="dashboard">{{ dashboard.leasings.length }}</span>
       </button>
       <button class="acc-nav-tab" type="button"
+              [class.acc-nav-tab--active]="activeDataTab === 'invoices'"
+              (click)="setDataTab('invoices')">
+        <i class="material-icons">receipt_long</i>
+        Фактури
+        <span class="acc-nav-tab__badge" *ngIf="invoicesTotal > 0">{{ invoicesTotal }}</span>
+      </button>
+      <button class="acc-nav-tab" type="button"
               [class.acc-nav-tab--active]="activeDataTab === 'download'"
               (click)="setDataTab('download')">
         <i class="material-icons">download</i>
@@ -499,6 +506,112 @@
           <div class="acc-empty-state">
             <i class="material-icons">euro_symbol</i>
             <p>Няма активни лизингови договори за периода.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- ── INVOICES TAB ─────────────────────────────────────── -->
+    <div class="acc-tab-content" *ngIf="activeDataTab === 'invoices'">
+
+      <!-- Filters row -->
+      <div class="acc-inv-filters">
+        <select class="acc-ctrl-select" [(ngModel)]="invoicesStatus" (change)="applyInvoicesFilter()">
+          <option value="">Всички статуси</option>
+          <option value="DRAFT">Чернова</option>
+          <option value="ISSUED">Издадена</option>
+          <option value="PAID">Платена</option>
+          <option value="CANCELLED">Анулирана</option>
+        </select>
+        <button class="acc-load-btn" type="button" [disabled]="invoicesLoading" (click)="loadInvoices()">
+          <span class="acc-spinner acc-spinner--sm" *ngIf="invoicesLoading"></span>
+          <i class="material-icons" *ngIf="!invoicesLoading">refresh</i>
+          {{ invoicesLoading ? 'Зарежда...' : 'Обнови' }}
+        </button>
+      </div>
+
+      <div class="acc-error-bar" *ngIf="invoicesError">
+        <i class="material-icons">error_outline</i>
+        <span>{{ invoicesError }}</span>
+      </div>
+
+      <div class="acc-tab-loading" *ngIf="invoicesLoading">
+        <span class="acc-spinner acc-spinner--lg"></span>
+        <span>Зарежда фактури...</span>
+      </div>
+
+      <ng-container *ngIf="!invoicesLoading">
+        <div class="acc-table-wrapper" *ngIf="invoices.length > 0; else noInvoices">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Краен срок</th>
+                <th>Клиент</th>
+                <th>Маршрут</th>
+                <th>Камион</th>
+                <th class="text-right income-header">Приход (€)</th>
+                <th>Статус</th>
+                <th class="text-right">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let inv of invoices" class="acc-table-row">
+                <td><strong>{{ inv.invoiceNumber }}</strong></td>
+                <td class="acc-table-date">{{ inv.issueDate }}</td>
+                <td class="acc-table-date">{{ inv.dueDate ?? '—' }}</td>
+                <td>{{ inv.clientName ?? '—' }}</td>
+                <td><div class="acc-table-route">{{ inv.tripRoute ?? '—' }}</div></td>
+                <td><span class="acc-table-plate">{{ inv.vehiclePlate ?? '—' }}</span></td>
+                <td class="text-right income-value">{{ fmtEur(inv.revenueEur ?? 0) }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="invoiceStatusClass(inv.status)">
+                    {{ invoiceStatusLabel(inv.status) }}
+                  </span>
+                </td>
+                <td class="text-right" style="white-space:nowrap">
+                  <button class="acc-inv-btn acc-inv-btn--view" type="button"
+                          [disabled]="invoiceOpening[inv.id]"
+                          (click)="openInvoice(inv)" title="Отвори фактура">
+                    <span *ngIf="invoiceOpening[inv.id]" class="acc-spinner acc-spinner--sm"></span>
+                    <i *ngIf="!invoiceOpening[inv.id]" class="material-icons">open_in_new</i>
+                  </button>
+                  <button class="acc-inv-btn acc-inv-btn--delete" type="button"
+                          (click)="deleteInvoice(inv.id)" title="Изтрий фактура">
+                    <i class="material-icons">delete_outline</i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="acc-table-footer">
+                <td colspan="6"><strong>Общо {{ invoicesTotal }} фактури</strong></td>
+                <td class="text-right income-value">
+                  <strong>{{ fmtEur(invoicesTotalRevenue) }}</strong>
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Pagination -->
+          <div class="acc-inv-pagination" *ngIf="invoicesTotalPages > 1">
+            <button [disabled]="invoicesPage === 0" (click)="invoicesGoToPage(invoicesPage - 1)">‹</button>
+            <button *ngFor="let p of invoicePages"
+                    [class.active]="p === invoicesPage"
+                    (click)="invoicesGoToPage(p)">{{ p + 1 }}</button>
+            <button [disabled]="invoicesPage >= invoicesTotalPages - 1" (click)="invoicesGoToPage(invoicesPage + 1)">›</button>
+          </div>
+        </div>
+
+        <ng-template #noInvoices>
+          <div class="acc-empty-state">
+            <i class="material-icons">receipt_long</i>
+            <p>Няма генерирани фактури.<br>
+              Фактури се създават от списъка с курсове чрез бутона
+              <strong>„Фактура"</strong> до всеки курс.
+            </p>
           </div>
         </ng-template>
       </ng-container>

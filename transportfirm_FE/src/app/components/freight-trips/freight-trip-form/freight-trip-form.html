@@ -82,10 +82,46 @@
         </div>
       </div>
 
-      <!-- 02 Камион -->
+      <!-- 02 Фирмени данни -->
       <div class="tf-section">
         <div class="tf-section-header">
           <div class="tf-section-number">02</div>
+          <h2>Фирмени данни</h2>
+        </div>
+
+        <div class="tf-subsection-label">Продавач (нашата фирма)</div>
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">Наименование на фирмата</label>
+            <input type="text" formControlName="sellerName" class="tf-input" placeholder="напр. TransTrack ООД">
+          </div>
+          <div class="tf-group">
+            <label class="tf-label">ЕИК / Булстат</label>
+            <input type="text" formControlName="sellerEik" class="tf-input" placeholder="напр. 123456789">
+          </div>
+          <div class="tf-group tf-group-wide">
+            <label class="tf-label">Адрес</label>
+            <input type="text" formControlName="sellerAddress" class="tf-input" placeholder="напр. гр. София, ул. Витоша 1">
+          </div>
+        </div>
+
+        <div class="tf-subsection-label">Купувач (клиент / получател)</div>
+        <div class="tf-grid">
+          <div class="tf-group">
+            <label class="tf-label">ЕИК / Булстат</label>
+            <input type="text" formControlName="clientEik" class="tf-input" placeholder="напр. 987654321">
+          </div>
+          <div class="tf-group tf-group-wide">
+            <label class="tf-label">Адрес</label>
+            <input type="text" formControlName="clientAddress" class="tf-input" placeholder="напр. гр. Пловдив, бул. Марица 5">
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 Камион -->
+      <div class="tf-section">
+        <div class="tf-section-header">
+          <div class="tf-section-number">03</div>
           <h2>Камион</h2>
         </div>
 
@@ -118,10 +154,10 @@
         </div>
       </div>
 
-      <!-- 03 Финанси -->
+      <!-- 04 Финанси -->
       <div class="tf-section">
         <div class="tf-section-header">
-          <div class="tf-section-number">03</div>
+          <div class="tf-section-number">04</div>
           <h2>Финанси (всичко в EUR)</h2>
         </div>
 
@@ -132,7 +168,7 @@
           </div>
 
           <div class="tf-group">
-            <label class="tf-label">ДДС (€)</label>
+            <label class="tf-label">ДДС (€) <span class="tf-hint">— изчислява се автоматично (20%)</span></label>
             <input type="number" formControlName="vatEur" class="tf-input" min="0" step="0.01" placeholder="0.00">
           </div>
 
@@ -168,10 +204,10 @@
         </div>
       </div>
 
-      <!-- 04 Товар -->
+      <!-- 05 Товар -->
       <div class="tf-section">
         <div class="tf-section-header">
-          <div class="tf-section-number">04</div>
+          <div class="tf-section-number">05</div>
           <h2>Товар</h2>
         </div>
 
@@ -188,10 +224,10 @@
         </div>
       </div>
 
-      <!-- 05 Бележки -->
+      <!-- 06 Бележки -->
       <div class="tf-section">
         <div class="tf-section-header">
-          <div class="tf-section-number">05</div>
+          <div class="tf-section-number">06</div>
           <h2>Бележки</h2>
         </div>
 

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8080/api'
+  apiUrl: 'https://YOUR-APP.railway.app/api'   // ← замени след Railway deploy
 };

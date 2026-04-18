@@ -1,6 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
@@ -16,7 +17,7 @@ import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.serv
   templateUrl: './freight-trip-form.html',
   styleUrls: ['./freight-trip-form.scss']
 })
-export class FreightTripFormComponent implements OnInit {
+export class FreightTripFormComponent implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
@@ -42,6 +43,7 @@ export class FreightTripFormComponent implements OnInit {
 
   loading = true;
   saving = false;
+  private vatSub?: Subscription;
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
@@ -55,6 +57,11 @@ export class FreightTripFormComponent implements OnInit {
       destinationCity: ['', Validators.required],
       distanceKm: [null],
       clientName: [''],
+      clientEik: [''],
+      clientAddress: [''],
+      sellerName: [''],
+      sellerEik: [''],
+      sellerAddress: [''],
       revenueEur: [null],
       vatEur: [null],
       tollFeesEur: [null],
@@ -66,6 +73,14 @@ export class FreightTripFormComponent implements OnInit {
       cargoDescription: [''],
       cargoWeightTons: [null],
       notes: ['']
+    });
+
+    // Auto-calculate VAT at 20% when revenue changes
+    this.vatSub = this.form.get('revenueEur')!.valueChanges.subscribe((revenue: number | null) => {
+      if (revenue != null && revenue > 0) {
+        const vat = Math.round(revenue * 0.20 * 100) / 100;
+        this.form.patchValue({ vatEur: vat }, { emitEvent: false });
+      }
     });
 
     // Check for locked vehicleId from query params (dispatcher dashboard flow)
@@ -122,6 +137,11 @@ export class FreightTripFormComponent implements OnInit {
           destinationCity: trip.destinationCity,
           distanceKm: trip.distanceKm ?? null,
           clientName: trip.clientName ?? '',
+          clientEik: trip.clientEik ?? '',
+          clientAddress: trip.clientAddress ?? '',
+          sellerName: trip.sellerName ?? '',
+          sellerEik: trip.sellerEik ?? '',
+          sellerAddress: trip.sellerAddress ?? '',
           revenueEur: trip.revenueEur ?? null,
           vatEur: trip.vatEur ?? null,
           tollFeesEur: trip.tollFeesEur ?? null,
@@ -160,6 +180,11 @@ export class FreightTripFormComponent implements OnInit {
       destinationCity: raw.destinationCity,
       distanceKm: raw.distanceKm ?? undefined,
       clientName: raw.clientName || undefined,
+      clientEik: raw.clientEik || undefined,
+      clientAddress: raw.clientAddress || undefined,
+      sellerName: raw.sellerName || undefined,
+      sellerEik: raw.sellerEik || undefined,
+      sellerAddress: raw.sellerAddress || undefined,
       revenueEur: raw.revenueEur ?? undefined,
       vatEur: raw.vatEur ?? undefined,
       tollFeesEur: raw.tollFeesEur ?? undefined,
@@ -204,6 +229,10 @@ export class FreightTripFormComponent implements OnInit {
         }
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.vatSub?.unsubscribe();
   }
 
   cancel(): void {

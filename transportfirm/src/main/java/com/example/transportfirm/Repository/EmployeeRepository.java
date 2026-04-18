@@ -27,6 +27,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("SELECT DISTINCT e.email FROM Employee e WHERE e.role IN :roles AND e.email IS NOT NULL AND e.email <> ''")
     List<String> findEmailsByRoles(@Param("roles") List<Role> roles);
 
+    /** Returns distinct non-blank phone numbers of active employees with the given roles. */
+    @Query("SELECT DISTINCT e.phone FROM Employee e WHERE e.role IN :roles AND e.phone IS NOT NULL AND e.phone <> '' AND e.employmentStatus = com.example.transportfirm.enums.EmploymentStatus.ACTIVE")
+    List<String> findPhonesByRoles(@Param("roles") List<Role> roles);
+
     // Paginated driver list — supports text search + document-status filter
     @Query("SELECT e FROM Employee e LEFT JOIN e.driverInfo d WHERE e.jobTitle = :jobTitle " +
            "AND (:search = '' OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')) OR e.egn LIKE CONCAT('%', :search, '%')) " +

@@ -15,6 +15,11 @@ export interface FreightTrip {
   destinationCity: string;
   distanceKm?: number;
   clientName?: string;
+  clientEik?: string;
+  clientAddress?: string;
+  sellerName?: string;
+  sellerEik?: string;
+  sellerAddress?: string;
   revenueEur?: number;
   vatEur?: number;
   tollFeesEur?: number;

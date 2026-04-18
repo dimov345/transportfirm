@@ -33,6 +33,11 @@
     </select>
   </div>
 
+  <!-- Invoice error -->
+  <div class="empty-state" *ngIf="invoiceError" style="padding: 8px 16px; color: #c62828; background: #ffebee; border-radius: 6px; margin-bottom: 8px;">
+    <span>⚠ {{ invoiceError }}</span>
+  </div>
+
   <!-- TABLE -->
   <div class="table-container">
     <div *ngIf="loading" class="loading-state">Зареждане...</div>
@@ -54,6 +59,7 @@
           <th>Приходи</th>
           <th>Нетна печалба</th>
           <th>Статус</th>
+          <th>Фактура</th>
           <th></th>
         </tr>
       </thead>
@@ -80,6 +86,21 @@
             <span class="status-badge" [ngClass]="statusClasses[t.status]">
               {{ statusLabels[t.status] }}
             </span>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <button
+              *ngIf="canViewInvoices"
+              type="button"
+              class="btn-action btn-invoice"
+              [disabled]="invoiceLoading[t.id!]"
+              (click)="openInvoice(t.id)"
+              title="Генерирай / Виж фактура"
+            >
+              <span *ngIf="invoiceLoading[t.id!]" class="inv-spinner"></span>
+              <svg *ngIf="!invoiceLoading[t.id!]" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 17v-2h8v2H8zm0-4v-2h8v2H8zm0-4V7h5v2H8z"/>
+              </svg>
+            </button>
           </td>
           <td class="actions-cell" (click)="$event.stopPropagation()">
             <div class="actions-group">

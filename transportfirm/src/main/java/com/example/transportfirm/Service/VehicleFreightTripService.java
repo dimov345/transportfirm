@@ -100,6 +100,11 @@ public class VehicleFreightTripService {
         existing.setDestinationCity(updated.getDestinationCity());
         existing.setDistanceKm(updated.getDistanceKm());
         existing.setClientName(updated.getClientName());
+        existing.setClientEik(updated.getClientEik());
+        existing.setClientAddress(updated.getClientAddress());
+        existing.setSellerName(updated.getSellerName());
+        existing.setSellerEik(updated.getSellerEik());
+        existing.setSellerAddress(updated.getSellerAddress());
 
         existing.setRevenueEur(updated.getRevenueEur());
         existing.setVatEur(updated.getVatEur());

@@ -9,6 +9,7 @@ import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 import com.example.transportfirm.repository.VehicleRepository;
 import com.example.transportfirm.service.auth.EmailService;
+import com.example.transportfirm.service.auth.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,9 +32,10 @@ public class DocumentReminderScheduler {
     private final DriverRepository driverRepository;
     private final EmployeeRepository employeeRepository;
     private final EmailService emailService;
+    private final SmsService smsService;
 
     /** Изпълнява се всеки ден в 08:00 сутринта. */
-    @Scheduled(cron = "0 00 8 * * *")
+    @Scheduled(cron = "0 22 14 * * *")
     @Transactional
     public void sendDocumentReminders() {
         LocalDate today       = LocalDate.now();
@@ -42,13 +44,15 @@ public class DocumentReminderScheduler {
         log.info("Стартиране на проверка за документи за дата {}", today);
 
         List<String> notifyEmails = getNotifyEmails();
-        log.info("Намерени {} имейла за нотификации (ADMIN/MANAGER)", notifyEmails.size());
+        List<String> notifyPhones = getNotifyPhones();
+        log.info("Намерени {} имейла и {} телефона за нотификации (ADMIN/MANAGER)",
+                notifyEmails.size(), notifyPhones.size());
         if (notifyEmails.isEmpty()) {
             log.warn("Няма намерени имейли за ADMIN/MANAGER — нотификациите за ППС може да не достигнат!");
         }
 
         sendDriverReminders(today, warningDate);
-        sendVehicleReminders(today, warningDate, notifyEmails);
+        sendVehicleReminders(today, warningDate, notifyEmails, notifyPhones);
 
         log.info("Проверката за документи приключи.");
     }
@@ -91,9 +95,16 @@ public class DocumentReminderScheduler {
 
             try {
                 emailService.sendDriverDocumentReminderEmail(email, name, items);
-                log.info("Изпратен reminder до шофьор '{}' ({}): {} документа", name, email, items.size());
+                log.info("Изпратен email reminder до шофьор '{}' ({}): {} документа", name, email, items.size());
             } catch (Exception e) {
-                log.error("Грешка при изпращане на reminder до шофьор '{}' ({}): {}", name, email, e.getMessage(), e);
+                log.error("Грешка при изпращане на email reminder до шофьор '{}' ({}): {}", name, email, e.getMessage(), e);
+            }
+
+            String phone = emp.getPhone();
+            if (phone != null && !phone.isBlank()) {
+                String smsText = buildDriverSmsSummary(name, items);
+                smsService.sendSms(phone, smsText);
+                log.info("Изпратен SMS reminder до шофьор '{}' ({}): {} документа", name, phone, items.size());
             }
         }
     }
@@ -102,7 +113,8 @@ public class DocumentReminderScheduler {
     // Vehicle document reminders
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void sendVehicleReminders(LocalDate today, LocalDate warningDate, List<String> notifyEmails) {
+    private void sendVehicleReminders(LocalDate today, LocalDate warningDate,
+                                       List<String> notifyEmails, List<String> notifyPhones) {
         List<VehicleRecord> vehicles;
         try {
             vehicles = vehicleRepository.findAllForReminders();
@@ -131,11 +143,17 @@ public class DocumentReminderScheduler {
                         && vehicle.getDispatcherGroup().getDispatcher() != null
                         && vehicle.getDispatcherGroup().getDispatcher().getEmployee() != null) {
 
-                    String dispEmail = vehicle.getDispatcherGroup().getDispatcher().getEmployee().getEmail();
+                    Employee dispEmp = vehicle.getDispatcherGroup().getDispatcher().getEmployee();
+                    String dispEmail = dispEmp.getEmail();
                     if (dispEmail != null && !dispEmail.isBlank()) {
                         emailService.sendVehicleDocumentReminderEmail(dispEmail, plate, items);
-                        log.info("Изпратен reminder за ППС '{}' до спедитор ({})", plate, dispEmail);
+                        log.info("Изпратен email reminder за ППС '{}' до спедитор ({})", plate, dispEmail);
                         sentToDispatcher = true;
+                    }
+                    String dispPhone = dispEmp.getPhone();
+                    if (dispPhone != null && !dispPhone.isBlank()) {
+                        smsService.sendSms(dispPhone, buildVehicleSmsSummary(plate, items));
+                        log.info("Изпратен SMS reminder за ППС '{}' до спедитор ({})", plate, dispPhone);
                     }
                 }
             } catch (Exception e) {
@@ -146,14 +164,21 @@ public class DocumentReminderScheduler {
                 log.debug("ППС '{}' няма назначена спедиторска група — само ADMIN/MANAGER ще бъдат нотифицирани", plate);
             }
 
-            // Always notify ADMIN and MANAGER
+            // Always notify ADMIN and MANAGER via email
             for (String notifyEmail : notifyEmails) {
                 try {
                     emailService.sendVehicleDocumentReminderEmail(notifyEmail, plate, items);
-                    log.info("Изпратен reminder за ППС '{}' до {} (ADMIN/MANAGER)", plate, notifyEmail);
+                    log.info("Изпратен email reminder за ППС '{}' до {} (ADMIN/MANAGER)", plate, notifyEmail);
                 } catch (Exception e) {
                     log.error("Грешка при изпращане до '{}' за ППС '{}': {}", notifyEmail, plate, e.getMessage(), e);
                 }
+            }
+
+            // Always notify ADMIN and MANAGER via SMS
+            String vehicleSmsText = buildVehicleSmsSummary(plate, items);
+            for (String notifyPhone : notifyPhones) {
+                smsService.sendSms(notifyPhone, vehicleSmsText);
+                log.info("Изпратен SMS reminder за ППС '{}' до {} (ADMIN/MANAGER)", plate, notifyPhone);
             }
         }
     }
@@ -175,6 +200,52 @@ public class DocumentReminderScheduler {
             log.error("Грешка при зареждане на ADMIN/MANAGER имейли: {}", e.getMessage(), e);
             return List.of();
         }
+    }
+
+    /** Returns distinct phone numbers of all active ADMIN and MANAGER employees. */
+    private List<String> getNotifyPhones() {
+        try {
+            List<String> phones = employeeRepository.findPhonesByRoles(List.of(Role.ADMIN, Role.MANAGER));
+            log.debug("Заредени {} телефона за ADMIN/MANAGER", phones.size());
+            return phones;
+        } catch (Exception e) {
+            log.error("Грешка при зареждане на ADMIN/MANAGER телефони: {}", e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    /** Builds a concise SMS message for driver document reminders. */
+    private String buildDriverSmsSummary(String driverName, List<String[]> items) {
+        StringBuilder sb = new StringBuilder("TransTrack: ");
+        sb.append(driverName).append(" — документи: ");
+        for (int i = 0; i < items.size(); i++) {
+            String[] item = items.get(i);
+            if (i > 0) sb.append(", ");
+            if ("expired".equals(item[1])) {
+                sb.append(item[0]).append(" ИЗТЕКЪЛ");
+            } else {
+                sb.append(item[0]).append(" изтича след ").append(item[2]).append("д");
+            }
+        }
+        sb.append(". Моля подновете навреме.");
+        return sb.toString();
+    }
+
+    /** Builds a concise SMS message for vehicle document reminders. */
+    private String buildVehicleSmsSummary(String plate, List<String[]> items) {
+        StringBuilder sb = new StringBuilder("TransTrack: ППС ");
+        sb.append(plate).append(" — ");
+        for (int i = 0; i < items.size(); i++) {
+            String[] item = items.get(i);
+            if (i > 0) sb.append(", ");
+            if ("expired".equals(item[1])) {
+                sb.append(item[0]).append(" ИЗТЕКЪЛ");
+            } else {
+                sb.append(item[0]).append(" изтича след ").append(item[2]).append("д");
+            }
+        }
+        sb.append(". Необходимо подновяване.");
+        return sb.toString();
     }
 
     /**

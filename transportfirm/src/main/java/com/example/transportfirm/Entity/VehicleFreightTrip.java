@@ -56,6 +56,24 @@ public class VehicleFreightTrip {
     @Column(length = 200)
     private String clientName;
 
+    /** ЕИК / Булстат на клиента (получателя) */
+    @Column(name = "client_eik", length = 20)
+    private String clientEik;
+
+    @Column(name = "client_address", length = 500)
+    private String clientAddress;
+
+    /** Наименование на нашата фирма (продавач) */
+    @Column(name = "seller_name", length = 200)
+    private String sellerName;
+
+    /** ЕИК / Булстат на нашата фирма (продавач) */
+    @Column(name = "seller_eik", length = 20)
+    private String sellerEik;
+
+    @Column(name = "seller_address", length = 500)
+    private String sellerAddress;
+
     // Financials — all in EUR
     @Column(precision = 10, scale = 2)
     private BigDecimal revenueEur;

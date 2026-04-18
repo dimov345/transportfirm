@@ -8,8 +8,10 @@ import { Router } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import { ReportService, ReportType, ReportPeriod } from '../../core/services/report.service';
 import { AccountingDashboard } from '../../core/models/accounting.model';
+import { InvoiceService } from '../../core/services/invoice.service';
+import { Invoice } from '../../core/models/invoice.model';
 
-type DataTab = 'salary' | 'trips' | 'maintenance' | 'leasing' | 'download';
+type DataTab = 'salary' | 'trips' | 'maintenance' | 'leasing' | 'invoices' | 'download';
 
 interface MonthOption { value: number; label: string; }
 
@@ -24,8 +26,9 @@ export class AccountingComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser  = isPlatformBrowser(this.platformId);
   private cdr        = inject(ChangeDetectorRef);
-  private reportSvc  = inject(ReportService);
-  private router     = inject(Router);
+  private reportSvc   = inject(ReportService);
+  private invoiceSvc  = inject(InvoiceService);
+  private router      = inject(Router);
 
   // ── Period state ──────────────────────────────────────────────
   activePeriod: ReportPeriod = 'MONTHLY';
@@ -45,6 +48,16 @@ export class AccountingComponent implements OnInit {
   downloading: Record<string, boolean> = {
     salary: false, trips: false, maintenance: false, leasing: false, combined: false
   };
+
+  // ── Invoices state ────────────────────────────────────────────
+  invoices: Invoice[] = [];
+  invoicesLoading     = false;
+  invoicesError       = '';
+  invoicesTotal       = 0;
+  invoicesTotalPages  = 0;
+  invoicesPage        = 0;
+  invoicesStatus      = '';
+  invoiceOpening: Record<string, boolean> = {};
 
   private readonly numFmt = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -120,6 +133,101 @@ export class AccountingComponent implements OnInit {
   // ── Tab navigation ────────────────────────────────────────────
   setDataTab(tab: DataTab): void {
     this.activeDataTab = tab;
+    if (tab === 'invoices' && this.invoices.length === 0 && !this.invoicesLoading) {
+      this.loadInvoices();
+    }
+  }
+
+  // ── Invoices ──────────────────────────────────────────────────
+  loadInvoices(): void {
+    if (!this.isBrowser) return;
+    this.invoicesLoading = true;
+    this.invoicesError   = '';
+    this.cdr.detectChanges();
+
+    this.invoiceSvc.getAll(this.invoicesPage, 20, this.invoicesStatus || undefined).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.invoicesError   = this.httpErrorMessage(err);
+        this.invoicesLoading = false;
+        this.cdr.detectChanges();
+        return EMPTY;
+      })
+    ).subscribe(page => {
+      this.invoices          = page.content;
+      this.invoicesTotal     = page.totalElements;
+      this.invoicesTotalPages = page.totalPages;
+      this.invoicesLoading   = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  invoicesGoToPage(p: number): void {
+    if (p < 0 || p >= this.invoicesTotalPages) return;
+    this.invoicesPage = p;
+    this.loadInvoices();
+  }
+
+  applyInvoicesFilter(): void {
+    this.invoicesPage = 0;
+    this.loadInvoices();
+  }
+
+  openInvoice(inv: Invoice): void {
+    if (this.invoiceOpening[inv.id]) return;
+    this.invoiceOpening[inv.id] = true;
+    this.cdr.detectChanges();
+
+    this.invoiceSvc.openInvoiceHtml(inv.id).subscribe({
+      next: () => {
+        this.invoiceOpening[inv.id] = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.invoiceOpening[inv.id] = false;
+        this.invoicesError = err?.message ?? 'Грешка при отваряне на фактурата.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteInvoice(id: string): void {
+    if (!confirm('Сигурни ли сте, че искате да изтриете тази фактура?')) return;
+    this.invoiceSvc.delete(id).subscribe({
+      next: () => this.loadInvoices(),
+      error: () => {
+        this.invoicesError = 'Грешка при изтриване на фактурата.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  invoiceStatusLabel(status: string): string {
+    switch (status) {
+      case 'DRAFT':     return 'Чернова';
+      case 'ISSUED':    return 'Издадена';
+      case 'PAID':      return 'Платена';
+      case 'CANCELLED': return 'Анулирана';
+      default:          return status;
+    }
+  }
+
+  invoiceStatusClass(status: string): string {
+    switch (status) {
+      case 'ISSUED':    return 'status-badge--issued';
+      case 'PAID':      return 'status-badge--paid';
+      case 'CANCELLED': return 'status-badge--cancelled';
+      default:          return 'status-badge--draft';
+    }
+  }
+
+  get invoicePages(): number[] {
+    return Array.from({ length: this.invoicesTotalPages }, (_, i) => i);
+  }
+
+  get invoicesTotalRevenue(): number {
+    let total = 0;
+    for (const inv of this.invoices) total += inv.revenueEur ?? 0;
+    return total;
   }
 
   // ── Row navigation ────────────────────────────────────────────

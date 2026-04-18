@@ -63,7 +63,8 @@ public class SecurityConfig {
                                 "/reset-password",
                                 "/send-otp",
                                 "/verify-otp",
-                                "/auth/first-login"
+                                "/auth/first-login",
+                                "/auth/bootstrap"
                         ).permitAll()
 
                         // ADMIN endpoints

@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -14,7 +14,7 @@ import { EmployeeDocument } from '../../../core/models/employee/employee-documen
 @Component({
   selector: 'app-mechanic-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './mechanic-details.html',
   styleUrls: ['./mechanic-details.scss']
 })

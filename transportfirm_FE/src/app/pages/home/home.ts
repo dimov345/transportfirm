@@ -59,21 +59,24 @@ export class Home implements OnInit {
     ],
     DISPATCHER: [
       { label: 'Моите ППС',  subtitle: 'Превозни средства от вашите групи',          icon: 'local_shipping', route: '/dispatcher',  accent: '#2563eb' },
-      { label: 'Шофьори',   subtitle: 'Преглед на шофьори и документи',             icon: 'drive_eta',      route: '/drivers',     accent: '#0f766e' },
-      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                  icon: 'directions_car', route: '/vehicles',    accent: '#7c3aed' }
+      { label: 'Курсове',    subtitle: 'Активни и планирани курсове',                icon: 'map',            route: '/freight-trips', accent: '#0f766e' },
+      { label: 'Шофьори',   subtitle: 'Преглед на шофьори и документи',             icon: 'drive_eta',      route: '/drivers',     accent: '#7c3aed' },
+      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                  icon: 'directions_car', route: '/vehicles',    accent: '#0891b2' }
     ],
     MECHANIC: [
-      { label: 'Моите ППС', subtitle: 'Поддръжка на назначените превозни средства',  icon: 'build',          route: '/mechanic',    accent: '#b45309' }
+      { label: 'Моите ППС',  subtitle: 'Поддръжка на назначените превозни средства', icon: 'build',          route: '/mechanic',    accent: '#b45309' },
+      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                  icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' }
     ],
     DRIVER: [
-      { label: 'Профил', subtitle: 'Вашата лична информация',                        icon: 'person',         route: '/profile',     accent: '#2563eb' }
+      { label: 'Моите документи', subtitle: 'Преглед на личните ви документи',       icon: 'folder_open',    route: '/my-documents', accent: '#2563eb' },
+      { label: 'Профил',          subtitle: 'Вашата лична информация',               icon: 'person',         route: '/profile',      accent: '#0f766e' }
     ]
   };
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.loadNotifications();
+    if (this.showNotifications) this.loadNotifications();
     if (this.showFinancials) this.loadStats();
   }
 
@@ -119,9 +122,11 @@ export class Home implements OnInit {
   }
 
   // ── Auth helpers ──────────────────────────────────────────────────────────
-  get showFinancials(): boolean { return ['ADMIN', 'MANAGER', 'ACCOUNTANT'].includes(this.role); }
-  get roleLabel():     string   { return this.roleLabels[this.role] ?? this.role; }
-  get cards():         NavCard[]{ return this.allCards[this.role]   ?? [];        }
+  get showFinancials():    boolean { return ['ADMIN', 'MANAGER', 'ACCOUNTANT'].includes(this.role); }
+  /** Notifications panel shows fleet-wide alerts — only relevant for management roles. */
+  get showNotifications(): boolean { return ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC'].includes(this.role); }
+  get roleLabel():         string  { return this.roleLabels[this.role] ?? this.role; }
+  get cards():             NavCard[]{ return this.allCards[this.role]  ?? []; }
 
   // ── Navigation ────────────────────────────────────────────────────────────
   goTo(path: string): void { this.router.navigateByUrl(path); }

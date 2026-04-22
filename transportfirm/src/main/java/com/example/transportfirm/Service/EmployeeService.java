@@ -167,19 +167,23 @@ public class EmployeeService {
         employeeRepository.delete(employee);
     }
 
+    @Transactional(readOnly = true)
     public Employee getById(UUID id) {
-        return employeeRepository.findById(id)
+        return employeeRepository.findByIdWithInfos(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<Employee> getAll() {
-        return employeeRepository.findAll();
+        return employeeRepository.findAllWithInfos();
     }
 
+    @Transactional(readOnly = true)
     public List<Employee> getByJobTitle(JobTitle jobTitle) {
-        return employeeRepository.findByJobTitle(jobTitle);
+        return employeeRepository.findByJobTitleWithInfos(jobTitle);
     }
 
+    @Transactional(readOnly = true)
     public Employee getByEgn(String egn) {
         return employeeRepository.findByEgn(egn)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
@@ -187,6 +191,7 @@ public class EmployeeService {
 
     // --- Paginated queries ---
 
+    @Transactional(readOnly = true)
     public Page<Employee> getDriversPaged(String search, String status, int expiryDays, int page, int size) {
         int days = expiryDays > 0 ? expiryDays : 30;
         LocalDate expiryDate = LocalDate.now().plusDays(days);
@@ -198,6 +203,7 @@ public class EmployeeService {
                 PageRequest.of(page, size, Sort.by("name").ascending()));
     }
 
+    @Transactional(readOnly = true)
     public Page<Employee> getByJobTitlePaged(JobTitle jobTitle, String search, int page, int size) {
         return employeeRepository.searchByJobTitle(
                 jobTitle,
@@ -205,6 +211,7 @@ public class EmployeeService {
                 PageRequest.of(page, size, Sort.by("name").ascending()));
     }
 
+    @Transactional(readOnly = true)
     public Page<Employee> getAllPaged(String search, int page, int size) {
         return employeeRepository.searchAll(
                 search != null ? search.trim() : "",

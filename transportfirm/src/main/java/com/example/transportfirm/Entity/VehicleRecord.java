@@ -3,6 +3,7 @@ package com.example.transportfirm.entity;
 import com.example.transportfirm.enums.VehicleStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -126,13 +127,16 @@ public class VehicleRecord {
     @Column(length = 1000)
     private String notesForMechanic;
 
-    @OneToOne(mappedBy = "vehicle")
+    // FetchType.LAZY prevents N+1 secondary-select on non-owning OneToOne
+    // (Note: @BatchSize is not supported on @OneToOne — only on collections/entities)
+    @OneToOne(mappedBy = "vehicle", fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"vehicle", "employee", "hibernateLazyInitializer", "handler"})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private DriverInfo driver;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @BatchSize(size = 50)
     private List<VehicleDocument> documents = new ArrayList<>();
 
     @PrePersist

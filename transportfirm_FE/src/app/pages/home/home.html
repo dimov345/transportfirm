@@ -250,8 +250,8 @@
 
     </div><!-- /charts-col -->
 
-    <!-- ── Notifications column ── -->
-    <div class="notif-col">
+    <!-- ── Notifications column — management roles only ── -->
+    <div class="notif-col" *ngIf="showNotifications">
       <div class="notif-card">
         <div class="notif-card__header">
           <i class="material-icons">notifications_active</i>

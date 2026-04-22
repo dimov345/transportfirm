@@ -7,6 +7,7 @@ import com.example.transportfirm.repository.MechanicRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -29,11 +30,13 @@ public class MechanicService {
         return mechanicRepository.save(info);
     }
 
+    @Transactional(readOnly = true)
     public MechanicInfo getById(UUID id) {
         return mechanicRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mechanic not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<MechanicInfo> getAll() {
         return mechanicRepository.findAll();
     }

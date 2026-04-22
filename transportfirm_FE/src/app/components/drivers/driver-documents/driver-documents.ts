@@ -9,8 +9,16 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+import { AuthService } from '../../../core/auth/auth.service';
 import { DriverService } from '../../../core/services/driver.service';
+import { EmployeeService } from '../../../core/services/employee.service';
 import { DriverDocument } from '../../../core/models/driver/driver-document.model';
+
+interface ExpiryItem {
+  label: string;
+  issued: string | null;
+  expires: string | null;
+}
 
 @Component({
   selector: 'app-driver-documents',
@@ -20,19 +28,26 @@ import { DriverDocument } from '../../../core/models/driver/driver-document.mode
   styleUrls: ['./driver-documents.scss']
 })
 export class DriverDocumentsComponent implements OnInit {
-  employeeId!: string; // UUID
+  employeeId!: string;
   documents: DriverDocument[] = [];
-
   selectedType: string = '';
 
-  isLoading = true;
+  isLoading  = true;
   isUploading = false;
+
+  /** True when the logged-in user is a DRIVER viewing their own docs (read-only mode). */
+  isReadOnly = false;
+
+  /** Driver expiry-date panel — populated only in read-only mode (DRIVER viewing self). */
+  expiryItems: ExpiryItem[] = [];
 
   readonly isBrowser: boolean;
 
   constructor(
     private route: ActivatedRoute,
+    private auth: AuthService,
     private driverService: DriverService,
+    private employeeService: EmployeeService,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: object
   ) {
@@ -40,21 +55,32 @@ export class DriverDocumentsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
+    if (!this.isBrowser) { this.isLoading = false; return; }
 
-    if (!idParam || !idParam.trim()) {
-      console.error('Invalid employeeId in route');
-      this.isLoading = false;
-      this.cdr.detectChanges();
-      return;
-    }
+    const isDriver = this.auth.hasRole('DRIVER');
+    this.isReadOnly = isDriver;
 
-    this.employeeId = idParam;
-
-    if (this.isBrowser) {
-      this.loadDocuments();
+    if (isDriver) {
+      // DRIVER role: always load their OWN documents via /employees/me
+      this.employeeService.getMe().subscribe({
+        next: emp => {
+          this.employeeId = emp.id;
+          this.buildExpiryItems(emp);
+          this.loadDocuments();
+        },
+        error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      });
     } else {
-      this.isLoading = false;
+      // ADMIN / MANAGER / DISPATCHER: load by route param id
+      const idParam = this.route.snapshot.paramMap.get('id');
+      if (!idParam?.trim()) {
+        console.error('Invalid employeeId in route');
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        return;
+      }
+      this.employeeId = idParam;
+      this.loadDocuments();
     }
   }
 
@@ -148,6 +174,33 @@ export class DriverDocumentsComponent implements OnInit {
     a.download = fileName;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  /** Map Employee.driverInfo expiry dates into a display array for the read-only panel. */
+  private buildExpiryItems(emp: any): void {
+    const di = emp.driverInfo;
+    if (!di) { this.expiryItems = []; return; }
+
+    this.expiryItems = [
+      { label: 'Шофьорска книжка',    issued: di.driverLicenseIssuedOn,      expires: di.driverLicenseExpiresOn },
+      { label: 'Професионална карта', issued: di.qualificationCardIssuedOn,  expires: di.qualificationCardExpiresOn },
+      { label: 'Психо удостоверение', issued: di.psychologicalExamIssuedOn,  expires: di.psychologicalExamExpiresOn },
+      { label: 'Дигитална карта',     issued: di.digitalCardIssuedOn,        expires: di.digitalCardExpiresOn }
+    ];
+  }
+
+  formatDate(d: string | null): string {
+    return d ? new Date(d).toLocaleDateString('bg-BG') : '—';
+  }
+
+  /** 'expired' | 'soon' (<=30d) | 'ok' | 'none' — drives left-border color on the expiry row. */
+  expiryStatus(d: string | null): 'expired' | 'soon' | 'ok' | 'none' {
+    if (!d) return 'none';
+    const exp = new Date(d).getTime();
+    const now = Date.now();
+    if (exp < now) return 'expired';
+    if (exp - now < 30 * 24 * 60 * 60 * 1000) return 'soon';
+    return 'ok';
   }
 
   delete(docId: string): void {

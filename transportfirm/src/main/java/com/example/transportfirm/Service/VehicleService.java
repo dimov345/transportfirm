@@ -49,16 +49,19 @@ public class VehicleService {
     // VEHICLE CRUD
     // ===========================================================
 
+    @Transactional(readOnly = true)
     public List<VehicleRecord> getAll() {
-        return vehicleRepository.findAll();
+        return vehicleRepository.findAllWithGroups();
     }
 
+    @Transactional(readOnly = true)
     public List<VehicleRecord> getByGroupId(UUID groupId) {
-        return vehicleRepository.findByMechanicGroup_IdOrDispatcherGroup_Id(groupId, groupId);
+        return vehicleRepository.findByGroupIdWithGroups(groupId);
     }
 
+    @Transactional(readOnly = true)
     public VehicleRecord getByPlate(UUID id) {
-        return vehicleRepository.findById(id)
+        return vehicleRepository.findByIdWithGroups(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
     }
@@ -109,6 +112,7 @@ public class VehicleService {
     // DOCUMENTS LOGIC
     // ===========================================================
 
+    @Transactional(readOnly = true)
     public List<VehicleDocument> getDocumentsByVehicle(UUID id) {
         if (!vehicleRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found");
@@ -116,6 +120,7 @@ public class VehicleService {
         return documentRepository.findByVehicle_Id(id);
     }
 
+    @Transactional(readOnly = true)
     public VehicleDocument getDocumentById(UUID id) {
         return documentRepository.findById(id)
                 .orElseThrow(() ->

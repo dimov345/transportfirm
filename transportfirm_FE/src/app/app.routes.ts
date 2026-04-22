@@ -5,6 +5,7 @@ const ADMIN_MANAGER = ['ADMIN', 'MANAGER'];
 const ADMIN_MANAGER_DISPATCHER = ['ADMIN', 'MANAGER', 'DISPATCHER'];
 const ADMIN_MANAGER_MECHANIC = ['ADMIN', 'MANAGER', 'MECHANIC'];
 const ALL_STAFF = ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC'];
+const ALL_ROLES  = ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC', 'DRIVER'];
 
 export const routes: Routes = [
   {
@@ -56,6 +57,13 @@ export const routes: Routes = [
     loadComponent: () => import('./components/drivers/driver-documents/driver-documents').then(m => m.DriverDocumentsComponent),
     canActivate: [authGuard],
     data: { roles: ADMIN_MANAGER_DISPATCHER }
+  },
+  // DRIVER role: read-only view of their own documents (id param ignored, resolved via /employees/me)
+  {
+    path: 'my-documents',
+    loadComponent: () => import('./components/drivers/driver-documents/driver-documents').then(m => m.DriverDocumentsComponent),
+    canActivate: [authGuard],
+    data: { roles: ALL_ROLES }
   },
 
   // Vehicles — all staff can view

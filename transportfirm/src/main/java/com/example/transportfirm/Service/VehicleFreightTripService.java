@@ -24,19 +24,23 @@ public class VehicleFreightTripService {
     private final VehicleFreightTripRepository tripRepository;
     private final VehicleRepository vehicleRepository;
 
+    @Transactional(readOnly = true)
     public List<VehicleFreightTrip> getAll() {
-        return tripRepository.findAll(Sort.by(Sort.Direction.DESC, "departureDate"));
+        return tripRepository.findAllWithVehicle();
     }
 
+    @Transactional(readOnly = true)
     public VehicleFreightTrip getById(UUID id) {
         return tripRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Курсът не е намерен"));
     }
 
+    @Transactional(readOnly = true)
     public List<VehicleFreightTrip> getByVehicleId(UUID vehicleId) {
         return tripRepository.findByVehicle_IdOrderByDepartureDateDesc(vehicleId);
     }
 
+    @Transactional(readOnly = true)
     public Page<VehicleFreightTrip> getPaged(String search, String status, String vehicleId, int page, int size) {
         TripStatus tripStatus = null;
         if (status != null && !status.isBlank()) {
@@ -128,6 +132,7 @@ public class VehicleFreightTripService {
         tripRepository.delete(trip);
     }
 
+    @Transactional(readOnly = true)
     public long countByStatus(TripStatus status) {
         return tripRepository.countByStatus(status);
     }

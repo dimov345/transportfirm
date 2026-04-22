@@ -29,8 +29,19 @@ public class DriverDocument {
     @Column(nullable = false)
     private String fileName;
 
+    /** Legacy filesystem path — kept nullable for backward compat, new uploads use fileData. */
     @JsonIgnore
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String filePath;
+
+    /**
+     * PDF bytes stored in DB — survives Railway redeploys.
+     * NOTE: No @Lob on purpose — in Hibernate 6 @Lob on byte[] maps to PostgreSQL OID
+     * (large object), which is incompatible with a BYTEA column. Plain byte[] with
+     * columnDefinition = "bytea" maps cleanly to BYTEA.
+     */
+    @JsonIgnore
+    @Column(name = "file_data", nullable = true, columnDefinition = "bytea")
+    private byte[] fileData;
 
 }

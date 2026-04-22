@@ -1,21 +1,61 @@
 <div class="docs-page">
   <div class="docs-header">
     <div class="header-content">
-      <button class="back-btn" routerLink="/drivers">
+      <button class="back-btn" [routerLink]="isReadOnly ? '/' : '/drivers'">
         <i class="material-icons">arrow_back_ios</i>
         Назад
       </button>
 
       <div class="header-info">
-        <h1>Документи на шофьор</h1>
-        <div class="info-badge">ID на служител: {{ employeeId }}</div>
+        <h1>{{ isReadOnly ? 'Моите документи' : 'Документи на шофьор' }}</h1>
+        <div class="info-badge" *ngIf="!isReadOnly">ID на служител: {{ employeeId }}</div>
+        <div class="info-badge read-only-badge" *ngIf="isReadOnly">
+          <i class="material-icons" style="font-size:14px">visibility</i> Само за преглед
+        </div>
       </div>
     </div>
   </div>
 
   <div class="docs-content">
-    <!-- Upload Section -->
-    <div class="upload-section">
+
+    <!-- ===== Expiry Dates Panel — DRIVER read-only mode only ===== -->
+    <div class="expiry-panel" *ngIf="isReadOnly && expiryItems.length > 0">
+      <div class="expiry-panel__title">
+        <i class="material-icons">badge</i>
+        Валидност на документите
+      </div>
+      <div class="expiry-grid">
+        <div
+          class="expiry-row"
+          *ngFor="let item of expiryItems"
+          [ngClass]="'expiry-' + expiryStatus(item.expires)">
+
+          <div class="expiry-label">{{ item.label }}</div>
+
+          <div class="expiry-dates">
+            <span class="expiry-issued" *ngIf="item.issued">
+              <i class="material-icons">calendar_today</i>
+              {{ formatDate(item.issued) }}
+            </span>
+            <span class="expiry-sep" *ngIf="item.issued && item.expires">→</span>
+            <span class="expiry-expires" [ngClass]="'expire-text-' + expiryStatus(item.expires)">
+              <i class="material-icons">event</i>
+              {{ formatDate(item.expires) }}
+            </span>
+          </div>
+
+          <div class="expiry-status-badge" [ngClass]="'badge-' + expiryStatus(item.expires)">
+            <span *ngIf="expiryStatus(item.expires) === 'expired'">Изтекъл</span>
+            <span *ngIf="expiryStatus(item.expires) === 'soon'">Изтича скоро</span>
+            <span *ngIf="expiryStatus(item.expires) === 'ok'">Валиден</span>
+            <span *ngIf="expiryStatus(item.expires) === 'none'">Не е въведено</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Section — hidden for DRIVER role -->
+    <div class="upload-section" *ngIf="!isReadOnly">
       <div class="upload-card">
         <h3>Добавяне на документ</h3>
         <p class="upload-hint">Поддържа се само PDF формат (макс. 5 MB)</p>
@@ -75,7 +115,9 @@
               <i class="material-icons">download</i>
             </button>
 
+            <!-- Delete hidden for DRIVER role -->
             <button
+              *ngIf="!isReadOnly"
               class="icon-btn icon-btn--delete"
               type="button"
               (click)="delete(doc.id)"

@@ -14,16 +14,31 @@ import java.util.UUID;
 
 public interface VehicleFreightTripRepository extends JpaRepository<VehicleFreightTrip, UUID> {
 
-    List<VehicleFreightTrip> findByVehicle_IdOrderByDepartureDateDesc(UUID vehicleId);
+    @Query("SELECT t FROM VehicleFreightTrip t JOIN FETCH t.vehicle WHERE t.vehicle.id = :vehicleId ORDER BY t.departureDate DESC")
+    List<VehicleFreightTrip> findByVehicle_IdOrderByDepartureDateDesc(@Param("vehicleId") UUID vehicleId);
 
-    @Query("SELECT t FROM VehicleFreightTrip t WHERE " +
+    /** All trips ordered by date with vehicle pre-fetched — used by getAll(). */
+    @Query("SELECT t FROM VehicleFreightTrip t JOIN FETCH t.vehicle ORDER BY t.departureDate DESC")
+    List<VehicleFreightTrip> findAllWithVehicle();
+
+    @Query(value =
+           "SELECT t FROM VehicleFreightTrip t JOIN FETCH t.vehicle v WHERE " +
            "(:search = '' OR " +
            "  LOWER(t.originCity) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "  LOWER(t.destinationCity) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "  LOWER(t.clientName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "  LOWER(t.vehicle.plateNumber) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "  LOWER(v.plateNumber) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "AND (:status IS NULL OR t.status = :status) " +
-           "AND (:vehicleId IS NULL OR t.vehicle.id = :vehicleId)")
+           "AND (:vehicleId IS NULL OR v.id = :vehicleId)",
+           countQuery =
+           "SELECT COUNT(t) FROM VehicleFreightTrip t JOIN t.vehicle v WHERE " +
+           "(:search = '' OR " +
+           "  LOWER(t.originCity) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(t.destinationCity) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(t.clientName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(v.plateNumber) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:status IS NULL OR t.status = :status) " +
+           "AND (:vehicleId IS NULL OR v.id = :vehicleId)")
     Page<VehicleFreightTrip> search(
             @Param("search") String search,
             @Param("status") TripStatus status,

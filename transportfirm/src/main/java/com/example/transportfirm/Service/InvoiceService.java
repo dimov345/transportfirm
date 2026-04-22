@@ -33,7 +33,7 @@ public class InvoiceService {
      */
     @Transactional
     public InvoiceResponse createOrGetForTrip(UUID tripId, InvoiceRequest req) {
-        Optional<Invoice> existing = invoiceRepository.findByTripId(tripId);
+        Optional<Invoice> existing = invoiceRepository.findByTripIdWithVehicle(tripId);
         if (existing.isPresent()) {
             log.debug("Намерена съществуваща фактура {} за курс {}", existing.get().getInvoiceNumber(), tripId);
             return toResponse(existing.get());
@@ -78,22 +78,25 @@ public class InvoiceService {
         return toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public InvoiceResponse getById(UUID id) {
-        return toResponse(invoiceRepository.findById(id)
+        return toResponse(invoiceRepository.findByIdWithVehicle(id)
                 .orElseThrow(() -> new NoSuchElementException("Фактура не е намерена: " + id)));
     }
 
+    @Transactional(readOnly = true)
     public Optional<InvoiceResponse> getByTripId(UUID tripId) {
-        return invoiceRepository.findByTripId(tripId).map(this::toResponse);
+        return invoiceRepository.findByTripIdWithVehicle(tripId).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<InvoiceResponse> getAll(int page, int size, String status) {
         var pageable = PageRequest.of(page, size);
         if (status != null && !status.isBlank()) {
             InvoiceStatus s = InvoiceStatus.valueOf(status.toUpperCase());
-            return invoiceRepository.findByStatusOrderByIssueDateDesc(s, pageable).map(this::toResponse);
+            return invoiceRepository.findByStatusWithTripOrderByIssueDateDesc(s, pageable).map(this::toResponse);
         }
-        return invoiceRepository.findAllByOrderByIssueDateDesc(pageable).map(this::toResponse);
+        return invoiceRepository.findAllWithTripOrderByIssueDateDesc(pageable).map(this::toResponse);
     }
 
     @Transactional

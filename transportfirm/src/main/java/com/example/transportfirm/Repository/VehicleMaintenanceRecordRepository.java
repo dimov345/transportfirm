@@ -6,13 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public interface VehicleMaintenanceRecordRepository extends JpaRepository<VehicleMaintenanceRecord, UUID> {
-    Page<VehicleMaintenanceRecord> findAllByVehicle_Id(UUID vehicleId, Pageable pageable);
+    @Query(value = "SELECT m FROM VehicleMaintenanceRecord m JOIN FETCH m.vehicle WHERE m.vehicle.id = :vehicleId ORDER BY m.openedAt DESC",
+           countQuery = "SELECT COUNT(m) FROM VehicleMaintenanceRecord m WHERE m.vehicle.id = :vehicleId")
+    Page<VehicleMaintenanceRecord> findAllByVehicle_Id(@Param("vehicleId") UUID vehicleId, Pageable pageable);
 
     List<VehicleMaintenanceRecord> findAllByVehicle_Id(UUID vehicleId);
 

@@ -42,7 +42,7 @@ public class DriverInfo {
     @OneToOne
     @JoinColumn(name = "vehicle_id", unique = true)
     @JsonIgnoreProperties({
-            "driver", "documents", "truckGroup",
+            "driver", "documents", "dispatcherGroup", "mechanicGroup",
             "hibernateLazyInitializer", "handler"
     })
     @ToString.Exclude

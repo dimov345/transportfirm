@@ -32,4 +32,14 @@ public class EmployeeDocument {
 
     @JsonIgnore
     private String filePath;
+
+    /**
+     * PDF bytes stored in DB — survives Railway redeploys.
+     * NOTE: No @Lob on purpose — in Hibernate 6 @Lob on byte[] maps to PostgreSQL OID
+     * (large object), which is incompatible with a BYTEA column. Plain byte[] with
+     * columnDefinition = "bytea" maps cleanly to BYTEA.
+     */
+    @JsonIgnore
+    @Column(name = "file_data", nullable = true, columnDefinition = "bytea")
+    private byte[] fileData;
 }

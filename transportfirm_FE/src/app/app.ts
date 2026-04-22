@@ -12,7 +12,7 @@ import { filter } from 'rxjs';
   styleUrls: ['./app.scss']
 })
 export class AppComponent {
-  isSidebarCollapsed = false;
+  isSidebarCollapsed = true;
   showSidebar = true;
   isAuthRoute = false;
 

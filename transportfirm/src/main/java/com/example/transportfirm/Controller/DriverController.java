@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,8 +65,7 @@ public class DriverController {
     @GetMapping("/documents/{docId}/download")
     public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID docId) throws IOException {
         DriverDocument doc = driverService.getDocument(docId);
-        Path path = Paths.get(doc.getFilePath());
-        byte[] fileBytes = Files.readAllBytes(path);
+        byte[] fileBytes = driverService.getDocumentBytes(docId);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")

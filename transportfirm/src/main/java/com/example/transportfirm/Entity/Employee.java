@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -101,6 +102,7 @@ public class Employee {
     // Универсален списък документи за ВСЕКИ служител
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("employee-docs")
+    @BatchSize(size = 50)
     private List<EmployeeDocument> documents = new ArrayList<>();
 
     @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY)

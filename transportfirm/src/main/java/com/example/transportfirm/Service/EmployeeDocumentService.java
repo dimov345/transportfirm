@@ -13,8 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,47 +42,47 @@ public class EmployeeDocumentService {
                                            MultipartFile file) throws IOException {
 
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
-        if (file.isEmpty()) {
+        if (file.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-        }
 
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-        }
 
-        String storedFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-        Path targetDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(targetDir);
-
-        Path filePath = targetDir.resolve(storedFileName);
-
-        Files.copy(file.getInputStream(),
-                filePath,
-                StandardCopyOption.REPLACE_EXISTING);
+        if (file.getSize() > 5 * 1024 * 1024)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large (max 5 MB)");
 
         EmployeeDocument doc = new EmployeeDocument();
         doc.setEmployee(employee);
         doc.setType(type);
         doc.setFileName(file.getOriginalFilename());
-        doc.setFilePath(filePath.toString());
+        doc.setFileData(file.getBytes());   // stored in DB — survives redeploys
 
         return documentRepository.save(doc);
     }
 
     public EmployeeDocument getDocument(UUID id) {
         return documentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found"));
+    }
+
+    /** Returns raw PDF bytes — reads from DB (fileData) or falls back to legacy filePath. */
+    public byte[] getDocumentBytes(UUID id) throws IOException {
+        EmployeeDocument doc = getDocument(id);
+        if (doc.getFileData() != null) return doc.getFileData();
+        if (doc.getFilePath() != null) {
+            Path path = Path.of(doc.getFilePath());
+            if (Files.exists(path)) return Files.readAllBytes(path);
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document file not found");
     }
 
     public void deleteDocument(UUID id) {
-        if (!documentRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
+        EmployeeDocument doc = getDocument(id);
+        if (doc.getFilePath() != null) {
+            try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
         }
-        documentRepository.deleteById(id);
+        documentRepository.delete(doc);
     }
 }

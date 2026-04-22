@@ -98,6 +98,11 @@ export class EmployeeService {
     return this.http.get<any[]>(`${this.apiUrl}/job/DRIVER`);
   }
 
+  /** Returns the currently logged-in user's own Employee record (all roles). */
+  getMe(): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/me`);
+  }
+
   getById(id: string): Observable<Employee> {
     return this.http.get<Employee>(`${this.apiUrl}/${id}`);
   }

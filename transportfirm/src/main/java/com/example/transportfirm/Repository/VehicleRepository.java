@@ -15,7 +15,29 @@ import java.util.UUID;
 public interface VehicleRepository extends JpaRepository<VehicleRecord, UUID> {
 
     List<VehicleRecord> findByDriverIsNull();
-    List<VehicleRecord> findByMechanicGroup_IdOrDispatcherGroup_Id(UUID mechanicGroupId, UUID dispatcherGroupId);
+
+    /** Fetches all vehicles with their groups and driver in one query — used by GET /vehicles list. */
+    @Query("SELECT DISTINCT v FROM VehicleRecord v " +
+           "LEFT JOIN FETCH v.dispatcherGroup " +
+           "LEFT JOIN FETCH v.mechanicGroup " +
+           "LEFT JOIN FETCH v.driver")
+    List<VehicleRecord> findAllWithGroups();
+
+    /** Single vehicle with groups and driver — used by GET /vehicles/{id}. */
+    @Query("SELECT v FROM VehicleRecord v " +
+           "LEFT JOIN FETCH v.dispatcherGroup " +
+           "LEFT JOIN FETCH v.mechanicGroup " +
+           "LEFT JOIN FETCH v.driver " +
+           "WHERE v.id = :id")
+    java.util.Optional<VehicleRecord> findByIdWithGroups(@Param("id") UUID id);
+
+    /** Vehicles by group with groups and driver pre-fetched. */
+    @Query("SELECT DISTINCT v FROM VehicleRecord v " +
+           "LEFT JOIN FETCH v.dispatcherGroup " +
+           "LEFT JOIN FETCH v.mechanicGroup " +
+           "LEFT JOIN FETCH v.driver " +
+           "WHERE v.mechanicGroup.id = :groupId OR v.dispatcherGroup.id = :groupId")
+    List<VehicleRecord> findByGroupIdWithGroups(@Param("groupId") UUID groupId);
 
     /** Fetches all vehicles with their dispatcher group + dispatcher + employee in one query (no lazy loading). */
     @Query("SELECT DISTINCT v FROM VehicleRecord v " +
@@ -39,8 +61,18 @@ public interface VehicleRepository extends JpaRepository<VehicleRecord, UUID> {
             @Param("rangeEnd")   LocalDate rangeEnd);
 
     // Paginated search + filter for vehicle list
-    @Query("SELECT v FROM VehicleRecord v WHERE " +
-           "(:search = '' OR LOWER(v.plateNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.model) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.owner) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+    @Query(value =
+           "SELECT DISTINCT v FROM VehicleRecord v " +
+           "LEFT JOIN FETCH v.dispatcherGroup " +
+           "LEFT JOIN FETCH v.mechanicGroup " +
+           "LEFT JOIN FETCH v.driver " +
+           "WHERE (:search = '' OR LOWER(v.plateNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.model) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.owner) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:technicalCondition = '' OR v.technicalCondition = :technicalCondition) " +
+           "AND (:typePps = '' OR v.typePps = :typePps) " +
+           "AND (:vehicleStatus IS NULL OR v.vehicleStatus = :vehicleStatus)",
+           countQuery =
+           "SELECT COUNT(v) FROM VehicleRecord v " +
+           "WHERE (:search = '' OR LOWER(v.plateNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.model) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.owner) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "AND (:technicalCondition = '' OR v.technicalCondition = :technicalCondition) " +
            "AND (:typePps = '' OR v.typePps = :typePps) " +
            "AND (:vehicleStatus IS NULL OR v.vehicleStatus = :vehicleStatus)")

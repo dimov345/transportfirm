@@ -23,7 +23,7 @@ public class DispatcherInfo {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
     @JsonBackReference("employee-dispatcher")
     private Employee employee;

@@ -47,6 +47,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
         roles: ['DISPATCHER']
       },
       {
+        label: 'Моите документи',
+        icon: 'folder',
+        route: '/my-documents',
+        roles: ['DRIVER']
+      },
+      {
         label: 'ППС',
         icon: 'lorry',
         route: '/vehicles',

@@ -45,7 +45,7 @@ public class MechanicController {
     @PreAuthorize("hasRole('MECHANIC')")
     @GetMapping("/me/groups")
     public List<TruckGroup> myGroups(Principal principal) {
-        Employee emp = employeeRepository.findByEmail(principal.getName())
+        Employee emp = employeeRepository.findByEmailWithInfos(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         if (emp.getMechanicInfo() == null) {

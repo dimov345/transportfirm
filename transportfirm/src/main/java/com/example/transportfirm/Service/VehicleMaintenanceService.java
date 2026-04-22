@@ -6,10 +6,10 @@ import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.VehicleRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,10 +28,12 @@ public class VehicleMaintenanceService {
         this.vehicleRecordRepository = vehicleRecordRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<VehicleMaintenanceRecord> getHistory(UUID vehicleId, Pageable pageable) {
         return recordRepository.findAllByVehicle_Id(vehicleId, pageable);
     }
 
+    @Transactional(readOnly = true)
     public VehicleMaintenanceRecord getById(UUID recordId) {
         return recordRepository.findById(recordId)
                 .orElseThrow(() -> new RuntimeException("Maintenance record not found"));

@@ -35,15 +35,18 @@ public class TruckGroupService {
         this.mechanicRepository = mechanicRepository;
     }
 
+    @Transactional(readOnly = true)
     public TruckGroup getById(UUID groupId) {
         return truckGroupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("TruckGroup not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<TruckGroup> getAll() {
         return truckGroupRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<TruckGroup> getAllByType(GroupType groupType) {
         return truckGroupRepository.findAllByGroupType(groupType);
     }
@@ -176,10 +179,12 @@ public class TruckGroupService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TruckGroup> getDispatcherGroups(UUID dispatcherId) {
         return truckGroupRepository.findAllByDispatcher_Id(dispatcherId);
     }
 
+    @Transactional(readOnly = true)
     public List<TruckGroup> getMechanicGroups(UUID mechanicId) {
         return truckGroupRepository.findAllByMechanic_Id(mechanicId);
     }

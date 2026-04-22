@@ -11,6 +11,7 @@ import com.example.transportfirm.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -63,10 +64,12 @@ public class DriverService {
     // =========================
     // DOCUMENTS
     // =========================
+    @Transactional(readOnly = true)
     public List<DriverDocument> getDriverDocumentsByEmployee(UUID employeeId) {
         return documentRepository.findByEmployee_Id(employeeId);
     }
 
+    @Transactional(readOnly = true)
     public DriverDocument getDocument(UUID docId) {
         return documentRepository.findById(docId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
@@ -82,31 +85,44 @@ public class DriverService {
         if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF allowed");
 
+        if (file.getSize() > 5 * 1024 * 1024)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large (max 5 MB)");
+
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
-
-        Files.createDirectories(Paths.get(uploadDir));
-
-        String storedName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path path = Paths.get(uploadDir).resolve(storedName);
-        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
         DriverDocument doc = new DriverDocument();
         doc.setEmployee(employee);
         doc.setType(type);
         doc.setFileName(file.getOriginalFilename());
-        doc.setFilePath(path.toString());
+        doc.setFileData(file.getBytes());   // stored in DB — survives redeploys
 
         return documentRepository.save(doc);
+    }
+
+    /** Returns raw PDF bytes for download — reads from DB (fileData) or falls back to legacy filePath. */
+    public byte[] getDocumentBytes(UUID docId) throws IOException {
+        DriverDocument doc = documentRepository.findById(docId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+
+        if (doc.getFileData() != null) return doc.getFileData();
+
+        // Legacy fallback: file stored on disk before migration
+        if (doc.getFilePath() != null) {
+            Path path = Path.of(doc.getFilePath());
+            if (Files.exists(path)) return Files.readAllBytes(path);
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document file not found");
     }
 
     public void deleteDocument(UUID id) {
         DriverDocument doc = documentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 
-        try {
-            Files.deleteIfExists(Path.of(doc.getFilePath()));
-        } catch (IOException ignored) {}
+        // Clean up legacy file if present
+        if (doc.getFilePath() != null) {
+            try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
+        }
 
         documentRepository.delete(doc);
     }

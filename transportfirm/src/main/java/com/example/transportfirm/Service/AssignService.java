@@ -75,17 +75,20 @@ public class AssignService {
     // READ (reverse lookups)
     // =========================
 
+    @Transactional(readOnly = true)
     public VehicleRecord getVehicleOfDriver(UUID driverInfoId) {
         DriverInfo driver = driverRepository.findById(driverInfoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
         return driver.getVehicle();
     }
 
+    @Transactional(readOnly = true)
     public DriverInfo getDriverOfVehicle(UUID vehicleId) {
         return driverRepository.findByVehicle_Id(vehicleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No driver assigned to this vehicle"));
     }
 
+    @Transactional(readOnly = true)
     public List<VehicleRecord> getAvailableVehicles() {
         return vehicleRepository.findByDriverIsNull();
     }

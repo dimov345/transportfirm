@@ -41,6 +41,20 @@ export class EmployeeForm implements OnInit {
 
   employeeId: string | null = null;
 
+  /** Country-code prefix for the phone field (default: Bulgaria) */
+  phonePrefix = '+359';
+
+  readonly PHONE_PREFIXES = [
+    { code: '+359', label: '🇧🇬 +359 (БГ)' },
+    { code: '+49',  label: '🇩🇪 +49 (DE)'  },
+    { code: '+90',  label: '🇹🇷 +90 (TR)'  },
+    { code: '+40',  label: '🇷🇴 +40 (RO)'  },
+    { code: '+30',  label: '🇬🇷 +30 (GR)'  },
+    { code: '+381', label: '🇷🇸 +381 (RS)' },
+    { code: '+44',  label: '🇬🇧 +44 (UK)'  },
+    { code: '+1',   label: '🇺🇸 +1 (US)'   }
+  ];
+
   // public (template го ползва)
   loadedEmployee: Employee | null = null;
 
@@ -134,7 +148,7 @@ export class EmployeeForm implements OnInit {
             egn: emp.egn ?? '',
             name: emp.name ?? '',
             dateOfBirth: this.toDateInput(emp.dateOfBirth),
-            phone: emp.phone ?? '',
+            phone: '',           // will be set by parsePhone below
             email: emp.email ?? '',
 
             addressPermanent: emp.addressPermanent ?? '',
@@ -152,6 +166,9 @@ export class EmployeeForm implements OnInit {
             bankName: emp.bankName ?? '',
             iban: emp.iban ?? ''
           });
+
+          // Parse stored phone into prefix + local
+          if (emp.phone) this.parsePhone(emp.phone);
 
           // edit: username не участва
           this.form.get('username')?.clearValidators();
@@ -177,6 +194,30 @@ export class EmployeeForm implements OnInit {
       });
   }
 
+  /** Splits a stored E.164 phone into prefix + local and updates the form. */
+  private parsePhone(stored: string): void {
+    if (!stored) return;
+    // Sort by length descending to avoid +1 matching +381 first
+    const sorted = [...this.PHONE_PREFIXES].sort((a, b) => b.code.length - a.code.length);
+    for (const p of sorted) {
+      if (stored.startsWith(p.code)) {
+        this.phonePrefix = p.code;
+        this.form.get('phone')?.setValue(stored.slice(p.code.length));
+        return;
+      }
+    }
+    // No known prefix matched — show number as-is
+    this.form.get('phone')?.setValue(stored);
+  }
+
+  /** Builds the full E.164 phone by combining prefix + local number. */
+  private buildPhone(): string {
+    const local = (this.form.value.phone || '').replace(/\s/g, '');
+    if (local.startsWith('+')) return local;          // already E.164
+    const digits = local.replace(/^0+/, '');           // strip leading zero(s)
+    return this.phonePrefix + digits;
+  }
+
   private toDateInput(value: any): string {
     if (!value) return '';
     return typeof value === 'string' ? value.slice(0, 10) : '';
@@ -189,7 +230,7 @@ export class EmployeeForm implements OnInit {
       egn: v.egn,
       name: v.name,
       dateOfBirth: v.dateOfBirth,
-      phone: v.phone,
+      phone: this.buildPhone(),
       email: v.email,
 
       addressPermanent: v.addressPermanent || undefined,
@@ -221,7 +262,7 @@ export class EmployeeForm implements OnInit {
       egn: v.egn,
       name: v.name,
       dateOfBirth: v.dateOfBirth,
-      phone: v.phone,
+      phone: this.buildPhone(),
       email: v.email,
 
       addressPermanent: v.addressPermanent || null,

@@ -56,7 +56,14 @@
 
           <div class="tf-group">
             <label class="tf-label">Телефон *</label>
-            <input class="tf-input" formControlName="phone" type="text" />
+            <div class="tf-input-with-prefix">
+              <select class="tf-prefix-select"
+                      [value]="phonePrefix"
+                      (change)="phonePrefix = $any($event.target).value">
+                <option *ngFor="let p of PHONE_PREFIXES" [value]="p.code">{{ p.label }}</option>
+              </select>
+              <input class="tf-input" formControlName="phone" type="text" placeholder="88 123 456" />
+            </div>
             <div class="tf-error" *ngIf="field('phone')?.touched && field('phone')?.invalid">
               <small>Телефонът е задължителен.</small>
             </div>

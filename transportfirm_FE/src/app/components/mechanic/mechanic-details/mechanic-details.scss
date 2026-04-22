@@ -101,6 +101,11 @@
   p { font-size: 14px; margin: 0; font-weight: 500; }
 }
 
+/* Full-width card spanning the entire grid */
+.info-card--full {
+  grid-column: 1 / -1;
+}
+
 .upload-section { margin-bottom: 16px; }
 
 .upload-controls {

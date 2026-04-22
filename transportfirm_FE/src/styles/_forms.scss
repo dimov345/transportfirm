@@ -564,6 +564,26 @@ $ease: 0.15s ease;
     flex-shrink: 0;
   }
 
+  select.tf-prefix-select {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 100%;
+    padding: 0 10px;
+    background: #f3f4f6;
+    border: none;
+    border-right: 1px solid $border;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    outline: none;
+    min-width: 110px;
+
+    &:focus { outline: none; }
+  }
+
   input.tf-input {
     border: none !important;
     border-radius: 0 !important;

@@ -80,27 +80,48 @@ public class SmsService {
     }
 
     /**
-     * Нормализира телефонни номера до E.164 формат (+359XXXXXXXXX).
+     * Нормализира телефонни номера до E.164 формат.
      * Twilio изисква "+" префикс.
+     *
+     * <ul>
+     *   <li>+359XXXXXXXXX  → as-is (already E.164, stored by FE country-code picker)</li>
+     *   <li>00359XXXXXXX   → +359XXXXXXXXX</li>
+     *   <li>0XXXXXXXXX     → +359XXXXXXXXX (Bulgarian local format)</li>
+     *   <li>XXXXXXXXX (9d) → +359XXXXXXXXX (Bulgarian without leading zero)</li>
+     *   <li>anything else  → "+" + digits</li>
+     * </ul>
      */
     private String normalizePhone(String phone) {
         if (phone == null || phone.isBlank()) return null;
-        String p = phone.replaceAll("[\\s\\-.()+]", "");
+
+        // Strip only spaces and dashes — keep + and digits intact
+        String stripped = phone.replaceAll("[\\s\\-]", "");
+        if (stripped.isEmpty()) return null;
+
+        // Already E.164 (starts with +): trust it, just clean spaces
+        if (stripped.startsWith("+")) {
+            // Remove non-digit chars after the +
+            String digits = stripped.substring(1).replaceAll("\\D", "");
+            return digits.isEmpty() ? null : "+" + digits;
+        }
+
+        // Strip remaining non-digit chars
+        String p = stripped.replaceAll("\\D", "");
         if (p.isEmpty()) return null;
 
         if (p.startsWith("00")) {
-            p = p.substring(2);  // 00359... → 359...
+            p = p.substring(2);            // 00359... → 359...
         }
-        if (p.startsWith("359") && p.length() == 12) {
-            return "+" + p;       // 359888123456 → +359888123456
+        if (p.startsWith("359") && p.length() >= 11) {
+            return "+" + p;                // 359888123456 → +359888123456
         }
         if (p.startsWith("0") && p.length() == 10) {
-            return "+359" + p.substring(1);  // 0888123456 → +359888123456
+            return "+359" + p.substring(1); // 0888123456 → +359888123456
         }
-        if (p.length() == 9 && !p.startsWith("0")) {
-            return "+359" + p;    // 888123456 → +359888123456
+        if (p.length() == 9) {
+            return "+359" + p;             // 888123456 → +359888123456
         }
-        // Международен номер — добавяме + ако липсва
+        // Fallback: prepend +
         return "+" + p;
     }
 }

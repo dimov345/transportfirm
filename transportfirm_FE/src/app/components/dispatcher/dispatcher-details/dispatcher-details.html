@@ -32,7 +32,7 @@
             <i class="material-icons">arrow_back_ios</i>
             Назад
           </button>
-          <button type="button" class="btn-primary" (click)="goToEdit()">
+          <button type="button" class="btn-secondary" (click)="goToEdit()">
             <i class="material-icons">edit</i>
             Редактирай
           </button>
@@ -130,72 +130,70 @@
           </div>
         </div>
 
-        <!-- Документи -->
-        <div class="info-card full-width">
-          <div class="card-header">
-            <i class="material-icons">folder</i>
-            <h2>Документи</h2>
+      </div>
+
+      <!-- Документи -->
+      <div class="info-card info-card--full">
+        <div class="card-header">
+          <i class="material-icons">folder_open</i>
+          <h2>Документи</h2>
+        </div>
+
+        <!-- Upload controls -->
+        <div class="upload-section">
+          <div class="upload-controls">
+            <select [(ngModel)]="selectedDocType">
+              <option value="">Изберете тип документ</option>
+              <option value="ID_CARD">Лична карта</option>
+              <option value="PASSPORT">Паспорт</option>
+              <option value="CONTRACT">Договор</option>
+              <option value="MEDICAL_CERTIFICATE">Медицинско</option>
+              <option value="CERTIFICATION">Сертификат</option>
+              <option value="OTHER">Друго</option>
+            </select>
+
+            <label class="file-btn" [class.disabled]="isUploading">
+              <i class="material-icons">upload_file</i>
+              {{ isUploading ? 'Качване...' : 'Качи PDF' }}
+              <input type="file" accept="application/pdf"
+                     [disabled]="isUploading"
+                     (change)="onFileSelected($event)" />
+            </label>
           </div>
+          <p class="upload-hint">Само PDF файлове · макс. 5 MB</p>
+        </div>
 
-          <!-- Upload -->
-          <div class="upload-section">
-            <div class="upload-controls">
-              <select [(ngModel)]="selectedDocType" [disabled]="isUploading || loadingDocs">
-                <option value="">Изберете тип</option>
-                <option value="ID_CARD">Лична карта</option>
-                <option value="PASSPORT">Паспорт</option>
-                <option value="CONTRACT">Трудов договор</option>
-                <option value="CERTIFICATE">Сертификат</option>
-                <option value="OTHER">Друго</option>
-              </select>
+        <!-- Loading -->
+        <div class="loading-state-small" *ngIf="loadingDocs">Зареждане...</div>
 
-              <label class="file-btn" [class.disabled]="isUploading || loadingDocs">
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  [disabled]="isUploading || loadingDocs"
-                  (change)="onFileSelected($event)"
-                />
-                <i class="material-icons">upload</i>
-                <span>{{ isUploading ? 'Качване...' : 'Качи PDF' }}</span>
-              </label>
+        <!-- Documents list -->
+        <div class="docs-list" *ngIf="!loadingDocs && documents.length > 0">
+          <div class="doc-item" *ngFor="let doc of documents">
+            <i class="material-icons doc-icon">picture_as_pdf</i>
+            <div class="doc-info">
+              <span class="doc-name">{{ doc.fileName }}</span>
+              <span class="doc-type">{{ doc.type }}</span>
             </div>
-            <p class="upload-hint">Само PDF, макс. 5 MB</p>
-          </div>
-
-          <!-- Loading docs -->
-          <div class="loading-state-small" *ngIf="loadingDocs">
-            Зареждане на документи...
-          </div>
-
-          <!-- Docs list -->
-          <div class="docs-list" *ngIf="!loadingDocs && documents.length > 0">
-            <div class="doc-item" *ngFor="let doc of documents">
-              <i class="material-icons doc-icon">picture_as_pdf</i>
-              <div class="doc-info">
-                <span class="doc-name">{{ doc.fileName }}</span>
-                <span class="doc-type" *ngIf="doc.type">{{ doc.type }}</span>
-              </div>
-              <div class="doc-actions">
-                <button type="button" class="btn-icon" (click)="downloadDocument(doc)" title="Изтегли">
-                  <i class="material-icons">download</i>
-                </button>
-                <button type="button" class="btn-icon btn-danger" (click)="deleteDocument(doc.id)" title="Изтрий">
-                  <i class="material-icons">delete</i>
-                </button>
-              </div>
+            <div class="doc-actions">
+              <button type="button" class="btn-icon" title="Свали" (click)="downloadDocument(doc)">
+                <i class="material-icons">download</i>
+              </button>
+              <button type="button" class="btn-icon btn-danger" title="Изтрий" (click)="deleteDocument(doc.id)">
+                <i class="material-icons">delete</i>
+              </button>
             </div>
-          </div>
-
-          <!-- Empty docs -->
-          <div class="empty-section" *ngIf="!loadingDocs && documents.length === 0">
-            <i class="material-icons">folder_open</i>
-            <p>Няма прикачени документи</p>
           </div>
         </div>
 
+        <!-- Empty state -->
+        <div class="empty-section" *ngIf="!loadingDocs && documents.length === 0">
+          <i class="material-icons">folder_open</i>
+          <p>Няма прикачени документи</p>
+        </div>
       </div>
+
     </div>
+  </div>
 
   </ng-container>
 

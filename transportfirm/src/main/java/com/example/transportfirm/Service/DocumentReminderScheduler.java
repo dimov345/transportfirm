@@ -35,7 +35,7 @@ public class DocumentReminderScheduler {
     private final SmsService smsService;
 
     /** Изпълнява се всеки ден в 08:00 сутринта. */
-    @Scheduled(cron = "0 22 14 * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     @Transactional
     public void sendDocumentReminders() {
         LocalDate today       = LocalDate.now();
@@ -214,38 +214,53 @@ public class DocumentReminderScheduler {
         }
     }
 
-    /** Builds a concise SMS message for driver document reminders. */
+    /** Builds a formatted SMS message for driver document reminders. */
     private String buildDriverSmsSummary(String driverName, List<String[]> items) {
-        StringBuilder sb = new StringBuilder("TransTrack: ");
-        sb.append(driverName).append(" — документи: ");
-        for (int i = 0; i < items.size(); i++) {
-            String[] item = items.get(i);
-            if (i > 0) sb.append(", ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("[TransTrack] Документи\n");
+        sb.append("Шофьор: ").append(driverName).append("\n");
+        for (String[] item : items) {
+            sb.append("• ").append(item[0]).append(": ");
             if ("expired".equals(item[1])) {
-                sb.append(item[0]).append(" ИЗТЕКЪЛ");
+                sb.append("ИЗТЕКЪЛ (").append(formatSmsDate(item[3])).append(")");
+            } else if ("0".equals(item[2])) {
+                sb.append("изтича ДНЕС (").append(formatSmsDate(item[3])).append(")");
             } else {
-                sb.append(item[0]).append(" изтича след ").append(item[2]).append("д");
+                sb.append("след ").append(item[2]).append(" дни (").append(formatSmsDate(item[3])).append(")");
             }
+            sb.append("\n");
         }
-        sb.append(". Моля подновете навреме.");
+        sb.append("Моля подновете навреме!");
         return sb.toString();
     }
 
-    /** Builds a concise SMS message for vehicle document reminders. */
+    /** Builds a formatted SMS message for vehicle document reminders. */
     private String buildVehicleSmsSummary(String plate, List<String[]> items) {
-        StringBuilder sb = new StringBuilder("TransTrack: ППС ");
-        sb.append(plate).append(" — ");
-        for (int i = 0; i < items.size(); i++) {
-            String[] item = items.get(i);
-            if (i > 0) sb.append(", ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("[TransTrack] Документи ППС\n");
+        sb.append("ППС: ").append(plate).append("\n");
+        for (String[] item : items) {
+            sb.append("• ").append(item[0]).append(": ");
             if ("expired".equals(item[1])) {
-                sb.append(item[0]).append(" ИЗТЕКЪЛ");
+                sb.append("ИЗТЕКЪЛ (").append(formatSmsDate(item[3])).append(")");
+            } else if ("0".equals(item[2])) {
+                sb.append("изтича ДНЕС (").append(formatSmsDate(item[3])).append(")");
             } else {
-                sb.append(item[0]).append(" изтича след ").append(item[2]).append("д");
+                sb.append("след ").append(item[2]).append(" дни (").append(formatSmsDate(item[3])).append(")");
             }
+            sb.append("\n");
         }
-        sb.append(". Необходимо подновяване.");
+        sb.append("Необходимо подновяване!");
         return sb.toString();
+    }
+
+    /** Formats ISO date (2026-04-25) → short BG format (25.04.26). */
+    private String formatSmsDate(String isoDate) {
+        if (isoDate == null || isoDate.length() < 10) return isoDate;
+        // isoDate = "2026-04-25"
+        String[] p = isoDate.split("-");
+        if (p.length < 3) return isoDate;
+        return p[2] + "." + p[1] + "." + p[0].substring(2); // 25.04.26
     }
 
     /**

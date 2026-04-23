@@ -63,7 +63,6 @@ export class EmployeeForm implements OnInit {
   }
 
   jobTitleOptions = Object.values(JobTitle);
-  roleOptions = Object.values(Role);
   contractTypeOptions = Object.values(ContractType);
 
   readonly jobTitleLabels: Record<string, string | undefined> = {
@@ -72,10 +71,10 @@ export class EmployeeForm implements OnInit {
     ADMINISTRATOR: 'Администратор'
   };
 
-  readonly roleLabels: Record<string, string | undefined> = {
-    ADMIN: 'Администратор', MANAGER: 'Мениджър', DISPATCHER: 'Спедитор',
-    ACCOUNTANT: 'Счетоводител', DRIVER: 'Шофьор', MECHANIC: 'Механик'
-  };
+  private jobTitleToRole(jobTitle: string): Role {
+    const map: Record<string, string> = { ADMINISTRATOR: 'ADMIN' };
+    return (map[jobTitle] ?? jobTitle) as Role;
+  }
 
   readonly contractTypeLabels: Record<string, string | undefined> = {
     FULL_TIME: 'Пълен работен ден', PART_TIME: 'Непълен работен ден',
@@ -105,7 +104,6 @@ export class EmployeeForm implements OnInit {
       addressCurrent: [''],
 
       jobTitle: ['', Validators.required],
-      role: ['', Validators.required],
       hiredDate: ['', Validators.required],
       contractType: ['', Validators.required],
       salary: [null, Validators.required],
@@ -237,7 +235,7 @@ export class EmployeeForm implements OnInit {
       addressCurrent: v.addressCurrent || undefined,
 
       jobTitle: v.jobTitle,
-      role: v.role,
+      role: this.jobTitleToRole(v.jobTitle),
       hiredDate: v.hiredDate,
       contractType: v.contractType,
 
@@ -270,7 +268,7 @@ export class EmployeeForm implements OnInit {
 
       jobTitle: this.loadedEmployee.jobTitle,
 
-      role: v.role,
+      role: this.jobTitleToRole(this.loadedEmployee.jobTitle),
       hiredDate: v.hiredDate,
       contractType: v.contractType,
 

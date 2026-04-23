@@ -12,6 +12,12 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./employee-list.scss']
 })
 export class EmployeeList implements OnInit {
+  readonly jobTitleLabels: Record<string, string> = {
+    DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ADMINISTRATOR: 'Администратор'
+  };
+
   employees: EmployeeListItem[] = [];
   filtered: EmployeeListItem[] = [];
   searchText = '';

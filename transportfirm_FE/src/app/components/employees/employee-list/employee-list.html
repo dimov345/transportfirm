@@ -63,7 +63,7 @@
 
           <td class="job-cell">
             <div class="job-value" [class.no-job]="!emp.jobTitle">
-              {{ emp.jobTitle || '—' }}
+              {{ jobTitleLabels[emp.jobTitle] ?? emp.jobTitle ?? '—' }}
             </div>
           </td>
 

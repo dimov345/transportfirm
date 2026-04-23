@@ -100,17 +100,6 @@
           </div>
 
           <div class="tf-group">
-            <label class="tf-label">Роля *</label>
-            <select class="tf-input" formControlName="role">
-              <option value="">-- избери --</option>
-              <option *ngFor="let r of roleOptions" [value]="r">{{ roleLabels[r] ?? r }}</option>
-            </select>
-            <div class="tf-error" *ngIf="field('role')?.touched && field('role')?.invalid">
-              <small>Ролята е задължителна.</small>
-            </div>
-          </div>
-
-          <div class="tf-group">
             <label class="tf-label">Дата на назначаване *</label>
             <input class="tf-input" formControlName="hiredDate" type="date" />
             <div class="tf-error" *ngIf="field('hiredDate')?.touched && field('hiredDate')?.invalid">

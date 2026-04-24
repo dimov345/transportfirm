@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/invoices")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DISPATCHER')")
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DISPATCHER', 'ACCOUNTANT')")
 public class InvoiceController {
 
     private static final DateTimeFormatter BG_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -26,6 +26,7 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     /** Генерира или връща съществуваща фактура за курса (идемпотентна). */
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DISPATCHER')")
     @PostMapping("/trip/{tripId}")
     public ResponseEntity<InvoiceResponse> createOrGetForTrip(
             @PathVariable UUID tripId,
@@ -52,6 +53,7 @@ public class InvoiceController {
         return inv.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DISPATCHER')")
     @PutMapping("/{id}")
     public ResponseEntity<InvoiceResponse> update(
             @PathVariable UUID id,

@@ -62,15 +62,14 @@ public class InvoiceService {
         if (invoice.getSellerAddress() == null) invoice.setSellerAddress(trip.getSellerAddress());
 
         if (req != null) {
-            invoice.setClientAddress(req.getClientAddress());
-            invoice.setClientVatNumber(req.getClientVatNumber());
-            invoice.setSellerName(req.getSellerName());
-            invoice.setSellerVatNumber(req.getSellerVatNumber());
-            invoice.setSellerAddress(req.getSellerAddress());
-            invoice.setNotes(req.getNotes());
-            if (req.getStatus() != null) {
-                invoice.setStatus(InvoiceStatus.valueOf(req.getStatus().toUpperCase()));
-            }
+            // Override само ако изрично е зададено в заявката — не презаписвай с null
+            if (req.getClientAddress()   != null) invoice.setClientAddress(req.getClientAddress());
+            if (req.getClientVatNumber() != null) invoice.setClientVatNumber(req.getClientVatNumber());
+            if (req.getSellerName()      != null) invoice.setSellerName(req.getSellerName());
+            if (req.getSellerVatNumber() != null) invoice.setSellerVatNumber(req.getSellerVatNumber());
+            if (req.getSellerAddress()   != null) invoice.setSellerAddress(req.getSellerAddress());
+            if (req.getNotes()           != null) invoice.setNotes(req.getNotes());
+            if (req.getStatus()          != null) invoice.setStatus(InvoiceStatus.valueOf(req.getStatus().toUpperCase()));
         }
 
         Invoice saved = invoiceRepository.save(invoice);

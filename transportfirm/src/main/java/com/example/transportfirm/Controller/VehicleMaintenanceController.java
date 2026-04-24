@@ -6,7 +6,6 @@ import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.enums.VehicleMaintenanceDocumentType;
 import com.example.transportfirm.service.VehicleMaintenanceDocumentService;
 import com.example.transportfirm.service.VehicleMaintenanceService;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -103,7 +102,7 @@ public class VehicleMaintenanceController {
     // GET /maintenance/documents/{documentId}/download
     @GetMapping("/documents/{documentId}/download")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
-    public ResponseEntity<Resource> download(@PathVariable UUID documentId) {
+    public ResponseEntity<byte[]> download(@PathVariable UUID documentId) {
         return documentService.download(documentId);
     }
 

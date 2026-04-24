@@ -96,6 +96,7 @@ public class DriverService {
         doc.setType(type);
         doc.setFileName(file.getOriginalFilename());
         doc.setFileData(file.getBytes());   // stored in DB — survives redeploys
+        doc.setFilePath("DB");              // satisfies legacy NOT NULL constraint; fileData takes precedence on read
 
         return documentRepository.save(doc);
     }

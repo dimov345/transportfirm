@@ -149,7 +149,7 @@ export class FreightTripsListComponent implements OnInit {
   }
 
   get canViewInvoices(): boolean {
-    return this.auth.hasRole('ADMIN', 'MANAGER', 'DISPATCHER');
+    return this.auth.hasRole('ADMIN', 'MANAGER', 'DISPATCHER', 'ACCOUNTANT');
   }
 
   trackById = (_: number, t: FreightTrip) => t.id;

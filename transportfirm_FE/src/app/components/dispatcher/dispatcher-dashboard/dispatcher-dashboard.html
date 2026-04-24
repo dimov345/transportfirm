@@ -217,31 +217,41 @@
           Няма назначени ППС
         </div>
 
-        <div
-          class="dsh-vehicle"
-          *ngFor="let v of vehicles"
-          [class.dsh-selected]="selectedVehicle?.id === v.id"
-          (click)="selectVehicle(v)">
-
-          <div class="dsh-plate">{{ v.plateNumber }}</div>
-          <div class="dsh-model">{{ v.model }}</div>
-
-          <div class="dsh-meta">
-            <span class="vs-dot" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">●</span>
-            <span class="dsh-status-text">{{ getVehicleStatusLabel(v.vehicleStatus) }}</span>
+        <ng-container *ngFor="let entry of vehiclesByGroup">
+          <!-- Group header -->
+          <div class="dsh-group-header">
+            <i class="material-icons">folder</i>
+            <span class="dsh-group-name">{{ entry.group.groupName }}</span>
+            <span class="dsh-group-count">{{ entry.vehicles.length }}</span>
           </div>
 
-          <div class="dsh-odometer" *ngIf="v.odometerKm">
-            <i class="material-icons">speed</i> {{ v.odometerKm }} км
-          </div>
+          <!-- Vehicles in this group -->
+          <div
+            class="dsh-vehicle"
+            *ngFor="let v of entry.vehicles"
+            [class.dsh-selected]="selectedVehicle?.id === v.id"
+            (click)="selectVehicle(v)">
 
-          <div class="dsh-service-due" *ngIf="v.nextServiceDueDate">
-            <i class="material-icons" [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">build</i>
-            <span [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">
-              {{ formatDate(v.nextServiceDueDate) }}
-            </span>
+            <div class="dsh-plate">{{ v.plateNumber }}</div>
+            <div class="dsh-model">{{ v.model }}</div>
+
+            <div class="dsh-meta">
+              <span class="vs-dot" [ngClass]="getVehicleStatusClass(v.vehicleStatus)">●</span>
+              <span class="dsh-status-text">{{ getVehicleStatusLabel(v.vehicleStatus) }}</span>
+            </div>
+
+            <div class="dsh-odometer" *ngIf="v.odometerKm">
+              <i class="material-icons">speed</i> {{ v.odometerKm }} км
+            </div>
+
+            <div class="dsh-service-due" *ngIf="v.nextServiceDueDate">
+              <i class="material-icons" [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">build</i>
+              <span [class.dsh-urgent]="isExpired(v.nextServiceDueDate)">
+                {{ formatDate(v.nextServiceDueDate) }}
+              </span>
+            </div>
           </div>
-        </div>
+        </ng-container>
       </div>
 
     </div>

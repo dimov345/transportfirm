@@ -220,6 +220,15 @@ export class MechanicDashboardComponent implements OnInit {
     return value ? (map[value] ?? '') : '';
   }
 
+  get vehiclesByGroup(): { group: TruckGroup; vehicles: VehicleInfo[] }[] {
+    return this.groups
+      .map(g => ({
+        group: g,
+        vehicles: this.vehicles.filter(v => v.mechanicGroup?.id === g.id)
+      }))
+      .filter(e => e.vehicles.length > 0);
+  }
+
   openRecords(): number {
     return this.maintenanceRecords.filter(r => r.status === 'OPEN').length;
   }

@@ -602,6 +602,49 @@ $ease: 0.15s ease;
   font-size: 13px;
 }
 
+/* Group section header inside sidebar */
+.dsh-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f0f4f8;
+  border-bottom: 1px solid $border;
+  border-top: 1px solid $border;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  &:first-of-type { border-top: none; }
+
+  .material-icons {
+    font-size: 14px;
+    color: #718096;
+  }
+}
+
+.dsh-group-name {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a5568;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsh-group-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: $accent;
+  border-radius: 10px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
 .dsh-vehicle {
   padding: 12px 16px;
   border-bottom: 1px solid $border-2;

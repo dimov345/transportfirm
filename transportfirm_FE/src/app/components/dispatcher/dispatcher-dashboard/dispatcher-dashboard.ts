@@ -179,6 +179,15 @@ export class DispatcherDashboardComponent implements OnInit {
     return value ? (map[value] ?? '') : '';
   }
 
+  get vehiclesByGroup(): { group: TruckGroup; vehicles: VehicleInfo[] }[] {
+    return this.groups
+      .map(g => ({
+        group: g,
+        vehicles: this.vehicles.filter(v => v.dispatcherGroup?.id === g.id)
+      }))
+      .filter(e => e.vehicles.length > 0);
+  }
+
   totalCost(): number {
     return this.maintenanceRecords.reduce((sum, r) => sum + (r.totalGross ?? 0), 0);
   }

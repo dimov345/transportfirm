@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -7,6 +8,7 @@ import { DriverService } from '../../../core/services/driver.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { DriverInfo } from '../../../core/models/driver/driver-info.model';
 import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
+import { HasUnsavedChanges } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-driver-form',
@@ -15,7 +17,7 @@ import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
   templateUrl: './driver-form.html',
   styleUrls: ['./driver-form.scss']
 })
-export class DriverFormComponent implements OnInit {
+export class DriverFormComponent implements OnInit, HasUnsavedChanges {
   form!: FormGroup;
 
   employeeId!: string;
@@ -27,6 +29,7 @@ export class DriverFormComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private fb: FormBuilder,
@@ -58,7 +61,7 @@ export class DriverFormComponent implements OnInit {
     this.employeeId = employeeIdParam;
 
     // ✅ GET employee/{employeeId}
-    this.driverService.getEmployee(this.employeeId).subscribe({
+    this.driverService.getEmployee(this.employeeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (employee: Employee) => {
         const di: DriverInfo | null | undefined = employee.driverInfo;
 
@@ -83,6 +86,7 @@ export class DriverFormComponent implements OnInit {
           digitalCardIssuedOn: di.digitalCardIssuedOn ?? '',
           digitalCardExpiresOn: di.digitalCardExpiresOn ?? '',
         });
+        this.form.markAsPristine();
       },
       error: (err: unknown) => {
         console.error('Failed to load employee:', err);
@@ -111,10 +115,11 @@ export class DriverFormComponent implements OnInit {
       id: this.driverInfoId
     };
 
-    this.driverService.updateDriverInfo(this.driverInfoId, payload).subscribe({
+    this.driverService.updateDriverInfo(this.driverInfoId, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.saving = false;
         invalidateCache();
+        this.form.markAsPristine();
         this.router.navigate(['/drivers']);
       },
       error: (err: unknown) => {
@@ -123,5 +128,9 @@ export class DriverFormComponent implements OnInit {
         alert('Грешка при запис!');
       }
     });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty;
   }
 }

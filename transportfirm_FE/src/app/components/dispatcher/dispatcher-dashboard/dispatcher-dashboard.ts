@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
+  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-dispatcher-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './dispatcher-dashboard.html',
   styleUrls: ['./dispatcher-dashboard.scss']
@@ -27,6 +28,7 @@ export class DispatcherDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   loading = true;
   error = '';
@@ -68,7 +70,7 @@ export class DispatcherDashboardComponent implements OnInit {
   }
 
   private loadDispatcherData(): void {
-    this.truckGroupService.getGroupsByDispatcherMe().subscribe({
+    this.truckGroupService.getGroupsByDispatcherMe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (groups) => {
         this.groups = groups;
         this.loadVehiclesFromGroups(groups);
@@ -89,7 +91,7 @@ export class DispatcherDashboardComponent implements OnInit {
       return;
     }
 
-    this.vehicleService.getAll().subscribe({
+    this.vehicleService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (all) => {
         const groupIds = new Set(groups.map(g => g.id));
         this.vehicles = all.filter(v => v.dispatcherGroup && groupIds.has(v.dispatcherGroup.id));
@@ -119,7 +121,7 @@ export class DispatcherDashboardComponent implements OnInit {
     this.maintenanceRecords = [];
     this.cdr.detectChanges();
 
-    this.maintenanceService.getByVehicle(vehicleId, 0, 50).subscribe({
+    this.maintenanceService.getByVehicle(vehicleId, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (page) => {
         this.maintenanceRecords = page.content;
         this.loadingMaintenance = false;

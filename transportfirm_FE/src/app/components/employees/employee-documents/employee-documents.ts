@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +10,7 @@ import { EmployeeDocument } from '../../../core/models/employee/employee-documen
 @Component({
   selector: 'app-employee-documents',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './employee-documents.html',
   styleUrls: ['./employee-documents.scss']
@@ -20,6 +22,7 @@ export class EmployeeDocuments implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   employeeId!: string;
   documents: EmployeeDocument[] = [];
@@ -55,7 +58,7 @@ export class EmployeeDocuments implements OnInit {
     this.successMessage = '';
     this.cdr.detectChanges();
 
-    this.service.getDocuments(this.employeeId).subscribe({
+    this.service.getDocuments(this.employeeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (docs) => {
         this.documents = docs ?? [];
         this.isLoading = false;

@@ -1,5 +1,5 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -15,7 +15,6 @@ type QuickLink = { label: string; icon: string; route: string };
 export class ProfileComponent {
   private auth   = inject(AuthService);
   private router = inject(Router);
-  private pid    = inject(PLATFORM_ID);
 
   readonly email = this.auth.getEmail() ?? '—';
   readonly role  = this.auth.getRole()  ?? '—';
@@ -91,30 +90,23 @@ export class ProfileComponent {
     return local.substring(0, 2).toUpperCase();
   }
 
-  // ---- JWT ----
-  private get jwtPayload(): Record<string, unknown> | null {
-    if (!isPlatformBrowser(this.pid)) return null;
-    const t = this.auth.getToken();
-    if (!t) return null;
-    try { return JSON.parse(atob(t.split('.')[1])); }
-    catch { return null; }
-  }
+  // ---- JWT session info (iat/exp stored at login, token itself is httpOnly) ----
 
   get tokenIssuedAt(): string {
-    const v = this.jwtPayload?.['iat'];
-    if (typeof v !== 'number') return '—';
+    const v = this.auth.getTokenIat();
+    if (v === null) return '—';
     return new Date(v * 1000).toLocaleString('bg-BG');
   }
 
   get tokenExpiresAt(): string {
-    const v = this.jwtPayload?.['exp'];
-    if (typeof v !== 'number') return '—';
+    const v = this.auth.getTokenExp();
+    if (v === null) return '—';
     return new Date(v * 1000).toLocaleString('bg-BG');
   }
 
   get tokenDaysLeft(): number | null {
-    const v = this.jwtPayload?.['exp'];
-    if (typeof v !== 'number') return null;
+    const v = this.auth.getTokenExp();
+    if (v === null) return null;
     return Math.ceil((v * 1000 - Date.now()) / 86_400_000);
   }
 

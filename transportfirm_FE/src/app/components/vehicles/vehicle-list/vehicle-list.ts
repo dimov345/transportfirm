@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-vehicle-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './vehicle-list.html',
   styleUrls: ['./vehicle-list.scss']

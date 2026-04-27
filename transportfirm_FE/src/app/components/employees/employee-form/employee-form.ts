@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
+import { HasUnsavedChanges } from '../../../core/guards/unsaved-changes.guard';
 
 import {
   AdminService,
@@ -23,7 +25,7 @@ import { Employee } from '../../../core/models/employee/employee.model';
   templateUrl: './employee-form.html',
   styleUrls: ['./employee-form.scss']
 })
-export class EmployeeForm implements OnInit {
+export class EmployeeForm implements OnInit, HasUnsavedChanges {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -32,6 +34,7 @@ export class EmployeeForm implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   form!: FormGroup;
 
@@ -134,7 +137,7 @@ export class EmployeeForm implements OnInit {
     this.cdr.detectChanges();
 
     this.adminService.getEmployeeById(id)
-      .pipe(finalize(() => {
+      .pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
       }))
@@ -314,7 +317,7 @@ export class EmployeeForm implements OnInit {
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: () => { invalidateCache(); this.router.navigate(['/employees']); },
+        next: () => { invalidateCache(); this.form.markAsPristine(); this.router.navigate(['/employees']); },
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message ||
@@ -331,5 +334,9 @@ export class EmployeeForm implements OnInit {
 
   field(name: string) {
     return this.form.get(name);
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty;
   }
 }

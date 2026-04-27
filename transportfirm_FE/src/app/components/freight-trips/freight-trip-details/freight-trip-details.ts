@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
@@ -10,6 +11,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-freight-trip-details',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './freight-trip-details.html',
   styleUrls: ['./freight-trip-details.scss']
@@ -17,6 +19,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 export class FreightTripDetailsComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   private tripService = inject(FreightTripService);
   private route = inject(ActivatedRoute);
@@ -49,6 +52,7 @@ export class FreightTripDetailsComponent implements OnInit {
       return;
     }
     this.tripService.getById(id).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError(() => {
         this.error = 'Курсът не е намерен.';
         this.loading = false;

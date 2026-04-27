@@ -13,7 +13,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "vehicle_maintenance_documents")
+@Table(name = "vehicle_maintenance_documents", indexes = {
+    @Index(name = "idx_maint_doc_record", columnList = "maintenance_record_id")
+})
 public class VehicleMaintenanceDocument {
 
     @Id

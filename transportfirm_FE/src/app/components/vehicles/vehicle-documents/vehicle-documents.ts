@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +8,7 @@ import { VehicleService, VehicleDocument, VehicleInfo } from '../../../core/serv
 @Component({
   selector: 'app-vehicle-documents',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './vehicle-documents.html',
   styleUrls: ['./vehicle-documents.scss']
@@ -20,6 +22,8 @@ export class VehicleDocumentsComponent implements OnInit {
 
   isLoading = true;
   isUploading = false;
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -41,7 +45,7 @@ export class VehicleDocumentsComponent implements OnInit {
 
   /** Зарежда данните за ППС (само за header: plateNumber) */
   loadVehicleHeader() {
-    this.vehicleService.getById(this.id).subscribe({
+    this.vehicleService.getById(this.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (vehicle: VehicleInfo) => {
         this.plateNumber = vehicle.plateNumber || '';
         this.forceUpdate();
@@ -58,7 +62,7 @@ export class VehicleDocumentsComponent implements OnInit {
   loadDocuments() {
     this.isLoading = true;
 
-    this.vehicleService.getDocuments(this.id).subscribe({
+    this.vehicleService.getDocuments(this.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (docs) => {
         this.documents = [...docs];
         this.isLoading = false;

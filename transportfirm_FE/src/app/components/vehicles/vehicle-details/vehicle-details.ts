@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 
@@ -11,6 +12,7 @@ import { MaintenanceService, MaintenanceRecord } from '../../../core/services/ma
 @Component({
   selector: 'app-vehicle-details',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink],
   templateUrl: './vehicle-details.html',
   styleUrls: ['./vehicle-details.scss']
@@ -26,6 +28,7 @@ export class VehicleDetails implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   vehicle: VehicleInfo | null = null;
   assignedDriverInfo: DriverInfo | null = null;
@@ -84,7 +87,7 @@ export class VehicleDetails implements OnInit {
     this.assignedDriverInfo = null;
     this.cdr.detectChanges();
 
-    this.vehicleService.getById(id).subscribe({
+    this.vehicleService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (vehicle) => {
         this.vehicle = vehicle;
         this.loading = false;
@@ -115,7 +118,7 @@ export class VehicleDetails implements OnInit {
     this.assignedDriverInfo = null;
     this.cdr.detectChanges();
 
-    this.assignmentService.getDriverOfVehicle(vehicleId).subscribe({
+    this.assignmentService.getDriverOfVehicle(vehicleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (driverInfo) => {
         this.assignedDriverInfo = driverInfo;
         this.cdr.detectChanges();
@@ -133,7 +136,7 @@ export class VehicleDetails implements OnInit {
     this.maintenanceRecords = [];
     this.cdr.detectChanges();
 
-    this.maintenanceService.getByVehicle(vehicleId, 0, 50).subscribe({
+    this.maintenanceService.getByVehicle(vehicleId, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (page) => {
         this.maintenanceRecords = page.content;
         this.loadingMaintenance = false;

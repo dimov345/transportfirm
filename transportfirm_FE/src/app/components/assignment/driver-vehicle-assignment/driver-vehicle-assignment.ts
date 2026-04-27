@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -10,6 +11,7 @@ import { VehicleInfo } from '../../../core/services/vehicle.service';
 @Component({
   selector: 'app-driver-vehicle-assignment',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './driver-vehicle-assignment.html',
   styleUrls: ['./driver-vehicle-assignment.scss']
@@ -26,6 +28,8 @@ export class DriverVehicleAssignment implements OnInit {
   currentVehicle: VehicleInfo | null = null;
   availableVehicles: VehicleInfo[] = [];
   selectedVehicleId = '';
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private assignmentService: AssignmentService,
@@ -49,7 +53,7 @@ export class DriverVehicleAssignment implements OnInit {
       available: this.assignmentService.getAvailableVehicles().pipe(
         catchError(() => of([]))
       )
-    }).subscribe(({ current, available }) => {
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ current, available }) => {
       this.currentVehicle = (current as VehicleInfo | null) ?? null;
       this.availableVehicles = (available as VehicleInfo[]) ?? [];
 

@@ -33,6 +33,9 @@ public class VehicleRecord {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
+    @Version
+    private Long version;
+
     @NotBlank(message = "Plate number е задължителен")
     @Column(length = 20, unique = true)
     private String plateNumber;

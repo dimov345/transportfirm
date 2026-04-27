@@ -35,7 +35,7 @@ public class DocumentReminderScheduler {
     private final SmsService smsService;
 
     /** Изпълнява се всеки ден в 08:00 сутринта. */
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 8 * * *", zone = "Europe/Sofia")
     @Transactional
     public void sendDocumentReminders() {
         LocalDate today       = LocalDate.now();

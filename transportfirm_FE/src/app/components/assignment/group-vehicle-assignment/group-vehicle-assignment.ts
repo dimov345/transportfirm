@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -11,6 +12,7 @@ import { GroupType } from '../../../core/services/truck-group.service';
 @Component({
   selector: 'app-group-vehicle-assignment',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './group-vehicle-assignment.html',
   styleUrls: ['./group-vehicle-assignment.scss']
@@ -29,6 +31,8 @@ export class GroupVehicleAssignment implements OnInit {
   vehiclesInGroup: VehicleInfo[] = [];
   availableVehicles: VehicleInfo[] = [];
   selectedVehicleId = '';
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private vehicles: VehicleService,
@@ -58,7 +62,7 @@ export class GroupVehicleAssignment implements OnInit {
 
     forkJoin({
       vehicles: this.vehicles.getAll().pipe(catchError(() => of([] as VehicleInfo[])))
-    }).subscribe(({ vehicles }) => {
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ vehicles }) => {
       this.allVehicles = vehicles ?? [];
 
       this.vehiclesInGroup = this.allVehicles.filter(v => this.getVehicleGroupId(v) === this.groupId);

@@ -1,6 +1,7 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID
+  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -18,6 +19,7 @@ interface MonthOption { value: number; label: string; }
 @Component({
   selector: 'app-accounting',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './accounting.html',
   styleUrls: ['./accounting.scss']
@@ -29,6 +31,7 @@ export class AccountingComponent implements OnInit {
   private reportSvc   = inject(ReportService);
   private invoiceSvc  = inject(InvoiceService);
   private router      = inject(Router);
+  private destroyRef  = inject(DestroyRef);
 
   // ── Period state ──────────────────────────────────────────────
   activePeriod: ReportPeriod = 'MONTHLY';
@@ -117,6 +120,7 @@ export class AccountingComponent implements OnInit {
       this.activePeriod === 'MONTHLY' ? this.selectedMonth : undefined,
       this.activePeriod === 'WEEKLY'  ? this.selectedWeek  : undefined
     ).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError((err: HttpErrorResponse) => {
         this.loadError = this.httpErrorMessage(err);
         this.loading   = false;
@@ -146,6 +150,7 @@ export class AccountingComponent implements OnInit {
     this.cdr.detectChanges();
 
     this.invoiceSvc.getAll(this.invoicesPage, 20, this.invoicesStatus || undefined).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError((err: HttpErrorResponse) => {
         this.invoicesError   = this.httpErrorMessage(err);
         this.invoicesLoading = false;

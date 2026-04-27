@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ type DispatcherRow = {
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dispatcher-list',
   imports: [CommonModule, FormsModule],
   templateUrl: './dispatcher-list.html',

@@ -14,12 +14,18 @@ const TTL_MS = 30_000;
 /**
  * Caches GET responses for 30 seconds.
  * Skips caching for auth endpoints and non-GET requests.
- * Invalidation happens automatically by TTL — mutation endpoints (POST/PUT/DELETE)
- * do NOT need to clear the cache manually since list data refreshes on next visit.
+ * Auto-invalidates the entire cache on any successful mutation (POST/PUT/DELETE/PATCH).
  */
 export const cacheInterceptor: HttpInterceptorFn = (req, next) => {
+  // Auto-invalidate cache on successful mutations so the next GET is always fresh.
   if (req.method !== 'GET') {
-    return next(req);
+    return next(req).pipe(
+      tap(event => {
+        if (event instanceof HttpResponse && event.status >= 200 && event.status < 300) {
+          cache.clear();
+        }
+      })
+    );
   }
 
   // Skip caching for auth routes — always fetch fresh tokens/user data
@@ -46,7 +52,11 @@ export const cacheInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-/** Call this after a mutation (create/update/delete) to force fresh data on next load. */
+/**
+ * Manually clear the cache, optionally scoped to a URL fragment.
+ * The interceptor already clears the full cache automatically on successful mutations,
+ * so manual calls are only needed for edge cases (e.g. optimistic updates).
+ */
 export function invalidateCache(urlFragment?: string): void {
   if (!urlFragment) {
     cache.clear();

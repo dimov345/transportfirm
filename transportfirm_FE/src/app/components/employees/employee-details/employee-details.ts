@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EmployeeService, Employee } from '../../../core/services/employee.service';
@@ -11,6 +12,7 @@ import { GroupVehicleAssignment } from '../../assignment/group-vehicle-assignmen
 @Component({
   selector: 'app-employee-details',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, FormsModule, GroupVehicleAssignment],
   templateUrl: './employee-details.html',
   styleUrls: ['./employee-details.scss']
@@ -34,6 +36,7 @@ export class EmployeeDetails implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -62,7 +65,7 @@ export class EmployeeDetails implements OnInit {
     this.errorMessage = '';
     this.cdr.detectChanges();
 
-    this.employeeService.getById(id).subscribe({
+    this.employeeService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.employee = data;
         this.loading = false;
@@ -90,7 +93,7 @@ export class EmployeeDetails implements OnInit {
     const mechanicId = this.getMechanicInfoId();
     if (!mechanicId) return;
 
-    this.groups.getGroupsByMechanic(mechanicId).subscribe({
+    this.groups.getGroupsByMechanic(mechanicId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
         this.createdGroup = list?.[0] ?? null;
         this.cdr.detectChanges();
@@ -102,7 +105,7 @@ export class EmployeeDetails implements OnInit {
     const dispatcherId = this.getDispatcherInfoId();
     if (!dispatcherId) return;
 
-    this.groups.getGroupsByDispatcher(dispatcherId).subscribe({
+    this.groups.getGroupsByDispatcher(dispatcherId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
         this.createdGroup = list?.[0] ?? null;
         this.cdr.detectChanges();

@@ -42,7 +42,7 @@ public class VehicleMaintenanceController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return maintenanceService.getHistory(vehicleId, PageRequest.of(page, size));
+        return maintenanceService.getHistory(vehicleId, PageRequest.of(page, Math.min(size, 100)));
     }
 
     // GET /maintenance/{recordId}

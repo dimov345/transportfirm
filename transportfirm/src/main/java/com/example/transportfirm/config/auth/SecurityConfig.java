@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
 
                         // everything else
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(AbstractHttpConfigurer::disable)

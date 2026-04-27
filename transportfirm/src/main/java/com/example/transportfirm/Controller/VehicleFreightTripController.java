@@ -30,7 +30,7 @@ public class VehicleFreightTripController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return tripService.getPaged(search, status, vehicleId, page, size);
+        return tripService.getPaged(search, status, vehicleId, page, Math.min(size, 100));
     }
 
     // GET /freight-trips/all

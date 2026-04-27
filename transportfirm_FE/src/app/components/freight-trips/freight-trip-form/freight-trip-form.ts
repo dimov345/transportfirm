@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
@@ -17,9 +17,10 @@ import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.serv
   templateUrl: './freight-trip-form.html',
   styleUrls: ['./freight-trip-form.scss']
 })
-export class FreightTripFormComponent implements OnInit, OnDestroy {
+export class FreightTripFormComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   private fb = inject(FormBuilder);
   private tripService = inject(FreightTripService);
@@ -43,7 +44,6 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
 
   loading = true;
   saving = false;
-  private vatSub?: Subscription;
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
@@ -76,7 +76,7 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
     });
 
     // Auto-calculate VAT at 20% when revenue changes
-    this.vatSub = this.form.get('revenueEur')!.valueChanges.subscribe((revenue: number | null) => {
+    this.form.get('revenueEur')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((revenue: number | null) => {
       if (revenue != null && revenue > 0) {
         const vat = Math.round(revenue * 0.20 * 100) / 100;
         this.form.patchValue({ vatEur: vat }, { emitEvent: false });
@@ -91,7 +91,7 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
       this.form.get('vehicleId')!.disable();
 
       // Check if this vehicle already has an active IN_TRANSIT trip
-      this.tripService.getByVehicleId(qVehicleId).subscribe({
+      this.tripService.getByVehicleId(qVehicleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (trips) => {
           this.vehicleInTransit = trips.some((t: FreightTrip) => t.status === 'IN_TRANSIT');
           if (this.vehicleInTransit && this.form.get('status')!.value === 'IN_TRANSIT') {
@@ -104,7 +104,7 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
     }
 
     // Load all vehicles (for edit mode or when no locked vehicle)
-    this.vehicleService.getAll().subscribe({
+    this.vehicleService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (v) => {
         this.vehicles = v;
         if (this.lockedVehicleId) {
@@ -121,6 +121,7 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
       this.isEdit = true;
       this.tripId = editId;
       this.tripService.getById(editId).pipe(
+        takeUntilDestroyed(this.destroyRef),
         catchError(() => {
           alert('Курсът не е намерен.');
           this.router.navigate(['/freight-trips']);
@@ -229,10 +230,6 @@ export class FreightTripFormComponent implements OnInit, OnDestroy {
         }
       });
     }
-  }
-
-  ngOnDestroy(): void {
-    this.vatSub?.unsubscribe();
   }
 
   cancel(): void {

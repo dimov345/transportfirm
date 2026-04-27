@@ -1,6 +1,7 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID
+  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -25,6 +26,7 @@ import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
 export class MaintenanceFormComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private maintenanceService = inject(MaintenanceService);
@@ -108,7 +110,7 @@ export class MaintenanceFormComponent implements OnInit {
   }
 
   private loadRecord(id: string): void {
-    this.maintenanceService.getById(id).subscribe({
+    this.maintenanceService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (rec) => {
         this.form = {
           type: rec.type,
@@ -137,7 +139,7 @@ export class MaintenanceFormComponent implements OnInit {
   }
 
   private loadDocuments(recordId: string): void {
-    this.maintenanceService.getDocuments(recordId).subscribe({
+    this.maintenanceService.getDocuments(recordId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (docs) => {
         this.documents = docs;
         this.cdr.detectChanges();

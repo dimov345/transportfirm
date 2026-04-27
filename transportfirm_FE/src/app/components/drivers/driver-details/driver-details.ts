@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { catchError, of } from 'rxjs';
@@ -15,6 +16,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-driver-details',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, DriverVehicleAssignment],
   templateUrl: './driver-details.html',
   styleUrls: ['./driver-details.scss']
@@ -39,6 +41,7 @@ export class DriverDetails implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private auth = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
   get isAdminOrManager(): boolean {
     return this.auth.hasRole('ADMIN', 'MANAGER');
@@ -73,6 +76,7 @@ export class DriverDetails implements OnInit {
     this.error = '';
 
     this.driverService.getEmployee(this.employeeId).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError((err: unknown) => {
         console.error(err);
         this.error = 'Грешка при зареждане на данните за шофьора';
@@ -99,6 +103,7 @@ export class DriverDetails implements OnInit {
   loadAssignmentData(): void {
     // текущо МПС
     this.assignmentService.getVehicleOfDriver(this.driverInfo!.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: v => this.currentVehicle = v,
         error: () => this.currentVehicle = null
@@ -106,6 +111,7 @@ export class DriverDetails implements OnInit {
 
     // свободни МПС
     this.assignmentService.getAvailableVehicles()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(list => this.availableVehicles = list);
   }
 

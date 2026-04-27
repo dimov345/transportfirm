@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { SidebarComponent } from './shared/sidebar/sidebar';
+import { ToastComponent } from './shared/toast/toast';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
@@ -7,7 +8,7 @@ import { filter } from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
 })

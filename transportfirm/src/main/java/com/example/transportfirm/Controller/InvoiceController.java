@@ -39,7 +39,7 @@ public class InvoiceController {
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false)    String status) {
-        return ResponseEntity.ok(invoiceService.getAll(page, size, status));
+        return ResponseEntity.ok(invoiceService.getAll(page, Math.min(size, 100), status));
     }
 
     @GetMapping("/{id}")

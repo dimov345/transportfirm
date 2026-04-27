@@ -23,6 +23,9 @@ public class Invoice {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
+    @Version
+    private Long version;
+
     @Column(name = "invoice_number", nullable = false, unique = true, length = 30)
     private String invoiceNumber;  // напр. INV-2026-0001
 

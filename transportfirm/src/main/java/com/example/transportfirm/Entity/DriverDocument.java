@@ -8,7 +8,9 @@ import lombok.Data;
 import java.util.UUID;
 
 @Entity
-@Table(name = "driver_documents")
+@Table(name = "driver_documents", indexes = {
+    @Index(name = "idx_drv_doc_employee", columnList = "employee_id")
+})
 @Data
 public class DriverDocument {
 

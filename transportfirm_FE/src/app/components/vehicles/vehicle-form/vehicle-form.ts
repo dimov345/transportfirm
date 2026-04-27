@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -6,6 +7,7 @@ import { finalize } from 'rxjs/operators';
 
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
 import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
+import { HasUnsavedChanges } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -14,7 +16,7 @@ import { invalidateCache } from '../../../core/interceptors/cache.interceptor';
   templateUrl: './vehicle-form.html',
   styleUrls: ['./vehicle-form.scss']
 })
-export class VehicleFormComponent implements OnInit {
+export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
   private fb = inject(FormBuilder);
   private vehicleService = inject(VehicleService);
   private router = inject(Router);
@@ -23,6 +25,7 @@ export class VehicleFormComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   vehicleForm: FormGroup = this.createForm();
 
@@ -130,6 +133,7 @@ export class VehicleFormComponent implements OnInit {
     this.vehicleService
       .getById(this.id)
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         finalize(() => {
           this.loading = false;
           this.cdr.detectChanges();
@@ -215,7 +219,7 @@ export class VehicleFormComponent implements OnInit {
         })
       )
       .subscribe({
-        next: () => { invalidateCache(); this.router.navigate(['/vehicles']); },
+        next: () => { invalidateCache(); this.vehicleForm.markAsPristine(); this.router.navigate(['/vehicles']); },
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message || `Грешка при ${this.isEdit ? 'редактиране' : 'създаване'} на превозното средство!`;
@@ -251,5 +255,9 @@ export class VehicleFormComponent implements OnInit {
   getVehicleStatusLabel(value?: string | null): string {
     if (!value) return '—';
     return this.vehicleStatuses.find(s => s.value === value)?.label ?? value;
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.vehicleForm.dirty;
   }
 }

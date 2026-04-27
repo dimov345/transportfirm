@@ -13,11 +13,11 @@ export class GroupAssignmentService {
 
   assignVehicle(groupType: GroupType, groupId: string, vehicleId: string): Observable<void> {
     const prefix = groupType === 'MECHANIC' ? 'mechanic-group' : 'dispatcher-group';
-    return this.http.put<void>(`${this.apiUrl}/${prefix}/${groupId}/vehicle/${vehicleId}`, {}, { withCredentials: true });
+    return this.http.put<void>(`${this.apiUrl}/${prefix}/${groupId}/vehicle/${vehicleId}`, {});
   }
 
   removeVehicle(groupType: GroupType, groupId: string, vehicleId: string): Observable<void> {
     const prefix = groupType === 'MECHANIC' ? 'mechanic-group' : 'dispatcher-group';
-    return this.http.delete<void>(`${this.apiUrl}/${prefix}/${groupId}/vehicle/${vehicleId}`, { withCredentials: true });
+    return this.http.delete<void>(`${this.apiUrl}/${prefix}/${groupId}/vehicle/${vehicleId}`);
   }
 }

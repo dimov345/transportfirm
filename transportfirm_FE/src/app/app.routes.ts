@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { unsavedChangesGuard } from './core/guards/unsaved-changes.guard';
 
 const ADMIN_MANAGER = ['ADMIN', 'MANAGER'];
 const ADMIN_MANAGER_DISPATCHER = ['ADMIN', 'MANAGER', 'DISPATCHER'];
@@ -38,12 +39,14 @@ export const routes: Routes = [
     path: 'drivers/new',
     loadComponent: () => import('./components/drivers/driver-form/driver-form').then(m => m.DriverFormComponent),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {
     path: 'drivers/edit/:id',
     loadComponent: () => import('./components/drivers/driver-form/driver-form').then(m => m.DriverFormComponent),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {
@@ -77,12 +80,14 @@ export const routes: Routes = [
     path: 'vehicles/new',
     loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form').then(m => m.VehicleFormComponent),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {
     path: 'vehicles/edit/:id',
     loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form').then(m => m.VehicleFormComponent),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {
@@ -109,12 +114,14 @@ export const routes: Routes = [
     path: 'employees/new',
     loadComponent: () => import('./components/employees/employee-form/employee-form').then(m => m.EmployeeForm),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {
     path: 'employees/edit/:id',
     loadComponent: () => import('./components/employees/employee-form/employee-form').then(m => m.EmployeeForm),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ADMIN_MANAGER }
   },
   {

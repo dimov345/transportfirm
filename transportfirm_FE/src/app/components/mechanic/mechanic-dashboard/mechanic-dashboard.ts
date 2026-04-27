@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
+  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-mechanic-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './mechanic-dashboard.html',
   styleUrls: ['./mechanic-dashboard.scss']

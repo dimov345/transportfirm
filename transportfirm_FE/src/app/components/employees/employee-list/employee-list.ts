@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EmployeeService, EmployeeListItem } from '../../../core/services/employee.service';
@@ -8,12 +8,13 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-employee-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './employee-list.html',
   styleUrls: ['./employee-list.scss']
 })
 export class EmployeeList implements OnInit {
-  readonly jobTitleLabels: Record<string, string> = {
+  readonly jobTitleLabels: Record<string, string | undefined> = {
     DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
     ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
     ADMINISTRATOR: 'Администратор'

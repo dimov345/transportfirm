@@ -2,9 +2,13 @@ import {
   Component,
   OnInit,
   ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Inject,
-  PLATFORM_ID
+  PLATFORM_ID,
+  DestroyRef,
+  inject
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +27,7 @@ interface ExpiryItem {
 @Component({
   selector: 'app-driver-documents',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './driver-documents.html',
   styleUrls: ['./driver-documents.scss']
@@ -42,6 +47,7 @@ export class DriverDocumentsComponent implements OnInit {
   expiryItems: ExpiryItem[] = [];
 
   readonly isBrowser: boolean;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -62,7 +68,7 @@ export class DriverDocumentsComponent implements OnInit {
 
     if (isDriver) {
       // DRIVER role: always load their OWN documents via /employees/me
-      this.employeeService.getMe().subscribe({
+      this.employeeService.getMe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: emp => {
           this.employeeId = emp.id;
           this.buildExpiryItems(emp);
@@ -87,7 +93,7 @@ export class DriverDocumentsComponent implements OnInit {
   loadDocuments(): void {
     this.isLoading = true;
 
-    this.driverService.getDocuments(this.employeeId).subscribe({
+    this.driverService.getDocuments(this.employeeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (docs: DriverDocument[]) => {
         this.documents = docs ?? [];
         this.isLoading = false;

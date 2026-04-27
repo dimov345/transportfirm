@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,6 +27,7 @@ export class Home implements OnInit {
   private router     = inject(Router);
   private cdr        = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
   readonly email = this.auth.getEmail() ?? '—';
   readonly role  = this.auth.getRole()  ?? '—';
@@ -89,7 +91,8 @@ export class Home implements OnInit {
         this.statsLoading = false;
         this.cdr.detectChanges();
         return EMPTY;
-      })
+      }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(s => {
       this.stats        = s;
       this.statsLoading = false;
@@ -106,7 +109,8 @@ export class Home implements OnInit {
         this.notifLoading = false;
         this.cdr.detectChanges();
         return EMPTY;
-      })
+      }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(n => {
       this.notifications = n;
       this.notifLoading  = false;

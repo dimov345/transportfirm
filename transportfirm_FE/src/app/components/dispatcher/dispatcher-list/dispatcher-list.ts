@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -30,6 +31,7 @@ export class DispatcherListComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private dispatcherService: DispatcherService,
@@ -50,7 +52,7 @@ export class DispatcherListComponent implements OnInit {
   loadDispatchers() {
     this.setLoading(true);
 
-    this.dispatcherService.getAllDispatchers().subscribe({
+    this.dispatcherService.getAllDispatchers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (employees) => {
         this.allDispatchers = employees.map(e => this.toRow(e));
         this.applyFilters();

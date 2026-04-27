@@ -28,9 +28,18 @@ public class VehicleMaintenanceDocument {
     @Column(nullable = false)
     private String fileName;
 
+    /** Legacy filesystem path — kept for backward compat. New uploads use fileData. */
     @JsonIgnore
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String filePath;
+
+    /**
+     * File bytes stored in DB — survives Railway redeploys.
+     * No @Lob — Hibernate 6 maps @Lob byte[] to OID, incompatible with BYTEA.
+     */
+    @JsonIgnore
+    @Column(name = "file_data", nullable = true, columnDefinition = "bytea")
+    private byte[] fileData;
 
     private VehicleMaintenanceDocumentType docType;
 }

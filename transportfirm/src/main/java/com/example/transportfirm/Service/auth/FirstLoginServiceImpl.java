@@ -21,14 +21,14 @@ public class FirstLoginServiceImpl implements FirstLoginService {
     public void performFirstLogin(FirstLoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         if (!user.getFirstLogin()) {
-            throw new RuntimeException("First login already completed");
+            throw new RuntimeException("Invalid credentials");
         }
 
 
-        if (!request.getOtp().equals(user.getVerifyOtp())) {
+        if (user.getVerifyOtp() == null || !passwordEncoder.matches(request.getOtp(), user.getVerifyOtp())) {
             throw new RuntimeException("Invalid OTP");
         }
 

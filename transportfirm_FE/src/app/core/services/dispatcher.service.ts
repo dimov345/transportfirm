@@ -4,9 +4,8 @@ import { Observable } from 'rxjs';
 
 import { Employee } from '../models/employee/employee.model';
 import { DispatcherInfo } from '../models/dispatcher/dispatcher-info.model';
+import { DispatcherDocument } from '../models/dispatcher/dispatcher-document.model';
 import { TruckGroup } from './truck-group.service';
-
-import { EmployeeDocument } from '../models/employee/employee-document.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -27,27 +26,28 @@ export class DispatcherService {
     return this.http.get<TruckGroup[]>(`${this.apiUrl}/dispatchers/${dispatcherInfoId}/groups`);
   }
 
-  // Документи (общи employee документи)
-  getDocuments(employeeId: string): Observable<EmployeeDocument[]> {
-    return this.http.get<EmployeeDocument[]>(`${this.apiUrl}/employee-documents/${employeeId}`);
+  // Документи (dispatcher_documents)
+  getDocuments(employeeId: string): Observable<DispatcherDocument[]> {
+    return this.http.get<DispatcherDocument[]>(`${this.apiUrl}/dispatchers/employee/${employeeId}/documents`);
   }
 
-  uploadDocument(employeeId: string, type: string, file: File): Observable<EmployeeDocument> {
+  uploadDocument(employeeId: string, type: string, file: File): Observable<DispatcherDocument> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<EmployeeDocument>(
-      `${this.apiUrl}/employee-documents/upload/${employeeId}/${type}`,
+    formData.append('type', type);
+    return this.http.post<DispatcherDocument>(
+      `${this.apiUrl}/dispatchers/employee/${employeeId}/documents`,
       formData
     );
   }
 
   downloadDocument(documentId: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/employee-documents/download/${documentId}`, {
+    return this.http.get(`${this.apiUrl}/dispatchers/documents/${documentId}/download`, {
       responseType: 'blob'
     });
   }
 
   deleteDocument(documentId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/employee-documents/delete/${documentId}`);
+    return this.http.delete<void>(`${this.apiUrl}/dispatchers/documents/${documentId}`);
   }
 }

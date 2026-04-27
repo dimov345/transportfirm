@@ -18,8 +18,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Еднократен bootstrap endpoint — създава първия ADMIN ако няма нито един.
- * Достъпен без автентикация само ако базата е празна (без ADMIN).
+ * One-time bootstrap endpoint — creates the first ADMIN if none exists.
+ * Self-disables after the first successful call (returns 410 Gone thereafter).
+ * Accessible without authentication only when no ADMIN exists in the database.
  */
 @RestController
 @RequestMapping("/auth/bootstrap")
@@ -33,12 +34,10 @@ public class BootstrapController {
     @PostMapping
     @Transactional
     public ResponseEntity<String> bootstrap(@RequestBody BootstrapRequest req) {
-        // Работи само ако няма нито един ADMIN
-        boolean adminExists = employeeRepository.findAll().stream()
-                .anyMatch(e -> Role.ADMIN.equals(e.getRole()));
-
-        if (adminExists) {
-            return ResponseEntity.status(403).body("Admin вече съществува.");
+        // Single efficient existence check — no full table scan
+        if (employeeRepository.existsByRole(Role.ADMIN)) {
+            // 410 Gone: endpoint is permanently disabled after first use
+            return ResponseEntity.status(410).body("Системата вече е инициализирана. Този endpoint е деактивиран.");
         }
 
         Employee employee = new Employee();
@@ -70,7 +69,7 @@ public class BootstrapController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("Admin създаден успешно. Моля изтрий или деактивирай /auth/bootstrap след употреба.");
+        return ResponseEntity.ok("Admin създаден успешно. Endpoint-ът е самодеактивиран — следващи заявки ще получат 410.");
     }
 
     record BootstrapRequest(String name, String email, String password,

@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,6 +20,7 @@ import { InvoiceService } from '../../../core/services/invoice.service';
 export class FreightTripsListComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   private tripService    = inject(FreightTripService);
   private vehicleService = inject(VehicleService);
@@ -67,7 +69,7 @@ export class FreightTripsListComponent implements OnInit {
   }
 
   private loadVehicles(): void {
-    this.vehicleService.getAll().subscribe({
+    this.vehicleService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (vehicles) => {
         this.vehicles = vehicles;
         this.cdr.detectChanges();
@@ -84,7 +86,7 @@ export class FreightTripsListComponent implements OnInit {
       this.filters.vehicleId,
       this.page,
       this.pageSize
-    ).subscribe({
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (page) => {
         this.trips = page.content;
         this.totalElements = page.totalElements;

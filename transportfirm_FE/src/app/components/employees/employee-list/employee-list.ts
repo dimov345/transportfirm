@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EmployeeService, EmployeeListItem } from '../../../core/services/employee.service';
 import { Router } from '@angular/router';
@@ -25,6 +26,7 @@ export class EmployeeList implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private employeeService: EmployeeService,
@@ -45,7 +47,7 @@ export class EmployeeList implements OnInit {
   loadEmployees() {
     this.setLoading(true);
 
-    this.employeeService.getAll().subscribe({
+    this.employeeService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.employees = data || [];
         this.filtered = this.employees;

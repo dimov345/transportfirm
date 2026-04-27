@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -53,6 +54,7 @@ export class DriversListComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private auth = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
   get isDispatcher(): boolean {
     return this.auth.hasRole('DISPATCHER');
@@ -77,7 +79,7 @@ export class DriversListComponent implements OnInit {
   loadDrivers() {
     this.setLoading(true);
 
-    this.driverService.getAllDriversFromEmployee().subscribe({
+    this.driverService.getAllDriversFromEmployee().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (employees) => {
         const rows = employees.map(e => this.toRow(e));
         this.allDrivers = this.markStatuses(rows);
@@ -242,6 +244,6 @@ export class DriversListComponent implements OnInit {
   }
 
   exportCSV() {
-    console.log('Export CSV not implemented yet.');
+    // TODO: implement CSV export
   }
 }

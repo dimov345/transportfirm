@@ -26,9 +26,20 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, 0L);
+    }
+
+    public String generateToken(UserDetails userDetails, long tokenVersion) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList());
+        claims.put("tv", tokenVersion);
         return createToken(claims, userDetails.getUsername());
+    }
+
+    public long extractTokenVersion(String token) {
+        Object tv = extractAllClaims(token).get("tv");
+        if (tv instanceof Number n) return n.longValue();
+        return 0L;
     }
 
     private String createToken(Map<String, Object> claims, String email) {

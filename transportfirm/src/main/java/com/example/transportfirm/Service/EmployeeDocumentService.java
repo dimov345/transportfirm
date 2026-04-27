@@ -5,6 +5,7 @@ import com.example.transportfirm.entity.EmployeeDocument;
 import com.example.transportfirm.enums.EmployeeDocumentType;
 import com.example.transportfirm.repository.EmployeeDocumentRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
+import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,8 +22,6 @@ public class EmployeeDocumentService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeDocumentRepository documentRepository;
-
-    private final String uploadDir = "employee_documents";
 
     public EmployeeDocumentService(EmployeeRepository employeeRepository,
                                    EmployeeDocumentRepository documentRepository) {
@@ -44,14 +43,7 @@ public class EmployeeDocumentService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
-        if (file.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-
-        if (file.getSize() > 5 * 1024 * 1024)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large (max 5 MB)");
+        FileValidationUtil.validatePdf(file);
 
         EmployeeDocument doc = new EmployeeDocument();
         doc.setEmployee(employee);
@@ -81,7 +73,8 @@ public class EmployeeDocumentService {
 
     public void deleteDocument(UUID id) {
         EmployeeDocument doc = getDocument(id);
-        if (doc.getFilePath() != null) {
+        // Legacy: clean up filesystem file if present
+        if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
             try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
         }
         documentRepository.delete(doc);

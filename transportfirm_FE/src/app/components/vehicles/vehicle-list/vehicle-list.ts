@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +25,7 @@ export class VehicleListComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private auth = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
   get isDispatcher(): boolean {
     return this.auth.hasRole('DISPATCHER');
@@ -38,15 +40,11 @@ export class VehicleListComponent implements OnInit {
   ngOnInit() {
     if (!this.isBrowser) return;
 
-    // debug (browser-only)
-    console.log('LS auth_token:', localStorage.getItem('auth_token'));
-    console.log('Cookie:', document.cookie);
-
     this.loadVehicles();
   }
 
   loadVehicles() {
-    this.vehicleService.getAll().subscribe({
+    this.vehicleService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (vehicles) => {
         this.vehicles = vehicles;
         this.filteredVehicles = vehicles;

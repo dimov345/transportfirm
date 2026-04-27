@@ -30,7 +30,9 @@ public class EmployeeDocument {
 
     private String fileName;
 
+    /** Legacy filesystem path — kept for backward compat. New uploads use fileData. */
     @JsonIgnore
+    @Column(nullable = true)
     private String filePath;
 
     /**

@@ -1,6 +1,6 @@
 package com.example.transportfirm.entity;
 
-import com.example.transportfirm.enums.VehicleDocumentType;
+import com.example.transportfirm.enums.DispatcherDocumentType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,24 +8,25 @@ import lombok.Data;
 import java.util.UUID;
 
 @Entity
-@Table(name = "vehicle_documents")
+@Table(name = "dispatcher_documents")
 @Data
-public class VehicleDocument {
+public class DispatcherDocument {
 
     @Id
     @GeneratedValue
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
     @JsonIgnore
-    private VehicleRecord vehicle;
+    private Employee employee;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VehicleDocumentType type;
+    private DispatcherDocumentType type;
 
+    @Column(nullable = false)
     private String fileName;
 
     /** Legacy filesystem path — kept for backward compat. New uploads use fileData. */
@@ -34,11 +35,10 @@ public class VehicleDocument {
     private String filePath;
 
     /**
-     * File bytes stored in DB — survives Railway redeploys.
+     * PDF bytes stored in DB — survives Railway redeploys.
      * No @Lob — Hibernate 6 maps @Lob byte[] to OID, incompatible with BYTEA.
      */
     @JsonIgnore
     @Column(name = "file_data", nullable = true, columnDefinition = "bytea")
     private byte[] fileData;
-
 }

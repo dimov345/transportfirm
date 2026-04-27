@@ -146,9 +146,16 @@
               <option value="">Изберете тип документ</option>
               <option value="ID_CARD">Лична карта</option>
               <option value="PASSPORT">Паспорт</option>
-              <option value="CONTRACT">Договор</option>
-              <option value="MEDICAL_CERTIFICATE">Медицинско</option>
+              <option value="EMPLOYMENT_CONTRACT">Трудов договор</option>
+              <option value="JOB_DESCRIPTION">Длъжностна характеристика</option>
+              <option value="SAFETY_INSTRUCTION">Инструктаж по безопасност</option>
+              <option value="GDPR_AGREEMENT">Съгласие за лични данни</option>
+              <option value="CONFIDENTIALITY_AGREEMENT">Декларация за конфиденциалност</option>
+              <option value="CV">Автобиография</option>
+              <option value="DIPLOMA">Диплома</option>
               <option value="CERTIFICATION">Сертификат</option>
+              <option value="TRAINING_CERTIFICATE">Сертификат от обучение</option>
+              <option value="MEDICAL_CERTIFICATE">Медицинско</option>
               <option value="OTHER">Друго</option>
             </select>
 
@@ -172,7 +179,7 @@
             <i class="material-icons doc-icon">picture_as_pdf</i>
             <div class="doc-info">
               <span class="doc-name">{{ doc.fileName }}</span>
-              <span class="doc-type">{{ doc.type }}</span>
+              <span class="doc-type">{{ docTypeLabel(doc.type) }}</span>
             </div>
             <div class="doc-actions">
               <button type="button" class="btn-icon" title="Свали" (click)="downloadDocument(doc)">

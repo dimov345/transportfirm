@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -128,16 +129,28 @@ public class InvoiceService {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
+    private static final String SUFFIX_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private String generateInvoiceNumber() {
         int year = LocalDate.now().getYear();
         long count = invoiceRepository.countByYear(year);
         String number;
         int attempt = 0;
         do {
-            number = String.format("INV-%d-%04d", year, count + 1 + attempt);
+            String suffix = randomSuffix(4);
+            number = String.format("INV-%d-%04d-%s", year, count + 1 + attempt, suffix);
             attempt++;
-        } while (invoiceRepository.existsByInvoiceNumber(number) && attempt < 200);
+        } while (invoiceRepository.existsByInvoiceNumber(number) && attempt < 20);
         return number;
+    }
+
+    private String randomSuffix(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(SUFFIX_CHARS.charAt(SECURE_RANDOM.nextInt(SUFFIX_CHARS.length())));
+        }
+        return sb.toString();
     }
 
     InvoiceResponse toResponse(Invoice inv) {

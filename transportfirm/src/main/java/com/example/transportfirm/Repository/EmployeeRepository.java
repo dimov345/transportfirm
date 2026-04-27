@@ -22,6 +22,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     List<Employee> findByJobTitle(JobTitle jobTitle);
     Optional<Employee> findByEmail(String email);
     List<Employee> findByEmploymentStatus(EmploymentStatus status);
+    boolean existsByRole(Role role);
 
     /**
      * Loads all employees with their role-specific info entities in a single query,

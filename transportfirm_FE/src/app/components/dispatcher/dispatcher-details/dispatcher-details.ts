@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,8 +9,7 @@ import { DispatcherService } from '../../../core/services/dispatcher.service';
 import { Employee } from '../../../core/models/employee/employee.model';
 import { TruckGroup } from '../../../core/services/truck-group.service';
 import { VehicleService, VehicleInfo } from '../../../core/services/vehicle.service';
-import { EmployeeDocumentService } from '../../../core/services/employee-document.service';
-import { EmployeeDocument } from '../../../core/models/employee/employee-document.model';
+import { DispatcherDocument } from '../../../core/models/dispatcher/dispatcher-document.model';
 
 @Component({
   selector: 'app-dispatcher-details',
@@ -29,20 +29,20 @@ export class DispatcherDetailsComponent implements OnInit {
   employeeId!: string;
 
   // Documents
-  documents: EmployeeDocument[] = [];
+  documents: DispatcherDocument[] = [];
   loadingDocs = false;
   isUploading = false;
   selectedDocType = '';
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private dispatcherService: DispatcherService,
     private vehicleService: VehicleService,
-    private employeeDocumentService: EmployeeDocumentService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -63,7 +63,7 @@ export class DispatcherDetailsComponent implements OnInit {
 
   loadDocuments(): void {
     this.loadingDocs = true;
-    this.employeeDocumentService.getDocuments(this.employeeId).subscribe({
+    this.dispatcherService.getDocuments(this.employeeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: docs => {
         this.documents = docs ?? [];
         this.loadingDocs = false;
@@ -102,7 +102,7 @@ export class DispatcherDetailsComponent implements OnInit {
     this.isUploading = true;
     this.cdr.detectChanges();
 
-    this.employeeDocumentService.uploadDocument(this.employeeId, type, file).subscribe({
+    this.dispatcherService.uploadDocument(this.employeeId, type, file).subscribe({
       next: doc => {
         this.documents = [doc, ...this.documents];
         this.isUploading = false;
@@ -118,8 +118,8 @@ export class DispatcherDetailsComponent implements OnInit {
     });
   }
 
-  downloadDocument(doc: EmployeeDocument): void {
-    this.employeeDocumentService.downloadDocument(doc.id).subscribe({
+  downloadDocument(doc: DispatcherDocument): void {
+    this.dispatcherService.downloadDocument(doc.id).subscribe({
       next: blob => this.saveBlob(blob, doc.fileName || 'document.pdf'),
       error: () => alert('Грешка при сваляне!')
     });
@@ -127,7 +127,7 @@ export class DispatcherDetailsComponent implements OnInit {
 
   deleteDocument(docId: string): void {
     if (!confirm('Наистина ли искате да изтриете този документ?')) return;
-    this.employeeDocumentService.deleteDocument(docId).subscribe({
+    this.dispatcherService.deleteDocument(docId).subscribe({
       next: () => {
         this.documents = this.documents.filter(d => d.id !== docId);
         this.cdr.detectChanges();
@@ -152,6 +152,7 @@ export class DispatcherDetailsComponent implements OnInit {
     this.groupVehicles = new Map();
 
     this.dispatcherService.getEmployee(this.employeeId).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError((err: unknown) => {
         console.error(err);
         this.error = 'Грешка при зареждане на данните';
@@ -175,7 +176,7 @@ export class DispatcherDetailsComponent implements OnInit {
   }
 
   private loadGroups(dispatcherInfoId: string) {
-    this.dispatcherService.getGroupsByDispatcher(dispatcherInfoId).subscribe({
+    this.dispatcherService.getGroupsByDispatcher(dispatcherInfoId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: groups => {
         this.groups = groups;
         this.cdr.detectChanges();
@@ -193,7 +194,7 @@ export class DispatcherDetailsComponent implements OnInit {
     const requests = groups.map(g =>
       this.vehicleService.getByGroup(g.id).pipe(catchError(() => of([] as VehicleInfo[])))
     );
-    forkJoin(requests).subscribe(results => {
+    forkJoin(requests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
       results.forEach((vehicles, i) => this.groupVehicles.set(groups[i].id, vehicles));
       this.cdr.detectChanges();
     });
@@ -233,5 +234,25 @@ export class DispatcherDetailsComponent implements OnInit {
 
   formatDate(date: string | null): string {
     return date ? new Date(date).toLocaleDateString('bg-BG') : '—';
+  }
+
+  readonly docTypeLabels: Record<string, string> = {
+    ID_CARD: 'Лична карта',
+    PASSPORT: 'Паспорт',
+    EMPLOYMENT_CONTRACT: 'Трудов договор',
+    JOB_DESCRIPTION: 'Длъжностна характеристика',
+    SAFETY_INSTRUCTION: 'Инструктаж по безопасност',
+    GDPR_AGREEMENT: 'Съгласие за лични данни',
+    CONFIDENTIALITY_AGREEMENT: 'Декларация за конфиденциалност',
+    CV: 'Автобиография',
+    DIPLOMA: 'Диплома',
+    CERTIFICATION: 'Сертификат',
+    TRAINING_CERTIFICATE: 'Сертификат от обучение',
+    MEDICAL_CERTIFICATE: 'Медицинско',
+    OTHER: 'Друго'
+  };
+
+  docTypeLabel(type: string): string {
+    return this.docTypeLabels[type] ?? type;
   }
 }

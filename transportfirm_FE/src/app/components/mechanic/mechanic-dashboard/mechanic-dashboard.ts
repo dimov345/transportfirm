@@ -1,6 +1,7 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID
+  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -28,6 +29,7 @@ export class MechanicDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   // State
   loading = true;
@@ -81,7 +83,7 @@ export class MechanicDashboardComponent implements OnInit {
     }
 
     // GET /mechanics/me/groups — вземаме групите на логнатия механик
-    this.truckGroupService.getGroupsByMechanicMe().subscribe({
+    this.truckGroupService.getGroupsByMechanicMe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (groups) => {
         this.groups = groups;
         this.mechanicName = email;
@@ -106,7 +108,7 @@ export class MechanicDashboardComponent implements OnInit {
     }
 
     // Вземаме всички ППС и филтрираме по mechanic groups
-    this.vehicleService.getAll().subscribe({
+    this.vehicleService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (all) => {
         const groupIds = new Set(groups.map(g => g.id));
         this.vehicles = all.filter(v => v.mechanicGroup && groupIds.has(v.mechanicGroup.id));
@@ -137,7 +139,7 @@ export class MechanicDashboardComponent implements OnInit {
     this.maintenanceRecords = [];
     this.cdr.detectChanges();
 
-    this.maintenanceService.getByVehicle(vehicleId, 0, 50).subscribe({
+    this.maintenanceService.getByVehicle(vehicleId, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (page) => {
         this.maintenanceRecords = page.content;
         this.loadingMaintenance = false;

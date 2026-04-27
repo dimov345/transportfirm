@@ -5,16 +5,11 @@ import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.enums.VehicleDocumentType;
 import com.example.transportfirm.service.VehicleService;
 import jakarta.validation.Valid;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,11 +41,13 @@ public class VehicleController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public VehicleRecord createVehicle(@RequestBody VehicleRecord vehicle) {
         return vehicleService.save(vehicle);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<VehicleRecord> updateVehicle(
             @PathVariable UUID id,
             @Valid @RequestBody VehicleRecord vehicle
@@ -60,6 +57,7 @@ public class VehicleController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public void deleteVehicle(@PathVariable UUID id) {
         vehicleService.delete(id);
     }
@@ -71,36 +69,23 @@ public class VehicleController {
 
     @PostMapping("/{id}/documents")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public VehicleDocument uploadDocument(
             @PathVariable UUID id,
             @RequestParam("type") VehicleDocumentType type,
             @RequestParam("file") MultipartFile file
-    ) throws IOException {
+    ) {
         return vehicleService.addDocument(id, type, file);
     }
 
     @GetMapping("/documents/{id}/download")
-    public ResponseEntity<Resource> downloadVehicleDocument(@PathVariable UUID id) {
-
-        VehicleDocument doc = vehicleService.getDocumentById(id);
-        Path filePath = vehicleService.getDocumentPath(doc.getFilePath());
-
-        File file = filePath.toFile();
-        if (!file.exists()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        FileSystemResource resource = new FileSystemResource(file);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + doc.getFileName() + "\"")
-                .body(resource);
+    public ResponseEntity<byte[]> downloadVehicleDocument(@PathVariable UUID id) {
+        return vehicleService.downloadDocument(id);
     }
 
     @DeleteMapping("/documents/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public void deleteDocument(@PathVariable UUID id) {
         vehicleService.deleteDocument(id);
     }

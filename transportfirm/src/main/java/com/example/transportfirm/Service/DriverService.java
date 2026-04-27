@@ -9,6 +9,7 @@ import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.EmployeeRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,14 +80,7 @@ public class DriverService {
                                       DriverDocumentType type,
                                       MultipartFile file) throws IOException {
 
-        if (file.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF allowed");
-
-        if (file.getSize() > 5 * 1024 * 1024)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large (max 5 MB)");
+        FileValidationUtil.validatePdf(file);
 
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
@@ -120,8 +114,8 @@ public class DriverService {
         DriverDocument doc = documentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 
-        // Clean up legacy file if present
-        if (doc.getFilePath() != null) {
+        // Legacy: clean up filesystem file if present
+        if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
             try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
         }
 

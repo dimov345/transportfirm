@@ -43,6 +43,10 @@ public class User {
     @Column(nullable = false)
     private Boolean firstLogin = true;
 
+    // Incremented on logout — any JWT with an older version is rejected
+    @Column(nullable = false)
+    private Long tokenVersion = 0L;
+
     @OneToOne
     @JoinColumn(name = "employee_id", nullable = false, unique = true)
     @ToString.Exclude

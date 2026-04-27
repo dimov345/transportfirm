@@ -4,9 +4,8 @@ import { Observable } from 'rxjs';
 
 import { Employee } from '../models/employee/employee.model';
 import { MechanicInfo } from '../models/mechanic/mechanic-info.model';
+import { MechanicDocument } from '../models/mechanic/mechanic-document.model';
 import { TruckGroup } from './truck-group.service';
-
-import { EmployeeDocument } from '../models/employee/employee-document.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -39,27 +38,28 @@ export class MechanicService {
     return this.http.delete<void>(`${this.apiUrl}/mechanics/${mechanicInfoId}`);
   }
 
-  // Документи (общи employee документи)
-  getDocuments(employeeId: string): Observable<EmployeeDocument[]> {
-    return this.http.get<EmployeeDocument[]>(`${this.apiUrl}/employee-documents/${employeeId}`);
+  // Документи (mechanic_documents)
+  getDocuments(employeeId: string): Observable<MechanicDocument[]> {
+    return this.http.get<MechanicDocument[]>(`${this.apiUrl}/mechanics/employee/${employeeId}/documents`);
   }
 
-  uploadDocument(employeeId: string, type: string, file: File): Observable<EmployeeDocument> {
+  uploadDocument(employeeId: string, type: string, file: File): Observable<MechanicDocument> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<EmployeeDocument>(
-      `${this.apiUrl}/employee-documents/upload/${employeeId}/${type}`,
+    formData.append('type', type);
+    return this.http.post<MechanicDocument>(
+      `${this.apiUrl}/mechanics/employee/${employeeId}/documents`,
       formData
     );
   }
 
   downloadDocument(documentId: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/employee-documents/download/${documentId}`, {
+    return this.http.get(`${this.apiUrl}/mechanics/documents/${documentId}/download`, {
       responseType: 'blob'
     });
   }
 
   deleteDocument(documentId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/employee-documents/delete/${documentId}`);
+    return this.http.delete<void>(`${this.apiUrl}/mechanics/documents/${documentId}`);
   }
 }

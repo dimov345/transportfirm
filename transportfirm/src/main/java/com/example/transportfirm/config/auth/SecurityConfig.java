@@ -59,6 +59,7 @@ public class SecurityConfig {
                         // PUBLIC endpoints
                         .requestMatchers(
                                 "/login",
+                                "/auth/logout",
                                 "/send-reset-otp",
                                 "/reset-password",
                                 "/send-otp",

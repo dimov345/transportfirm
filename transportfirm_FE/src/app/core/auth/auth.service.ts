@@ -5,7 +5,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { AuthResponse, LoginRequest } from './auth.models';
 import { environment } from '../../../environments/environment';
 
-const TOKEN_KEY = 'auth_token';
+// Only non-sensitive metadata stored in localStorage for UI purposes.
+// The JWT itself lives in the httpOnly cookie set by the server.
 const EMAIL_KEY = 'auth_email';
 const ROLE_KEY  = 'auth_role';
 
@@ -16,7 +17,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-  private readonly _isAuthed$ = new BehaviorSubject<boolean>(this.hasToken());
+  private readonly _isAuthed$ = new BehaviorSubject<boolean>(this.hasSession());
 
   constructor(private http: HttpClient) {}
 
@@ -30,7 +31,7 @@ export class AuthService {
       .pipe(
         tap((res) => {
           if (this.isBrowser) {
-            localStorage.setItem(TOKEN_KEY, res.token);
+            // Store only non-sensitive display metadata — token stays in httpOnly cookie
             localStorage.setItem(EMAIL_KEY, res.email);
             const role = this.decodeRole(res.token);
             if (role) localStorage.setItem(ROLE_KEY, role);
@@ -41,17 +42,15 @@ export class AuthService {
   }
 
   logout(): void {
+    // Revoke token server-side (increments tokenVersion + clears httpOnly cookie)
+    this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true })
+      .subscribe({ error: () => {} }); // fire-and-forget — clear local state regardless
+
     if (this.isBrowser) {
-      localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(EMAIL_KEY);
       localStorage.removeItem(ROLE_KEY);
     }
     this._isAuthed$.next(false);
-  }
-
-  getToken(): string | null {
-    if (!this.isBrowser) return null;
-    return localStorage.getItem(TOKEN_KEY);
   }
 
   getEmail(): string | null {
@@ -70,13 +69,13 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.hasToken();
+    return this.hasSession();
   }
 
-  private hasToken(): boolean {
+  private hasSession(): boolean {
     if (!this.isBrowser) return false;
-    const t = localStorage.getItem(TOKEN_KEY);
-    return !!t && t.trim().length > 0;
+    const email = localStorage.getItem(EMAIL_KEY);
+    return !!email && email.trim().length > 0;
   }
 
   private decodeRole(token: string): string | null {

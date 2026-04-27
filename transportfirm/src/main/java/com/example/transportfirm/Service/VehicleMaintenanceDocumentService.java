@@ -6,6 +6,7 @@ import com.example.transportfirm.enums.VehicleMaintenanceDocumentType;
 import com.example.transportfirm.repository.VehicleMaintenanceDocumentRepository;
 import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import org.springframework.http.HttpHeaders;
+import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,14 +48,7 @@ public class VehicleMaintenanceDocumentService {
         VehicleMaintenanceRecord record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Maintenance record not found"));
 
-        if (file == null || file.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
-
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
-
-        if (file.getSize() > 10 * 1024 * 1024)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large (max 10 MB)");
+        FileValidationUtil.validatePdf(file);
 
         String originalName = StringUtils.cleanPath(
                 file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");

@@ -9,6 +9,7 @@ import com.example.transportfirm.repository.DriverRepository;
 import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.VehicleRepository;
 import com.example.transportfirm.repository.VehicleDocumentRepository;
+import com.example.transportfirm.util.FileValidationUtil;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -32,7 +38,6 @@ public class VehicleService {
     private final DriverRepository driverRepository;
     private final VehicleMaintenanceRecordRepository maintenanceRecordRepository;
 
-    private final String uploadDir = "vehicle_documents";
 
     public VehicleService(VehicleRepository vehicleRepository,
                           VehicleDocumentRepository documentRepository,
@@ -95,12 +100,12 @@ public class VehicleService {
         List<VehicleMaintenanceRecord> maintenanceRecords = maintenanceRecordRepository.findAllByVehicle_Id(id);
         maintenanceRecordRepository.deleteAll(maintenanceRecords);
 
-        // изтриваме документите на камиона от файловата система
+        // изтриваме документите на камиона (legacy: и от файловата система)
         List<VehicleDocument> docs = documentRepository.findByVehicle_Id(id);
         docs.forEach(doc -> {
-            try {
-                Files.deleteIfExists(Path.of(doc.getFilePath()));
-            } catch (IOException ignored) {}
+            if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
+                try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
+            }
         });
 
         documentRepository.deleteAll(docs);
@@ -127,51 +132,68 @@ public class VehicleService {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
     }
 
-    public Path getDocumentPath(String filePath) {
-        return Paths.get(filePath);
-    }
-
-
     // ===========================================================
     // UPLOAD PDF DOCUMENT
     // ===========================================================
 
+    @Transactional
     public VehicleDocument addDocument(UUID id,
                                        VehicleDocumentType type,
-                                       MultipartFile file) throws IOException {
-
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uploaded file is empty");
-        }
-
-        if (!"application/pdf".equals(file.getContentType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF is allowed");
-        }
+                                       MultipartFile file) {
 
         VehicleRecord vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found"));
 
+        FileValidationUtil.validatePdf(file);
 
-        Path vehicleFolder = Paths.get(uploadDir, String.valueOf(id))
-                .toAbsolutePath()
-                .normalize();
+        String originalName = StringUtils.cleanPath(
+                file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");
 
-        Files.createDirectories(vehicleFolder);
+        try {
+            VehicleDocument doc = new VehicleDocument();
+            doc.setVehicle(vehicle);
+            doc.setType(type);
+            doc.setFileName(originalName);
+            doc.setFileData(file.getBytes());  // stored in DB — survives redeploys
+            doc.setFilePath("DB");             // satisfies legacy NOT NULL constraint; fileData takes precedence
+            return documentRepository.save(doc);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File read failed");
+        }
+    }
 
-        String uniqueName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        Path storedPath = vehicleFolder.resolve(uniqueName);
+    // ===========================================================
+    // DOWNLOAD DOCUMENT
+    // ===========================================================
 
-        Files.copy(file.getInputStream(), storedPath, StandardCopyOption.REPLACE_EXISTING);
+    public ResponseEntity<byte[]> downloadDocument(UUID id) {
+        VehicleDocument doc = documentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 
-        VehicleDocument doc = new VehicleDocument();
-        doc.setVehicle(vehicle);
-        doc.setType(type);
-        doc.setFilePath(storedPath.toString());
-        doc.setFileName(file.getOriginalFilename());
+        byte[] bytes = null;
 
-        return documentRepository.save(doc);
+        // Prefer DB-stored bytes
+        if (doc.getFileData() != null) {
+            bytes = doc.getFileData();
+        } else if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
+            // Legacy fallback: file stored on disk before migration
+            try {
+                Path path = Path.of(doc.getFilePath());
+                if (Files.exists(path)) bytes = Files.readAllBytes(path);
+            } catch (IOException ignored) {}
+        }
+
+        if (bytes == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document file not found");
+
+        String safeName = doc.getFileName() != null ? doc.getFileName().replace("\"", "") : "document.pdf";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeName + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(bytes);
     }
 
 
@@ -179,14 +201,16 @@ public class VehicleService {
     // DELETE DOCUMENT
     // ===========================================================
 
+    @Transactional
     public void deleteDocument(UUID id) {
         VehicleDocument doc = documentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 
-        try {
-            Files.deleteIfExists(Path.of(doc.getFilePath()));
-        } catch (IOException ignored) {}
+        // Legacy: clean up filesystem file if present
+        if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
+            try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
+        }
 
         documentRepository.delete(doc);
     }

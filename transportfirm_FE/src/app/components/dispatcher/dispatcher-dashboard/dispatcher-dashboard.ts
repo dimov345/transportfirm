@@ -1,6 +1,7 @@
 import {
-  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID
+  Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 

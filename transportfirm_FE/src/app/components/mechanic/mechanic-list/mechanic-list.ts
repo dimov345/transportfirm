@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,6 +32,7 @@ export class MechanicListComponent implements OnInit {
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private mechanicService: MechanicService,
@@ -51,7 +53,7 @@ export class MechanicListComponent implements OnInit {
   loadMechanics() {
     this.setLoading(true);
 
-    this.mechanicService.getAllMechanics().subscribe({
+    this.mechanicService.getAllMechanics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (employees) => {
         this.allMechanics = employees.map(e => this.toRow(e));
         this.applyFilters();

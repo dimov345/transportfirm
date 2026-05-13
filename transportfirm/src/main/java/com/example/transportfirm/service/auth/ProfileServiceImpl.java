@@ -1,10 +1,10 @@
 package com.example.transportfirm.service.auth;
 
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.io.ChangePasswordRequest;
-import com.example.transportfirm.io.ProfileRequest;
-import com.example.transportfirm.io.ProfileResponse;
-import com.example.transportfirm.repository.UserRepository;
+import com.example.transportfirm.io.auth.ChangePasswordRequest;
+import com.example.transportfirm.io.auth.ProfileRequest;
+import com.example.transportfirm.io.auth.ProfileResponse;
+import com.example.transportfirm.repository.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,24 +1,13 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.driver;
 
-import com.example.transportfirm.entity.DriverDocument;
 import com.example.transportfirm.entity.DriverInfo;
-import com.example.transportfirm.entity.Employee;
-import com.example.transportfirm.enums.DriverDocumentType;
-import com.example.transportfirm.repository.DriverDocumentRepository;
-import com.example.transportfirm.repository.DriverRepository;
-import com.example.transportfirm.repository.EmployeeRepository;
-
+import com.example.transportfirm.repository.driver.DriverRepository;
 import lombok.RequiredArgsConstructor;
-import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,18 +15,21 @@ import java.util.UUID;
 public class DriverService {
 
     private final DriverRepository driverRepository;
-    private final DriverDocumentRepository documentRepository;
-    private final EmployeeRepository employeeRepository;
 
-    private final String uploadDir = "driver_documents";
+    @Transactional(readOnly = true)
+    public DriverInfo getById(UUID driverInfoId) {
+        return driverRepository.findById(driverInfoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
+    }
 
+    @Transactional(readOnly = true)
+    public DriverInfo getByEmployeeId(UUID employeeId) {
+        return driverRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found for employee"));
+    }
 
-    // =========================
-    // DRIVER CRUD
-    // =========================
-
-
-    public DriverInfo updateDriver(UUID driverInfoId, DriverInfo updated) {
+    @Transactional
+    public DriverInfo update(UUID driverInfoId, DriverInfo updated) {
         DriverInfo existing = driverRepository.findById(driverInfoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DriverInfo not found"));
 
@@ -50,75 +42,11 @@ public class DriverService {
         existing.setDigitalCardIssuedOn(updated.getDigitalCardIssuedOn());
         existing.setDigitalCardExpiresOn(updated.getDigitalCardExpiresOn());
 
-        // по желание: ако искаш да позволиш assignment на vehicle
-        // existing.setVehicle(updated.getVehicle());
-
         return driverRepository.save(existing);
     }
 
-
-    public void deleteDriver(UUID id) {
-        driverRepository.deleteById(id);
-    }
-
-
-    // =========================
-    // DOCUMENTS
-    // =========================
-    @Transactional(readOnly = true)
-    public List<DriverDocument> getDriverDocumentsByEmployee(UUID employeeId) {
-        return documentRepository.findByEmployee_Id(employeeId);
-    }
-
-    @Transactional(readOnly = true)
-    public DriverDocument getDocument(UUID docId) {
-        return documentRepository.findById(docId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-    }
-
-    public DriverDocument addDocument(UUID employeeId,
-                                      DriverDocumentType type,
-                                      MultipartFile file) throws IOException {
-
-        FileValidationUtil.validatePdf(file);
-
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
-
-        DriverDocument doc = new DriverDocument();
-        doc.setEmployee(employee);
-        doc.setType(type);
-        doc.setFileName(file.getOriginalFilename());
-        doc.setFileData(file.getBytes());   // stored in DB — survives redeploys
-        doc.setFilePath("DB");              // satisfies legacy NOT NULL constraint; fileData takes precedence on read
-
-        return documentRepository.save(doc);
-    }
-
-    /** Returns raw PDF bytes for download — reads from DB (fileData) or falls back to legacy filePath. */
-    public byte[] getDocumentBytes(UUID docId) throws IOException {
-        DriverDocument doc = documentRepository.findById(docId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-
-        if (doc.getFileData() != null) return doc.getFileData();
-
-        // Legacy fallback: file stored on disk before migration
-        if (doc.getFilePath() != null) {
-            Path path = Path.of(doc.getFilePath());
-            if (Files.exists(path)) return Files.readAllBytes(path);
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document file not found");
-    }
-
-    public void deleteDocument(UUID id) {
-        DriverDocument doc = documentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-
-        // Legacy: clean up filesystem file if present
-        if (doc.getFilePath() != null && !doc.getFilePath().equals("DB")) {
-            try { Files.deleteIfExists(Path.of(doc.getFilePath())); } catch (IOException ignored) {}
-        }
-
-        documentRepository.delete(doc);
+    @Transactional
+    public void delete(UUID driverInfoId) {
+        driverRepository.deleteById(driverInfoId);
     }
 }

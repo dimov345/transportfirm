@@ -1,11 +1,11 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.vehicle;
 
 import com.example.transportfirm.enums.MaintenanceStatus;
 import com.example.transportfirm.enums.MaintenanceType;
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.entity.VehicleRecord;
-import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
-import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.repository.vehicle.VehicleMaintenanceRecordRepository;
+import com.example.transportfirm.repository.vehicle.VehicleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

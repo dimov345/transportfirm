@@ -1,10 +1,10 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.mechanic;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.MechanicDocument;
 import com.example.transportfirm.enums.MechanicDocumentType;
-import com.example.transportfirm.repository.EmployeeRepository;
-import com.example.transportfirm.repository.MechanicDocumentRepository;
+import com.example.transportfirm.repository.employee.EmployeeRepository;
+import com.example.transportfirm.repository.mechanic.MechanicDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;

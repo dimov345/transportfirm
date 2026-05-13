@@ -1,10 +1,10 @@
 package com.example.transportfirm.controller.auth;
 
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.io.AuthRequest;
-import com.example.transportfirm.io.AuthResponse;
-import com.example.transportfirm.io.ResetPasswordRequest;
-import com.example.transportfirm.repository.UserRepository;
+import com.example.transportfirm.io.auth.AuthRequest;
+import com.example.transportfirm.io.auth.AuthResponse;
+import com.example.transportfirm.io.auth.ResetPasswordRequest;
+import com.example.transportfirm.repository.auth.UserRepository;
 import com.example.transportfirm.service.auth.AppUserDetailsService;
 import com.example.transportfirm.service.auth.ProfileService;
 import com.example.transportfirm.service.auth.RateLimitService;

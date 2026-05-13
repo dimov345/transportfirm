@@ -1,7 +1,7 @@
 package com.example.transportfirm.filter;
 
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.repository.UserRepository;
+import com.example.transportfirm.repository.auth.UserRepository;
 import com.example.transportfirm.service.auth.AppUserDetailsService;
 import com.example.transportfirm.util.JwtUtil;
 import jakarta.servlet.FilterChain;

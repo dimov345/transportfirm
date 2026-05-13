@@ -1,4 +1,4 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.employee;
 
 import com.example.transportfirm.entity.DispatcherInfo;
 import com.example.transportfirm.entity.DriverDocument;
@@ -6,15 +6,15 @@ import com.example.transportfirm.entity.DriverInfo;
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.MechanicInfo;
 import com.example.transportfirm.entity.TruckGroup;
-import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.enums.JobTitle;
-import com.example.transportfirm.repository.DispatcherRepository;
-import com.example.transportfirm.repository.DriverDocumentRepository;
-import com.example.transportfirm.repository.DriverRepository;
-import com.example.transportfirm.repository.EmployeeRepository;
-import com.example.transportfirm.repository.MechanicRepository;
-import com.example.transportfirm.repository.TruckGroupRepository;
-import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.repository.dispatcher.DispatcherRepository;
+import com.example.transportfirm.repository.driver.DriverDocumentRepository;
+import com.example.transportfirm.repository.driver.DriverRepository;
+import com.example.transportfirm.repository.employee.EmployeeRepository;
+import com.example.transportfirm.repository.mechanic.MechanicRepository;
+import com.example.transportfirm.repository.vehicle.TruckGroupRepository;
+import com.example.transportfirm.repository.auth.UserRepository;
+import com.example.transportfirm.repository.vehicle.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +40,7 @@ public class EmployeeService {
     private final DispatcherRepository dispatcherRepository;
     private final DriverDocumentRepository driverDocumentRepository;
     private final TruckGroupRepository truckGroupRepository;
+    private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
 
     @Transactional
@@ -82,7 +83,16 @@ public class EmployeeService {
         existing.setName(updated.getName());
         existing.setDateOfBirth(updated.getDateOfBirth());
         existing.setPhone(updated.getPhone());
-        existing.setEmail(updated.getEmail());
+
+        String oldEmail = existing.getEmail();
+        String newEmail = updated.getEmail();
+        existing.setEmail(newEmail);
+        if (newEmail != null && !newEmail.equals(oldEmail)) {
+            userRepository.findByEmail(oldEmail).ifPresent(u -> {
+                u.setEmail(newEmail);
+                userRepository.save(u);
+            });
+        }
 
         // Адреси
         existing.setAddressPermanent(updated.getAddressPermanent());

@@ -103,7 +103,7 @@
           <div class="info-grid">
             <div class="info-item">
               <label>Длъжност</label>
-              <span class="value">{{ e.jobTitle || '—' }}</span>
+              <span class="value">{{ translateLabel(jobTitleLabels, e.jobTitle) }}</span>
             </div>
 
             <div class="info-item">
@@ -113,7 +113,7 @@
 
             <div class="info-item">
               <label>Статус</label>
-              <span class="value">{{ e.employmentStatus || '—' }}</span>
+              <span class="value">{{ translateLabel(employmentStatusLabels, e.employmentStatus) }}</span>
             </div>
 
             <div class="info-item">
@@ -123,7 +123,7 @@
 
             <div class="info-item">
               <label>Тип договор</label>
-              <span class="value">{{ e.contractType || '—' }}</span>
+              <span class="value">{{ translateLabel(contractTypeLabels, e.contractType) }}</span>
             </div>
 
             <div class="info-item">

@@ -1,8 +1,8 @@
 package com.example.transportfirm.service.auth;
 
-import com.example.transportfirm.io.ChangePasswordRequest;
-import com.example.transportfirm.io.ProfileRequest;
-import com.example.transportfirm.io.ProfileResponse;
+import com.example.transportfirm.io.auth.ChangePasswordRequest;
+import com.example.transportfirm.io.auth.ProfileRequest;
+import com.example.transportfirm.io.auth.ProfileResponse;
 
 public interface ProfileService {
 

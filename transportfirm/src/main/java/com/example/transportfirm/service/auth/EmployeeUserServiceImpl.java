@@ -2,16 +2,15 @@ package com.example.transportfirm.service.auth;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.io.CreateEmployeeRequest;
-import com.example.transportfirm.repository.UserRepository;
-import com.example.transportfirm.service.EmployeeService;
+import com.example.transportfirm.io.auth.CreateEmployeeRequest;
+import com.example.transportfirm.repository.auth.UserRepository;
+import com.example.transportfirm.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.LocalDate;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service

@@ -1,8 +1,8 @@
 package com.example.transportfirm.service.auth;
 
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.io.FirstLoginRequest;
-import com.example.transportfirm.repository.UserRepository;
+import com.example.transportfirm.io.auth.FirstLoginRequest;
+import com.example.transportfirm.repository.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

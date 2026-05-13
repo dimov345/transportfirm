@@ -268,6 +268,27 @@ export class EmployeeDetails implements OnInit {
     }
   }
 
+  readonly jobTitleLabels: Record<string, string> = {
+    DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ADMINISTRATOR: 'Администратор'
+  };
+
+  readonly employmentStatusLabels: Record<string, string> = {
+    ACTIVE: 'Активен', ON_PROBATION: 'Изпитателен срок', ON_LEAVE: 'В отпуск',
+    SICK: 'Болничен', SUSPENDED: 'Временно уволнен', FIRED: 'Уволнен', RETIRED: 'Пенсиониран'
+  };
+
+  readonly contractTypeLabels: Record<string, string> = {
+    FULL_TIME: 'Пълен работен ден', PART_TIME: 'Непълен работен ден',
+    TEMPORARY: 'Временен', INTERNSHIP: 'Стаж', CIVIL_CONTRACT: 'Граждански договор'
+  };
+
+  translateLabel(map: Record<string, string>, value: string | null | undefined): string {
+    if (!value) return '—';
+    return map[value] ?? value;
+  }
+
   private readonly numFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   fmtEur(eur: number | null | undefined): string {
     return '€' + this.numFmt.format(eur ?? 0);

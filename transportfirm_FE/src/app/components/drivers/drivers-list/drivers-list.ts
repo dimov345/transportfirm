@@ -244,7 +244,5 @@ export class DriversListComponent implements OnInit {
     return d.employeeId;
   }
 
-  exportCSV() {
-    // TODO: implement CSV export
-  }
+
 }

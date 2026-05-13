@@ -1,7 +1,7 @@
 package com.example.transportfirm.service.auth;
 
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.repository.UserRepository;
+import com.example.transportfirm.repository.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,19 +1,15 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.vehicle;
 
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.entity.VehicleDocument;
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.enums.VehicleDocumentType;
-import com.example.transportfirm.enums.VehicleStatus;
-import com.example.transportfirm.repository.DriverRepository;
-import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
-import com.example.transportfirm.repository.VehicleRepository;
-import com.example.transportfirm.repository.VehicleDocumentRepository;
+import com.example.transportfirm.repository.driver.DriverRepository;
+import com.example.transportfirm.repository.vehicle.VehicleMaintenanceRecordRepository;
+import com.example.transportfirm.repository.vehicle.VehicleRepository;
+import com.example.transportfirm.repository.vehicle.VehicleDocumentRepository;
 import com.example.transportfirm.util.FileValidationUtil;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

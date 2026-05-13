@@ -1,6 +1,6 @@
 package com.example.transportfirm.controller.auth;
 
-import com.example.transportfirm.io.FirstLoginRequest;
+import com.example.transportfirm.io.auth.FirstLoginRequest;
 import com.example.transportfirm.service.auth.FirstLoginService;
 import com.example.transportfirm.service.auth.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;

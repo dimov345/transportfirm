@@ -2,7 +2,7 @@ import {
   Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID, DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
@@ -29,6 +29,7 @@ export class MaintenanceFormComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
   private maintenanceService = inject(MaintenanceService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -264,6 +265,6 @@ export class MaintenanceFormComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/mechanic']);
+    this.location.back();
   }
 }

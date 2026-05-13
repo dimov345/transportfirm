@@ -1,9 +1,9 @@
 package com.example.transportfirm.controller.auth;
 
 import com.example.transportfirm.entity.TruckGroup;
-import com.example.transportfirm.io.CreateEmployeeRequest;
-import com.example.transportfirm.repository.TruckGroupRepository;
-import com.example.transportfirm.service.TruckGroupService;
+import com.example.transportfirm.io.auth.CreateEmployeeRequest;
+import com.example.transportfirm.repository.vehicle.TruckGroupRepository;
+import com.example.transportfirm.service.vehicle.TruckGroupService;
 import com.example.transportfirm.service.auth.EmployeeUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

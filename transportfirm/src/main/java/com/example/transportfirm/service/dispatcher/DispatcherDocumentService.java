@@ -1,10 +1,10 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.dispatcher;
 
 import com.example.transportfirm.entity.DispatcherDocument;
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.enums.DispatcherDocumentType;
-import com.example.transportfirm.repository.DispatcherDocumentRepository;
-import com.example.transportfirm.repository.EmployeeRepository;
+import com.example.transportfirm.repository.dispatcher.DispatcherDocumentRepository;
+import com.example.transportfirm.repository.employee.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;

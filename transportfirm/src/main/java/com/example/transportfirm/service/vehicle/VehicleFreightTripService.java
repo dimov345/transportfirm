@@ -1,10 +1,10 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.vehicle;
 
 import com.example.transportfirm.entity.VehicleFreightTrip;
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.enums.TripStatus;
-import com.example.transportfirm.repository.VehicleFreightTripRepository;
-import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.repository.vehicle.VehicleFreightTripRepository;
+import com.example.transportfirm.repository.vehicle.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

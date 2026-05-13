@@ -2,7 +2,7 @@ package com.example.transportfirm.service.auth;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.User;
-import com.example.transportfirm.io.CreateEmployeeRequest;
+import com.example.transportfirm.io.auth.CreateEmployeeRequest;
 
 public interface EmployeeUserService {
 

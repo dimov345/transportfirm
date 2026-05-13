@@ -1,14 +1,14 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.vehicle;
 
 import com.example.transportfirm.enums.GroupType;
 import com.example.transportfirm.entity.DispatcherInfo;
 import com.example.transportfirm.entity.MechanicInfo;
 import com.example.transportfirm.entity.TruckGroup;
 import com.example.transportfirm.entity.VehicleRecord;
-import com.example.transportfirm.repository.DispatcherRepository;
-import com.example.transportfirm.repository.MechanicRepository;
-import com.example.transportfirm.repository.TruckGroupRepository;
-import com.example.transportfirm.repository.VehicleRepository;
+import com.example.transportfirm.repository.dispatcher.DispatcherRepository;
+import com.example.transportfirm.repository.mechanic.MechanicRepository;
+import com.example.transportfirm.repository.vehicle.TruckGroupRepository;
+import com.example.transportfirm.repository.vehicle.VehicleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

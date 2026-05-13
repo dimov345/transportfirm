@@ -1,10 +1,10 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.employee;
 
 import com.example.transportfirm.entity.Employee;
 import com.example.transportfirm.entity.EmployeeDocument;
 import com.example.transportfirm.enums.EmployeeDocumentType;
-import com.example.transportfirm.repository.EmployeeDocumentRepository;
-import com.example.transportfirm.repository.EmployeeRepository;
+import com.example.transportfirm.repository.employee.EmployeeDocumentRepository;
+import com.example.transportfirm.repository.employee.EmployeeRepository;
 import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

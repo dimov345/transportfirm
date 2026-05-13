@@ -1,10 +1,10 @@
-package com.example.transportfirm.service;
+package com.example.transportfirm.service.vehicle;
 
 import com.example.transportfirm.entity.VehicleMaintenanceDocument;
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.enums.VehicleMaintenanceDocumentType;
-import com.example.transportfirm.repository.VehicleMaintenanceDocumentRepository;
-import com.example.transportfirm.repository.VehicleMaintenanceRecordRepository;
+import com.example.transportfirm.repository.vehicle.VehicleMaintenanceDocumentRepository;
+import com.example.transportfirm.repository.vehicle.VehicleMaintenanceRecordRepository;
 import org.springframework.http.HttpHeaders;
 import com.example.transportfirm.util.FileValidationUtil;
 import org.springframework.http.HttpStatus;

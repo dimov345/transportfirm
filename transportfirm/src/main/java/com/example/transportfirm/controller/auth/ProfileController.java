@@ -1,7 +1,7 @@
 package com.example.transportfirm.controller.auth;
 
-import com.example.transportfirm.io.ChangePasswordRequest;
-import com.example.transportfirm.io.ProfileResponse;
+import com.example.transportfirm.io.auth.ChangePasswordRequest;
+import com.example.transportfirm.io.auth.ProfileResponse;
 import com.example.transportfirm.service.auth.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

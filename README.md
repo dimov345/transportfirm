@@ -37,43 +37,43 @@
 ### ADMIN
 
 ```
-Email:    
-Password: 
+Email: admin@gmail.com   
+Password: Admin2026!
 ```
 
 ### MANAGER
 
 ```
-Email:    
-Password: 
+Email: manager@gmail.com    
+Password: Manager2026! 
 ```
 
 ### DISPATCHER — Диспечер
 
 ```
-Email:    
-Password: 
+Email: dispatcher@gmail.com    
+Password: Dispatcher2026! 
 ```
 
 ### MECHANIC — Механик
 
 ```
-Email:    
-Password: 
+Email: mechanic@gmail.com    
+Password: Mechanic2026! 
 ```
 
 ### ACCOUNTANT — Счетоводител
 
 ```
-Email:    
-Password: 
+Email: accountant@gmail.com    
+Password: Accountant2026!
 ```
 
 ### DRIVER — Шофьор
 
 ```
-Email:    
-Password: 
+Email: driver@gmail.com    
+Password: Driver2026!
 ```
 
 ---

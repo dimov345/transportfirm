@@ -1,0 +1,243 @@
+@if (employee; as e) {
+  <div class="details-container">
+    <!-- Header -->
+    <div class="details-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1>Детайли за служител</h1>
+          <div class="plate-number">{{ e.name }}</div>
+        </div>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            routerLink="/employees"
+            aria-label="Назад към списъка">
+            <i class="material-icons">arrow_back_ios</i>
+            Назад
+          </button>
+
+          <!-- ✅ само ADMIN -->
+          @if (isAdmin) {
+            <button
+              type="button"
+              class="btn-secondary"
+              [routerLink]="['/employees/edit', e.id]"
+              aria-label="Редактирай служител"
+            >
+              <i class="material-icons">edit</i>
+              Редактирай
+            </button>
+          }
+
+          <button
+            type="button"
+            class="btn-primary"
+            [routerLink]="['/employees-documents', e.id]"
+            aria-label="Документи на служител"
+          >
+            <i class="material-icons">folder</i>
+            Документи
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="details-content">
+      <div class="details-grid">
+
+        <!-- Лични данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">person</i>
+            <h2>Лични данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Име</label>
+              <span class="value">{{ e.name || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>ЕГН</label>
+              <span class="value">{{ e.egn || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Дата на раждане</label>
+              <span class="value">{{ e.dateOfBirth || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Телефон</label>
+              <span class="value">{{ e.phone || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Имейл</label>
+              <span class="value">{{ e.email || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Постоянен адрес</label>
+              <span class="value">{{ e.addressPermanent || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Настоящ адрес</label>
+              <span class="value">{{ e.addressCurrent || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Фирмени данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">business</i>
+            <h2>Фирмени данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Длъжност</label>
+              <span class="value">{{ translateLabel(jobTitleLabels, e.jobTitle) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Назначен на</label>
+              <span class="value">{{ e.hiredDate || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Статус</label>
+              <span class="value">{{ translateLabel(employmentStatusLabels, e.employmentStatus) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Освободен на</label>
+              <span class="value">{{ e.firedDate || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Тип договор</label>
+              <span class="value">{{ translateLabel(contractTypeLabels, e.contractType) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Работно време</label>
+              <span class="value">{{ e.workingHours || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        
+        @if (isMechanic() || isDispatcher()) {
+
+          <div class="info-card">
+            <div class="card-header">
+              <i class="material-icons">groups</i>
+              <h2>Група</h2>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Тип</label>
+                <span class="value">{{ getGroupTypeLabel() }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Име</label>
+                <span class="value">{{ hasGroup() ? getGroupName() : 'Няма група' }}</span>
+              </div>
+
+              @if (hasGroup()) {
+                <div class="info-item">
+                  <label>ID</label>
+                  <span class="value">{{ getGroupId() }}</span>
+                </div>
+              } @else {
+                <div class="info-item">
+                  <label>Статус</label>
+                  <span class="value">Не е назначен към група</span>
+                </div>
+              }
+            </div>
+
+            <!-- Actions -->
+            <div style="margin-top: 12px; display:flex; gap:10px; flex-wrap: wrap;">
+              @if (!hasGroup()) {
+                <button type="button" class="btn-primary" (click)="toggleCreateGroup()">
+                  + Създай група
+                </button>
+              } @else {
+                <button type="button" class="btn-secondary" (click)="toggleAssignVehicles()">
+                  Управлявай ППС
+                </button>
+              }
+            </div>
+
+            @if (showCreateGroup && !hasGroup()) {
+              <div style="margin-top: 12px;">
+                <div class="info-item">
+                  <label>Име на група</label>
+                  <input type="text" [(ngModel)]="groupName" placeholder="Напр. Mechanics A" />
+                </div>
+
+                <div style="margin-top: 10px; display:flex; gap:10px;">
+                  <button type="button" class="btn-primary" (click)="createGroup()">Запази</button>
+                  <button type="button" class="btn-secondary" (click)="toggleCreateGroup()">Отказ</button>
+                </div>
+              </div>
+            }
+
+            @if (hasGroup() && showAssignVehicles) {
+              <div style="margin-top: 12px;">
+                <app-group-vehicle-assignment
+                  [groupId]="getGroupId()"
+                  [groupType]="getGroupTypeValue()!"
+                />
+              </div>
+            }
+          </div>
+
+        }
+
+
+
+        <!-- Банкови данни -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="material-icons">account_balance</i>
+            <h2>Банкови данни</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Банка</label>
+              <span class="value">{{ e.bankName || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>IBAN</label>
+              <span class="value">{{ e.iban || '—' }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Заплата бруто</label>
+              <span class="value">{{ fmtEur(e.salary) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Заплата нето</label>
+              <span class="value">{{ fmtEur(e.salaryNeto) }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

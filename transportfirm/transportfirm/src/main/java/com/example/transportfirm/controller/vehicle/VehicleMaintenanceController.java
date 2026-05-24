@@ -1,0 +1,115 @@
+package com.example.transportfirm.controller.vehicle;
+
+import com.example.transportfirm.enums.MaintenanceType;
+import com.example.transportfirm.entity.VehicleMaintenanceDocument;
+import com.example.transportfirm.entity.VehicleMaintenanceRecord;
+import com.example.transportfirm.enums.VehicleMaintenanceDocumentType;
+import com.example.transportfirm.service.vehicle.VehicleMaintenanceDocumentService;
+import com.example.transportfirm.service.vehicle.VehicleMaintenanceService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/maintenance")
+public class VehicleMaintenanceController {
+
+    private final VehicleMaintenanceService maintenanceService;
+    private final VehicleMaintenanceDocumentService documentService;
+
+    public VehicleMaintenanceController(
+            VehicleMaintenanceService maintenanceService,
+            VehicleMaintenanceDocumentService documentService
+    ) {
+        this.maintenanceService = maintenanceService;
+        this.documentService = documentService;
+    }
+
+    // --- RECORDS ---
+
+    // GET /maintenance/vehicle/{vehicleId}?page=0&size=10
+    @GetMapping("/vehicle/{vehicleId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
+    public Page<VehicleMaintenanceRecord> history(
+            @PathVariable UUID vehicleId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return maintenanceService.getHistory(vehicleId, PageRequest.of(page, Math.min(size, 100)));
+    }
+
+    // GET /maintenance/{recordId}
+    @GetMapping("/{recordId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
+    public VehicleMaintenanceRecord getById(@PathVariable UUID recordId) {
+        return maintenanceService.getById(recordId);
+    }
+
+    // POST /maintenance/create/{vehicleId}?type=REPAIR
+    @PostMapping("/create/{vehicleId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
+    public VehicleMaintenanceRecord create(
+            @PathVariable UUID vehicleId,
+            @RequestParam("type") MaintenanceType type
+    ) {
+        return maintenanceService.create(vehicleId, type);
+    }
+
+    // PUT /maintenance/{recordId}
+    @PutMapping("/{recordId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
+    public VehicleMaintenanceRecord update(
+            @PathVariable UUID recordId,
+            @RequestBody VehicleMaintenanceRecord updated
+    ) {
+        return maintenanceService.update(recordId, updated);
+    }
+
+    // PUT /maintenance/{recordId}/close
+    @PutMapping("/{recordId}/close")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
+    public VehicleMaintenanceRecord close(@PathVariable UUID recordId) {
+        return maintenanceService.close(recordId);
+    }
+
+    // --- DOCUMENTS ---
+
+    // POST /maintenance/{recordId}/documents/upload?docType=INVOICE
+    @PostMapping(value = "/{recordId}/documents/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
+    public VehicleMaintenanceDocument uploadDocument(
+            @PathVariable UUID recordId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "docType", required = false) VehicleMaintenanceDocumentType docType
+    ) {
+        return documentService.upload(recordId, file, docType);
+    }
+
+    // GET /maintenance/{recordId}/documents
+    @GetMapping("/{recordId}/documents")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
+    public List<VehicleMaintenanceDocument> listDocuments(@PathVariable UUID recordId) {
+        return documentService.list(recordId);
+    }
+
+    // GET /maintenance/documents/{documentId}/download
+    @GetMapping("/documents/{documentId}/download")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC', 'DISPATCHER')")
+    public ResponseEntity<byte[]> download(@PathVariable UUID documentId) {
+        return documentService.download(documentId);
+    }
+
+    // DELETE /maintenance/documents/{documentId}
+    @DeleteMapping("/documents/{documentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'MECHANIC')")
+    public void deleteDocument(@PathVariable UUID documentId) {
+        documentService.delete(documentId);
+    }
+}

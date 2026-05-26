@@ -10,7 +10,13 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     label: 'Админ',
     icon: 'users',
     route: '/employees',
-    roles: ['ADMIN', 'MANAGER']
+    roles: ['ADMIN']
+  },
+  {
+    label: 'Служители',
+    icon: 'users',
+    route: '/manager-staff',
+    roles: ['MANAGER']
   },
   {
     label: 'Екип и техника',

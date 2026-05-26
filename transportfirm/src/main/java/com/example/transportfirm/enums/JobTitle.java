@@ -6,6 +6,5 @@ public enum JobTitle {
     DISPATCHER,
     ACCOUNTANT,
     MANAGER,
-    HR,
     ADMINISTRATOR
 }

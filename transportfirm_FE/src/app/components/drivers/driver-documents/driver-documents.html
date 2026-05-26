@@ -102,6 +102,20 @@
           <div class="doc-info">
             <span class="doc-name">{{ doc.fileName }}</span>
             <span class="doc-type" *ngIf="doc.type">{{ doc.type }}</span>
+            <!-- Срок на валидност — само за шофьора (read-only режим) -->
+            <ng-container *ngIf="isReadOnly">
+              <ng-container *ngIf="expiryForDocType(doc.type) as exp">
+                <span class="doc-expiry"
+                      [class.doc-expiry--expired]="expiryStatus(exp.expires) === 'expired'"
+                      [class.doc-expiry--soon]="expiryStatus(exp.expires) === 'soon'"
+                      [class.doc-expiry--ok]="expiryStatus(exp.expires) === 'ok'">
+                  <i class="material-icons" style="font-size:13px;vertical-align:middle">event</i>
+                  {{ exp.issued ? formatDate(exp.issued) + ' → ' : '' }}{{ formatDate(exp.expires) }}
+                  <span *ngIf="expiryStatus(exp.expires) === 'expired'"> · Изтекъл</span>
+                  <span *ngIf="expiryStatus(exp.expires) === 'soon'"> · Изтича скоро</span>
+                </span>
+              </ng-container>
+            </ng-container>
           </div>
 
           <div class="doc-actions">

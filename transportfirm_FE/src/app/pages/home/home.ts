@@ -303,19 +303,6 @@ export class Home implements OnInit {
     return (this.stats.vatThisMonthEur ?? 0) + (this.stats.salaryTaxesEur ?? 0);
   }
 
-  get netProfitThisMonth(): number {
-    if (!this.stats) return 0;
-    return (this.stats.revenueThisMonthEur ?? 0)
-      - (this.stats.tripExpensesEur  ?? 0)
-      - (this.stats.salaryBrutoEur   ?? 0)
-      - (this.stats.maintenanceEur   ?? 0);
-  }
-
-  get docAlertCount(): number {
-    if (!this.stats) return 0;
-    return (this.stats.expiredDocsCount ?? 0) + (this.stats.expiringDocsCount ?? 0);
-  }
-
   // ── Net profit line chart ─────────────────────────────────────────────────
   readonly LINE_W = 480;
   readonly LINE_H = 90;

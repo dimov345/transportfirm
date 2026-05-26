@@ -17,7 +17,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 export class EmployeeList implements OnInit {
   readonly jobTitleLabels: Record<string, string | undefined> = {
     DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
-    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър',
     ADMINISTRATOR: 'Администратор'
   };
 

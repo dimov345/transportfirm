@@ -585,7 +585,6 @@ public class ReportService {
             case DISPATCHER    -> "Спедитор";
             case ACCOUNTANT    -> "Счетоводител";
             case MANAGER       -> "Мениджър";
-            case HR            -> "ЧР";
             case ADMINISTRATOR -> "Администратор";
         };
     }

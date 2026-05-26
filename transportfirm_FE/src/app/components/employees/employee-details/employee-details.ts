@@ -270,7 +270,7 @@ export class EmployeeDetails implements OnInit {
 
   readonly jobTitleLabels: Record<string, string> = {
     DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
-    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър',
     ADMINISTRATOR: 'Администратор'
   };
 

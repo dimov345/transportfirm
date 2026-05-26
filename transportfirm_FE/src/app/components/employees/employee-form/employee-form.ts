@@ -70,7 +70,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
 
   readonly jobTitleLabels: Record<string, string | undefined> = {
     DRIVER: 'Шофьор', MECHANIC: 'Механик', DISPATCHER: 'Спедитор',
-    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър', HR: 'ЧР',
+    ACCOUNTANT: 'Счетоводител', MANAGER: 'Мениджър',
     ADMINISTRATOR: 'Администратор'
   };
 

@@ -22,6 +22,7 @@ interface ExpiryItem {
   label: string;
   issued: string | null;
   expires: string | null;
+  typeKey: string;
 }
 
 @Component({
@@ -188,15 +189,20 @@ export class DriverDocumentsComponent implements OnInit {
     if (!di) { this.expiryItems = []; return; }
 
     this.expiryItems = [
-      { label: 'Шофьорска книжка',    issued: di.driverLicenseIssuedOn,      expires: di.driverLicenseExpiresOn },
-      { label: 'Професионална карта', issued: di.qualificationCardIssuedOn,  expires: di.qualificationCardExpiresOn },
-      { label: 'Психо удостоверение', issued: di.psychologicalExamIssuedOn,  expires: di.psychologicalExamExpiresOn },
-      { label: 'Дигитална карта',     issued: di.digitalCardIssuedOn,        expires: di.digitalCardExpiresOn }
+      { label: 'Шофьорска книжка',    typeKey: 'DRIVER_LICENSE',     issued: di.driverLicenseIssuedOn,      expires: di.driverLicenseExpiresOn },
+      { label: 'Професионална карта', typeKey: 'QUALIFICATION_CARD', issued: di.qualificationCardIssuedOn,  expires: di.qualificationCardExpiresOn },
+      { label: 'Психо удостоверение', typeKey: 'PSYCHOLOGICAL_EXAM', issued: di.psychologicalExamIssuedOn,  expires: di.psychologicalExamExpiresOn },
+      { label: 'Дигитална карта',     typeKey: 'DIGITAL_TACHO_CARD', issued: di.digitalCardIssuedOn,        expires: di.digitalCardExpiresOn }
     ];
   }
 
   formatDate(d: string | null): string {
     return d ? new Date(d).toLocaleDateString('bg-BG') : '—';
+  }
+
+  /** Returns the ExpiryItem matching the document type, if any. */
+  expiryForDocType(type: string): ExpiryItem | undefined {
+    return this.expiryItems.find(e => e.typeKey === type);
   }
 
   /** 'expired' | 'soon' (<=30d) | 'ok' | 'none' — drives left-border color on the expiry row. */

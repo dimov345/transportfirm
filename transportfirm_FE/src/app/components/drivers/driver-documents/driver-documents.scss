@@ -111,6 +111,24 @@
   &.badge-none    { background: #f3f4f6; color: #6b7280; }
 }
 
+/* Inline expiry badge inside document list row */
+.doc-expiry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+
+  &--ok      { background: #dcfce7; color: #16a34a; }
+  &--soon    { background: #fef9c3; color: #b45309; }
+  &--expired { background: #fee2e2; color: #b91c1c; }
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .expiry-row {

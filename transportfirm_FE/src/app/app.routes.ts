@@ -103,6 +103,14 @@ export const routes: Routes = [
     data: { roles: ALL_STAFF }
   },
 
+  // Manager staff directory — read-only team view for MANAGER role
+  {
+    path: 'manager-staff',
+    loadComponent: () => import('./components/employees/manager-staff/manager-staff').then(m => m.ManagerStaffComponent),
+    canActivate: [authGuard],
+    data: { roles: ['MANAGER'] }
+  },
+
   // Employees — ADMIN, MANAGER only
   {
     path: 'employees',

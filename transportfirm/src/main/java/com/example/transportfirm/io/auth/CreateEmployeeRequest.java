@@ -3,7 +3,6 @@ package com.example.transportfirm.io.auth;
 import com.example.transportfirm.enums.ContractType;
 import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.enums.Role;
-import com.example.transportfirm.validation.EGNValid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +16,6 @@ public class CreateEmployeeRequest {
 
     // лични
     @NotBlank
-    @EGNValid
     private String egn;
 
     @NotBlank

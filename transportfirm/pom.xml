@@ -111,6 +111,12 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<!-- Thymeleaf — template engine за генериране на HTML фактури -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
 		<!-- Apache POI — XLSX report generation -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>

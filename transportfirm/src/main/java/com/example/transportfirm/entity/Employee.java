@@ -72,6 +72,7 @@ public class Employee {
     @NotNull
     private LocalDate hiredDate;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private EmploymentStatus employmentStatus = EmploymentStatus.ACTIVE;
 
@@ -104,6 +105,7 @@ public class Employee {
     private User user;
 
     // Универсален списък документи за ВСЕКИ служител
+    @Builder.Default
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("employee-docs")
     @BatchSize(size = 50)

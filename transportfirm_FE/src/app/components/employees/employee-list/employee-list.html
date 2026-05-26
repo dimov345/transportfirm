@@ -6,7 +6,7 @@
         <p class="subtitle">Общо {{ filtered.length }} служители</p>
       </div>
 
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="isAdmin">
         <button type="button" class="btn-add" (click)="createEmployee()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
@@ -87,7 +87,7 @@
                 </svg>
               </button>
 
-              <button type="button" class="btn-action btn-delete" (click)="deleteEmployee(emp.id!)" title="Изтрий">
+              <button *ngIf="isAdmin" type="button" class="btn-action btn-delete" (click)="deleteEmployee(emp.id!)" title="Изтрий">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>

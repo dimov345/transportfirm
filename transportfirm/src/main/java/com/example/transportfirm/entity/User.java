@@ -34,16 +34,19 @@ public class User {
     private String password;
 
     private String verifyOtp;
+    @Builder.Default
     private Boolean isAccountVerified = false;
     private Long verifyOtpExpireAt;
 
     private String resetOtp;
     private Long resetOtpExpireAt;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean firstLogin = true;
 
     // Incremented on logout — any JWT with an older version is rejected
+    @Builder.Default
     @Column(nullable = false)
     private Long tokenVersion = 0L;
 

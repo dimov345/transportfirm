@@ -13,9 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +31,7 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final VehicleFreightTripRepository tripRepository;
+    private final SpringTemplateEngine templateEngine;
 
     /**
      * Връща съществуваща фактура за курса, или създава нова ако няма.
@@ -193,5 +198,45 @@ public class InvoiceService {
             }
         }
         return r;
+    }
+
+    // ── HTML invoice generation via Thymeleaf ────────────────────────────────
+
+    public String buildHtml(UUID id) {
+        InvoiceResponse inv = getById(id);
+
+        BigDecimal revenue  = nvl(inv.getRevenueEur());
+        BigDecimal expenses = nvl(inv.getTotalExpensesEur());
+
+        Context ctx = new Context(Locale.forLanguageTag("bg"));
+        ctx.setVariable("inv",         inv);
+        ctx.setVariable("netProfit",   revenue.subtract(expenses));
+        ctx.setVariable("statusLabel", resolveStatusLabel(inv.getStatus()));
+        ctx.setVariable("statusColor", resolveStatusColor(inv.getStatus()));
+
+        return templateEngine.process("invoice", ctx);
+    }
+
+    private String resolveStatusLabel(String status) {
+        return switch (status != null ? status : "") {
+            case "DRAFT"     -> "Чернова";
+            case "ISSUED"    -> "Издадена";
+            case "PAID"      -> "Платена";
+            case "CANCELLED" -> "Анулирана";
+            default          -> status != null ? status : "";
+        };
+    }
+
+    private String resolveStatusColor(String status) {
+        return switch (status != null ? status : "") {
+            case "ISSUED"    -> "#1565c0";
+            case "PAID"      -> "#2e7d32";
+            case "CANCELLED" -> "#c62828";
+            default          -> "#616161";
+        };
+    }
+
+    private BigDecimal nvl(BigDecimal v) {
+        return v != null ? v : BigDecimal.ZERO;
     }
 }

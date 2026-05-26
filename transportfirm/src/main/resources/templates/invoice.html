@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Фактура ' + ${inv.invoiceNumber}">Фактура</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #212121; background: #f5f5f5; }
+    .page { background: #fff; max-width: 820px; margin: 20px auto; padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,.15); }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1565c0; padding-bottom: 20px; margin-bottom: 24px; }
+    .header-left h1 { font-size: 28px; color: #1565c0; letter-spacing: 2px; }
+    .header-left .subtitle { color: #666; font-size: 12px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .inv-number { font-size: 20px; font-weight: 700; color: #212121; }
+    .inv-meta { color: #555; font-size: 12px; margin-top: 4px; line-height: 1.8; }
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; color: #fff; margin-top: 6px; }
+    .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .party { border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; }
+    .party h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+    .party .name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .party .detail { color: #555; font-size: 12px; line-height: 1.6; }
+    .trip-info { background: #f8f9fa; border-left: 4px solid #1565c0; border-radius: 4px; padding: 12px 16px; margin-bottom: 24px; }
+    .trip-info h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; }
+    .trip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .trip-item label { font-size: 10px; text-transform: uppercase; color: #888; display: block; }
+    .trip-item span  { font-size: 13px; font-weight: 500; }
+    table.services { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table.services th { background: #1565c0; color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; }
+    table.services th:last-child, table.services td:last-child { text-align: right; }
+    table.services td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+    table.services tr:last-child td { border-bottom: none; }
+    .totals { margin-left: auto; width: 320px; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+    .totals-row { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 13px; border-bottom: 1px solid #eee; }
+    .totals-row.total-expenses { border-bottom: none; }
+    .totals-row.net-profit { background: #1565c0; color: #fff; font-weight: 700; font-size: 14px; }
+    .footer { border-top: 1px solid #e0e0e0; padding-top: 16px; color: #888; font-size: 11px; line-height: 1.7; }
+    .notes-box { background: #fffde7; border-left: 4px solid #f9a825; border-radius: 4px; padding: 10px 14px; margin-bottom: 20px; font-size: 12px; color: #555; }
+    .print-btn { display: block; margin: 0 auto 20px; padding: 10px 28px; background: #1565c0; color: #fff; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+    @media print {
+      body { background: #fff; }
+      .page { margin: 0; padding: 30px; box-shadow: none; }
+      .print-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <button class="print-btn" onclick="window.print()">🖨 Печат / Запази като PDF</button>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>ФАКТУРА</h1>
+      <div class="subtitle">Транспортни услуги — TransTrack</div>
+    </div>
+    <div class="header-right">
+      <div class="inv-number" th:text="${inv.invoiceNumber}">INV-0000</div>
+      <div class="inv-meta">
+        Дата на издаване:
+        <strong th:text="${inv.issueDate != null ? #temporals.format(inv.issueDate, 'dd.MM.yyyy') : '—'}"></strong><br>
+        Краен срок:
+        <strong th:text="${inv.dueDate != null ? #temporals.format(inv.dueDate, 'dd.MM.yyyy') : '—'}"></strong>
+      </div>
+      <span class="status-badge"
+            th:text="${statusLabel}"
+            th:style="'background:' + ${statusColor}">Статус</span>
+    </div>
+  </div>
+
+  <!-- ── Страни ──────────────────────────────────────────── -->
+  <div class="parties">
+    <div class="party">
+      <h3>Продавач</h3>
+      <div class="name" th:text="${inv.sellerName ?: 'TransTrack ООД'}"></div>
+      <div class="detail">
+        ЕИК №: <span th:text="${inv.sellerVatNumber ?: '—'}"></span><br>
+        Адрес: <span th:text="${inv.sellerAddress ?: '—'}"></span>
+      </div>
+    </div>
+    <div class="party">
+      <h3>Купувач</h3>
+      <div class="name" th:text="${inv.clientName ?: '—'}"></div>
+      <div class="detail">
+        ЕИК №: <span th:text="${inv.clientVatNumber ?: '—'}"></span><br>
+        Адрес: <span th:text="${inv.clientAddress ?: '—'}"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Информация за курса ─────────────────────────────── -->
+  <div class="trip-info">
+    <h3>Информация за курса</h3>
+    <div class="trip-grid">
+      <div class="trip-item">
+        <label>Маршрут</label>
+        <span th:text="${inv.tripRoute ?: '—'}"></span>
+      </div>
+      <div class="trip-item">
+        <label>Камион</label>
+        <span th:text="${inv.vehiclePlate ?: '—'}"></span>
+      </div>
+      <div class="trip-item">
+        <label>Тръгване</label>
+        <span th:text="${inv.tripDepartureDate != null ? #temporals.format(inv.tripDepartureDate, 'dd.MM.yyyy') : '—'}"></span>
+      </div>
+      <div class="trip-item">
+        <label>Пристигане</label>
+        <span th:text="${inv.tripArrivalDate != null ? #temporals.format(inv.tripArrivalDate, 'dd.MM.yyyy') : '—'}"></span>
+      </div>
+      <div class="trip-item">
+        <label>Разстояние</label>
+        <span th:text="${inv.distanceKm != null ? inv.distanceKm + ' км' : '—'}"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Услуги ──────────────────────────────────────────── -->
+  <table class="services">
+    <thead>
+      <tr>
+        <th>Описание</th>
+        <th>Ед. цена (€)</th>
+        <th>Стойност (€)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td th:text="'Транспортна услуга — ' + (${inv.tripRoute} ?: '—')"></td>
+        <td style="text-align:right"
+            th:text="${#numbers.formatDecimal(inv.revenueEur ?: 0, 1, 'NONE', 2, 'POINT')}"></td>
+        <td th:text="${#numbers.formatDecimal(inv.revenueEur ?: 0, 1, 'NONE', 2, 'POINT')}"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Суми ───────────────────────────────────────────── -->
+  <div class="totals">
+    <div class="totals-row">
+      <span>Приход от транспорт</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.revenueEur ?: 0, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.vatEur != null and inv.vatEur.signum() > 0}">
+      <span>ДДС</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.vatEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.tollFeesEur != null and inv.tollFeesEur.signum() > 0}">
+      <span>Пътни такси</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.tollFeesEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.fuelCostEur != null and inv.fuelCostEur.signum() > 0}">
+      <span>Гориво</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.fuelCostEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.borderFeesEur != null and inv.borderFeesEur.signum() > 0}">
+      <span>Гранични такси</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.borderFeesEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.parkingAccommodationEur != null and inv.parkingAccommodationEur.signum() > 0}">
+      <span>Паркинг/нощувки</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.parkingAccommodationEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row" th:if="${inv.otherExpensesEur != null and inv.otherExpensesEur.signum() > 0}">
+      <span>Други разходи</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(inv.otherExpensesEur, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row total-expenses">
+      <span>Разходи по курс</span>
+      <span class="val">− € <span th:text="${#numbers.formatDecimal(inv.totalExpensesEur ?: 0, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+
+    <div class="totals-row net-profit">
+      <span>Нетна печалба</span>
+      <span class="val">€ <span th:text="${#numbers.formatDecimal(netProfit, 1, 'NONE', 2, 'POINT')}"></span></span>
+    </div>
+  </div>
+
+  <!-- ── Бележки ─────────────────────────────────────────── -->
+  <div class="notes-box" th:if="${inv.notes != null and !inv.notes.isBlank()}">
+    <strong>Бележки:</strong> <span th:text="${inv.notes}"></span>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <div class="footer">
+    <p>
+      Фактура № <span th:text="${inv.invoiceNumber}"></span>
+      &nbsp;|&nbsp;
+      Издадена от <strong th:text="${inv.sellerName ?: 'TransTrack ООД'}"></strong>
+      &nbsp;|&nbsp; TransTrack система
+    </p>
+    <p>Документът е генериран автоматично и е валиден без подпис при електронно издаване.</p>
+  </div>
+
+</div>
+</body>
+</html>

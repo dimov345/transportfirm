@@ -158,7 +158,7 @@ export class Home implements OnInit {
 
   // ── Auth helpers ──────────────────────────────────────────────────────────
   get showFinancials():    boolean { return ['ADMIN', 'MANAGER', 'ACCOUNTANT'].includes(this.role); }
-  get showNotifications(): boolean { return ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC'].includes(this.role); }
+  get showNotifications(): boolean { return ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC', 'ACCOUNTANT'].includes(this.role); }
   get showRoleStats():     boolean { return ['DISPATCHER', 'MECHANIC', 'DRIVER'].includes(this.role); }
   get roleLabel():         string  { return this.roleLabels[this.role] ?? this.role; }
   get cards():             NavCard[]{ return this.allCards[this.role]  ?? []; }
@@ -301,6 +301,19 @@ export class Home implements OnInit {
   get totalTaxEur(): number {
     if (!this.stats) return 0;
     return (this.stats.vatThisMonthEur ?? 0) + (this.stats.salaryTaxesEur ?? 0);
+  }
+
+  get netProfitThisMonth(): number {
+    if (!this.stats) return 0;
+    return (this.stats.revenueThisMonthEur ?? 0)
+      - (this.stats.tripExpensesEur  ?? 0)
+      - (this.stats.salaryBrutoEur   ?? 0)
+      - (this.stats.maintenanceEur   ?? 0);
+  }
+
+  get docAlertCount(): number {
+    if (!this.stats) return 0;
+    return (this.stats.expiredDocsCount ?? 0) + (this.stats.expiringDocsCount ?? 0);
   }
 
   // ── Net profit line chart ─────────────────────────────────────────────────

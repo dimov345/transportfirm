@@ -4,6 +4,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EmployeeService, EmployeeListItem } from '../../../core/services/employee.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -28,6 +29,9 @@ export class EmployeeList implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private destroyRef = inject(DestroyRef);
+  private authService = inject(AuthService);
+
+  get isAdmin(): boolean { return this.authService.hasRole('ADMIN'); }
 
   constructor(
     private employeeService: EmployeeService,

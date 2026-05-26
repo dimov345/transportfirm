@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DashboardStats, DashboardNotification } from '../models/dashboard.model';
+import { DashboardStats, DashboardNotification, RoleStats } from '../models/dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
@@ -16,5 +16,9 @@ export class DashboardService {
 
   getNotifications(): Observable<DashboardNotification[]> {
     return this.http.get<DashboardNotification[]>(`${this.base}/notifications`);
+  }
+
+  getRoleStats(): Observable<RoleStats> {
+    return this.http.get<RoleStats>(`${this.base}/role-stats`);
   }
 }

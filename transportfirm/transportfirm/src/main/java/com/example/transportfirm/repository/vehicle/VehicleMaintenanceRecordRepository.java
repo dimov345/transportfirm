@@ -1,13 +1,12 @@
 package com.example.transportfirm.repository.vehicle;
 
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
+import com.example.transportfirm.enums.MaintenanceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,4 +45,10 @@ public interface VehicleMaintenanceRecordRepository extends JpaRepository<Vehicl
     List<VehicleMaintenanceRecord> findByOpenedAtRangeWithVehicle(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
+
+    @Query("SELECT COUNT(m) FROM VehicleMaintenanceRecord m WHERE m.status = :status AND m.vehicle.id IN :vehicleIds")
+    long countByStatusAndVehicleIdIn(@Param("status") MaintenanceStatus status, @Param("vehicleIds") List<UUID> vehicleIds);
+
+    @Query("SELECT COUNT(m) FROM VehicleMaintenanceRecord m WHERE m.status = :status AND m.vehicle.id IN :vehicleIds AND m.openedAt BETWEEN :start AND :end")
+    long countClosedInMonth(@Param("status") MaintenanceStatus status, @Param("vehicleIds") List<UUID> vehicleIds, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

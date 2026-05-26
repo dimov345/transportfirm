@@ -75,7 +75,7 @@
         </div>
         <div class="stat-card__body">
           <div class="stat-card__value">
-            <span class="badge-exp" *ngIf="stats.expiredDocsCount > 0">{{ stats.expiredDocsCount }} изтекли</span>
+            <span class="badge-exp"  *ngIf="stats.expiredDocsCount  > 0">{{ stats.expiredDocsCount  }} изтекли</span>
             <span class="badge-warn" *ngIf="stats.expiringDocsCount > 0">{{ stats.expiringDocsCount }} изтичат</span>
           </div>
           <div class="stat-card__label">Документи</div>
@@ -84,6 +84,349 @@
     </div>
     <div class="stats-row" *ngIf="statsLoading">
       <div class="stat-card stat-card--skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════
+       DISPATCHER ROLE PANEL
+  ═══════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="role === 'DISPATCHER'">
+    <div class="load-error" *ngIf="roleStatsError && !roleStatsLoading">
+      <i class="material-icons">error_outline</i><span>{{ roleStatsError }}</span>
+    </div>
+
+    <ng-container *ngIf="!roleStatsLoading && !roleStatsError && roleStats">
+      <!-- Overview stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><i class="material-icons">folder_shared</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.dispatcherGroupsCount }}</div>
+            <div class="stat-card__label">Групи под управление</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--teal"><i class="material-icons">directions_car</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.dispatcherVehiclesCount }}</div>
+            <div class="stat-card__label">ППС под управление</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--violet"><i class="material-icons">pending_actions</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.plannedTripsCount }}</div>
+            <div class="stat-card__label">Планирани курсове</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--orange"><i class="material-icons">local_shipping</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.inTransitTripsCount }}</div>
+            <div class="stat-card__label">В движение</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><i class="material-icons">task_alt</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.completedTripsThisMonthCount }}</div>
+            <div class="stat-card__label">Завършени (месец)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trip status panel -->
+      <div class="role-panel">
+        <div class="role-panel__header">
+          <i class="material-icons">route</i>
+          <span>Статус на курсовете</span>
+        </div>
+        <div class="role-panel__body">
+          <div class="role-kpi-row">
+            <div class="role-kpi role-kpi--blue">
+              <div class="role-kpi__icon"><i class="material-icons">pending_actions</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.plannedTripsCount }}</div>
+                <div class="role-kpi__lbl">Планирани</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--orange">
+              <div class="role-kpi__icon"><i class="material-icons">local_shipping</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.inTransitTripsCount }}</div>
+                <div class="role-kpi__lbl">В движение</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--green">
+              <div class="role-kpi__icon"><i class="material-icons">task_alt</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.completedTripsThisMonthCount }}</div>
+                <div class="role-kpi__lbl">Завършени месеца</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--teal">
+              <div class="role-kpi__icon"><i class="material-icons">directions_car</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.dispatcherVehiclesCount }}</div>
+                <div class="role-kpi__lbl">ППС в групите</div>
+              </div>
+            </div>
+          </div>
+          <div class="role-panel__actions">
+            <button class="role-action-btn" (click)="goTo('/freight-trips')">
+              <i class="material-icons">map</i> Всички курсове
+            </button>
+            <button class="role-action-btn role-action-btn--secondary" (click)="goTo('/dispatcher')">
+              <i class="material-icons">local_shipping</i> Моите ППС
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="stats-row" *ngIf="roleStatsLoading">
+      <div class="stat-card stat-card--skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MECHANIC ROLE PANEL
+  ═══════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="role === 'MECHANIC'">
+    <div class="load-error" *ngIf="roleStatsError && !roleStatsLoading">
+      <i class="material-icons">error_outline</i><span>{{ roleStatsError }}</span>
+    </div>
+
+    <ng-container *ngIf="!roleStatsLoading && !roleStatsError && roleStats">
+      <!-- Overview stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--orange"><i class="material-icons">folder_shared</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.mechanicGroupsCount }}</div>
+            <div class="stat-card__label">Групи под управление</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--teal"><i class="material-icons">directions_car</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.mechanicVehiclesCount }}</div>
+            <div class="stat-card__label">ППС под поддръжка</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon" [class.stat-card__icon--red]="roleStats.openMaintenanceCount > 0"
+               [class.stat-card__icon--green]="roleStats.openMaintenanceCount === 0">
+            <i class="material-icons">build_circle</i>
+          </div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.openMaintenanceCount }}</div>
+            <div class="stat-card__label">Отворени поддръжки</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><i class="material-icons">check_circle</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.closedMaintenanceThisMonthCount }}</div>
+            <div class="stat-card__label">Затворени (месец)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maintenance status panel -->
+      <div class="role-panel">
+        <div class="role-panel__header">
+          <i class="material-icons">build</i>
+          <span>Статус на поддръжката</span>
+        </div>
+        <div class="role-panel__body">
+          <div class="role-kpi-row">
+            <div class="role-kpi" [class.role-kpi--red]="roleStats.openMaintenanceCount > 0"
+                 [class.role-kpi--green]="roleStats.openMaintenanceCount === 0">
+              <div class="role-kpi__icon"><i class="material-icons">build_circle</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.openMaintenanceCount }}</div>
+                <div class="role-kpi__lbl">Отворени записи</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--green">
+              <div class="role-kpi__icon"><i class="material-icons">check_circle</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.closedMaintenanceThisMonthCount }}</div>
+                <div class="role-kpi__lbl">Затворени месеца</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--teal">
+              <div class="role-kpi__icon"><i class="material-icons">directions_car</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.mechanicVehiclesCount }}</div>
+                <div class="role-kpi__lbl">ППС в групите</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--orange">
+              <div class="role-kpi__icon"><i class="material-icons">folder_shared</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.mechanicGroupsCount }}</div>
+                <div class="role-kpi__lbl">Групи</div>
+              </div>
+            </div>
+          </div>
+          <div class="role-panel__actions">
+            <button class="role-action-btn" (click)="goTo('/mechanic')">
+              <i class="material-icons">build</i> Моите ППС
+            </button>
+            <button class="role-action-btn role-action-btn--secondary" (click)="goTo('/vehicles')">
+              <i class="material-icons">directions_car</i> Всички ППС
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="stats-row" *ngIf="roleStatsLoading">
+      <div class="stat-card stat-card--skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════
+       DRIVER ROLE PANEL
+  ═══════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="role === 'DRIVER'">
+    <div class="load-error" *ngIf="roleStatsError && !roleStatsLoading">
+      <i class="material-icons">error_outline</i><span>{{ roleStatsError }}</span>
+    </div>
+
+    <ng-container *ngIf="!roleStatsLoading && !roleStatsError && roleStats">
+      <!-- Overview stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--teal"><i class="material-icons">directions_car</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ roleStats.assignedVehiclePlate ?? '—' }}</div>
+            <div class="stat-card__label">Назначено ППС</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon"
+               [class.stat-card__icon--green]="driverDocStatus === 'ok'"
+               [class.stat-card__icon--orange]="driverDocStatus === 'warn'"
+               [class.stat-card__icon--red]="driverDocStatus === 'bad'">
+            <i class="material-icons">verified_user</i>
+          </div>
+          <div class="stat-card__body">
+            <div class="stat-card__value"
+                 [class.income-val]="driverDocStatus === 'ok'"
+                 [class.warn-val]="driverDocStatus === 'warn'"
+                 [class.expense-val]="driverDocStatus === 'bad'">
+              {{ driverDocStatus === 'ok' ? 'Валидни' : driverDocStatus === 'warn' ? 'Изтичат' : 'Изтекли' }}
+            </div>
+            <div class="stat-card__label">Статус документи</div>
+          </div>
+        </div>
+        <div class="stat-card" *ngIf="roleStats.expiredDocsCount > 0">
+          <div class="stat-card__icon stat-card__icon--red"><i class="material-icons">cancel</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value expense-val">{{ roleStats.expiredDocsCount }}</div>
+            <div class="stat-card__label">Изтекли документи</div>
+          </div>
+        </div>
+        <div class="stat-card" *ngIf="roleStats.expiringDocsCount > 0">
+          <div class="stat-card__icon stat-card__icon--orange"><i class="material-icons">warning_amber</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value warn-val">{{ roleStats.expiringDocsCount }}</div>
+            <div class="stat-card__label">Изтичат скоро</div>
+          </div>
+        </div>
+        <div class="stat-card" *ngIf="roleStats.daysUntilNextExpiry != null">
+          <div class="stat-card__icon stat-card__icon--blue"><i class="material-icons">event</i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ driverNextExpiryLabel }}</div>
+            <div class="stat-card__label">До следващо изтичане</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Driver document panel -->
+      <div class="role-panel">
+        <div class="role-panel__header">
+          <i class="material-icons">badge</i>
+          <span>Вашите документи</span>
+        </div>
+        <div class="role-panel__body">
+          <div class="driver-doc-status">
+            <div class="driver-doc-status__icon"
+                 [class.driver-doc-status__icon--ok]="driverDocStatus === 'ok'"
+                 [class.driver-doc-status__icon--warn]="driverDocStatus === 'warn'"
+                 [class.driver-doc-status__icon--bad]="driverDocStatus === 'bad'">
+              <i class="material-icons">
+                {{ driverDocStatus === 'ok' ? 'verified' : driverDocStatus === 'warn' ? 'warning_amber' : 'error' }}
+              </i>
+            </div>
+            <div class="driver-doc-status__text">
+              <ng-container *ngIf="driverDocStatus === 'ok'">
+                <div class="driver-doc-status__title">Всички документи са валидни</div>
+                <div class="driver-doc-status__sub">Следващо изтичане: {{ driverNextExpiryLabel }}</div>
+              </ng-container>
+              <ng-container *ngIf="driverDocStatus === 'warn'">
+                <div class="driver-doc-status__title">{{ roleStats.expiringDocsCount }} документа изтичат скоро</div>
+                <div class="driver-doc-status__sub">Следващо изтичане след: {{ driverNextExpiryLabel }}</div>
+              </ng-container>
+              <ng-container *ngIf="driverDocStatus === 'bad'">
+                <div class="driver-doc-status__title">{{ roleStats.expiredDocsCount }} документа са изтекли!</div>
+                <div class="driver-doc-status__sub">Свържете се с администратора незабавно.</div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="role-kpi-row" style="margin-top: 16px">
+            <div class="role-kpi role-kpi--teal" *ngIf="roleStats.assignedVehiclePlate">
+              <div class="role-kpi__icon"><i class="material-icons">directions_car</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.assignedVehiclePlate }}</div>
+                <div class="role-kpi__lbl">Назначено ППС</div>
+              </div>
+            </div>
+            <div class="role-kpi" style="--kpi-accent:#6366f1"
+                 [class.role-kpi--red]="(roleStats.expiredDocsCount ?? 0) > 0"
+                 [class.role-kpi--green]="(roleStats.expiredDocsCount ?? 0) === 0">
+              <div class="role-kpi__icon"><i class="material-icons">cancel</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.expiredDocsCount ?? 0 }}</div>
+                <div class="role-kpi__lbl">Изтекли</div>
+              </div>
+            </div>
+            <div class="role-kpi"
+                 [class.role-kpi--orange]="(roleStats.expiringDocsCount ?? 0) > 0"
+                 [class.role-kpi--green]="(roleStats.expiringDocsCount ?? 0) === 0">
+              <div class="role-kpi__icon"><i class="material-icons">warning_amber</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ roleStats.expiringDocsCount ?? 0 }}</div>
+                <div class="role-kpi__lbl">Изтичат скоро</div>
+              </div>
+            </div>
+            <div class="role-kpi role-kpi--blue">
+              <div class="role-kpi__icon"><i class="material-icons">event</i></div>
+              <div class="role-kpi__data">
+                <div class="role-kpi__val">{{ driverNextExpiryLabel }}</div>
+                <div class="role-kpi__lbl">Следващо изтичане</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="role-panel__actions">
+            <button class="role-action-btn" (click)="goTo('/my-documents')">
+              <i class="material-icons">folder_open</i> Моите документи
+            </button>
+            <button class="role-action-btn role-action-btn--secondary" (click)="goTo('/profile')">
+              <i class="material-icons">person</i> Профил
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="stats-row" *ngIf="roleStatsLoading">
+      <div class="stat-card stat-card--skeleton" *ngFor="let i of [1,2,3]"></div>
     </div>
   </ng-container>
 
@@ -160,7 +503,7 @@
             <ng-container *ngFor="let g of barGroups">
               <rect [attr.x]="g.revX" [attr.y]="g.revY" [attr.width]="g.barW" [attr.height]="g.revH"
                     fill="#16a34a" rx="2" class="bar-rect">
-                <title>Приходи {{ g.monthLabel }}: {{ fmtEur(g.netProfit + (g.expH > 0 ? g.expH : 0)) }}</title>
+                <title>Приходи {{ g.monthLabel }}</title>
               </rect>
               <rect [attr.x]="g.expX" [attr.y]="g.expY" [attr.width]="g.barW" [attr.height]="g.expH"
                     fill="#dc2626" rx="2" class="bar-rect">

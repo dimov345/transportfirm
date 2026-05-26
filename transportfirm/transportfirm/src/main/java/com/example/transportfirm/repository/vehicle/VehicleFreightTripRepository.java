@@ -55,4 +55,10 @@ public interface VehicleFreightTripRepository extends JpaRepository<VehicleFreig
     List<VehicleFreightTrip> findByDepartureDateBetweenWithVehicle(
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
+
+    @Query("SELECT COUNT(t) FROM VehicleFreightTrip t WHERE t.status = :status AND t.vehicle.id IN :vehicleIds")
+    long countByStatusAndVehicleIdIn(@Param("status") TripStatus status, @Param("vehicleIds") List<UUID> vehicleIds);
+
+    @Query("SELECT COUNT(t) FROM VehicleFreightTrip t WHERE t.status = :status AND t.vehicle.id IN :vehicleIds AND t.departureDate BETWEEN :start AND :end")
+    long countCompletedInMonth(@Param("status") TripStatus status, @Param("vehicleIds") List<UUID> vehicleIds, @Param("start") LocalDate start, @Param("end") LocalDate end);
 }

@@ -50,6 +50,18 @@ public interface VehicleRepository extends JpaRepository<VehicleRecord, UUID> {
 
     long countByVehicleStatusNot(VehicleStatus status);
 
+    @Query("SELECT COUNT(v) FROM VehicleRecord v WHERE v.dispatcherGroup IS NOT NULL AND v.dispatcherGroup.dispatcher.id = :dispatcherId")
+    long countByDispatcherId(@Param("dispatcherId") UUID dispatcherId);
+
+    @Query("SELECT v.id FROM VehicleRecord v WHERE v.dispatcherGroup IS NOT NULL AND v.dispatcherGroup.dispatcher.id = :dispatcherId")
+    List<UUID> findIdsByDispatcherId(@Param("dispatcherId") UUID dispatcherId);
+
+    @Query("SELECT COUNT(v) FROM VehicleRecord v WHERE v.mechanicGroup IS NOT NULL AND v.mechanicGroup.mechanic.id = :mechanicId")
+    long countByMechanicId(@Param("mechanicId") UUID mechanicId);
+
+    @Query("SELECT v.id FROM VehicleRecord v WHERE v.mechanicGroup IS NOT NULL AND v.mechanicGroup.mechanic.id = :mechanicId")
+    List<UUID> findIdsByMechanicId(@Param("mechanicId") UUID mechanicId);
+
     /** Returns leased vehicles whose contract overlaps the given date range. */
     @Query("SELECT v FROM VehicleRecord v WHERE v.leased = true " +
            "AND v.leasingMonthlyPaymentEur IS NOT NULL " +

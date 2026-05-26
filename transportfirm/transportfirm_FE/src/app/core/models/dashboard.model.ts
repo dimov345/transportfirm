@@ -26,6 +26,25 @@ export interface DashboardStats {
   monthlyStats:      MonthlyStatDto[];
 }
 
+export interface RoleStats {
+  // Dispatcher
+  dispatcherGroupsCount:         number;
+  dispatcherVehiclesCount:       number;
+  plannedTripsCount:             number;
+  inTransitTripsCount:           number;
+  completedTripsThisMonthCount:  number;
+  // Mechanic
+  mechanicGroupsCount:           number;
+  mechanicVehiclesCount:         number;
+  openMaintenanceCount:          number;
+  closedMaintenanceThisMonthCount: number;
+  // Driver
+  expiredDocsCount:    number;
+  expiringDocsCount:   number;
+  assignedVehiclePlate: string | null;
+  daysUntilNextExpiry: number | null;
+}
+
 export interface DashboardNotification {
   type:            string;   // 'vehicle' | 'driver'
   documentType:    string;

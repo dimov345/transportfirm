@@ -1,16 +1,22 @@
 package com.example.transportfirm.service.accounting;
 
 import com.example.transportfirm.entity.DriverInfo;
+import com.example.transportfirm.entity.Employee;
+import com.example.transportfirm.entity.TruckGroup;
 import com.example.transportfirm.entity.VehicleFreightTrip;
 import com.example.transportfirm.entity.VehicleMaintenanceRecord;
 import com.example.transportfirm.entity.VehicleRecord;
 import com.example.transportfirm.enums.EmploymentStatus;
+import com.example.transportfirm.enums.MaintenanceStatus;
+import com.example.transportfirm.enums.TripStatus;
 import com.example.transportfirm.enums.VehicleStatus;
 import com.example.transportfirm.io.accounting.DashboardStatsDto;
 import com.example.transportfirm.io.accounting.MonthlyStatDto;
 import com.example.transportfirm.io.accounting.NotificationDto;
+import com.example.transportfirm.io.accounting.RoleStatsDto;
 import com.example.transportfirm.repository.driver.DriverRepository;
 import com.example.transportfirm.repository.employee.EmployeeRepository;
+import com.example.transportfirm.repository.vehicle.TruckGroupRepository;
 import com.example.transportfirm.repository.vehicle.VehicleMaintenanceRecordRepository;
 import com.example.transportfirm.repository.vehicle.VehicleFreightTripRepository;
 import com.example.transportfirm.repository.vehicle.VehicleRepository;
@@ -37,6 +43,7 @@ public class DashboardService {
     private final VehicleFreightTripRepository tripRepository;
     private final VehicleMaintenanceRecordRepository maintenanceRepository;
     private final DriverRepository driverRepository;
+    private final TruckGroupRepository truckGroupRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Stats
@@ -112,6 +119,80 @@ public class DashboardService {
 
     public List<NotificationDto> getNotifications() {
         return buildNotifications(LocalDate.now());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Role-specific stats
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public RoleStatsDto getRoleStats(String email) {
+        RoleStatsDto dto = new RoleStatsDto();
+
+        Employee emp = employeeRepository.findByEmailWithInfos(email).orElse(null);
+        if (emp == null) return dto;
+
+        LocalDate today       = LocalDate.now();
+        LocalDate warningDate = today.plusDays(30);
+        YearMonth currentMonth = YearMonth.now();
+        LocalDate monthStart  = currentMonth.atDay(1);
+        LocalDate monthEnd    = currentMonth.atEndOfMonth();
+
+        // DISPATCHER
+        if (emp.getDispatcherInfo() != null) {
+            UUID dispId = emp.getDispatcherInfo().getId();
+            List<TruckGroup> groups = truckGroupRepository.findAllByDispatcher_Id(dispId);
+            dto.setDispatcherGroupsCount(groups.size());
+            dto.setDispatcherVehiclesCount((int) vehicleRepository.countByDispatcherId(dispId));
+            List<UUID> vehicleIds = vehicleRepository.findIdsByDispatcherId(dispId);
+            if (!vehicleIds.isEmpty()) {
+                dto.setPlannedTripsCount(tripRepository.countByStatusAndVehicleIdIn(TripStatus.PLANNED, vehicleIds));
+                dto.setInTransitTripsCount(tripRepository.countByStatusAndVehicleIdIn(TripStatus.IN_TRANSIT, vehicleIds));
+                dto.setCompletedTripsThisMonthCount(tripRepository.countCompletedInMonth(TripStatus.COMPLETED, vehicleIds, monthStart, monthEnd));
+            }
+        }
+
+        // MECHANIC
+        if (emp.getMechanicInfo() != null) {
+            UUID mechId = emp.getMechanicInfo().getId();
+            List<TruckGroup> groups = truckGroupRepository.findAllByMechanic_Id(mechId);
+            dto.setMechanicGroupsCount(groups.size());
+            dto.setMechanicVehiclesCount((int) vehicleRepository.countByMechanicId(mechId));
+            List<UUID> vehicleIds = vehicleRepository.findIdsByMechanicId(mechId);
+            if (!vehicleIds.isEmpty()) {
+                dto.setOpenMaintenanceCount(maintenanceRepository.countByStatusAndVehicleIdIn(MaintenanceStatus.OPEN, vehicleIds));
+                dto.setClosedMaintenanceThisMonthCount(maintenanceRepository.countClosedInMonth(
+                        MaintenanceStatus.CLOSED, vehicleIds,
+                        monthStart.atStartOfDay(), monthEnd.atTime(LocalTime.MAX)));
+            }
+        }
+
+        // DRIVER
+        if (emp.getDriverInfo() != null) {
+            DriverInfo driver = emp.getDriverInfo();
+            long expired = 0, expiring = 0;
+            Long nextExpiry = null;
+            LocalDate[] dates = {
+                driver.getDriverLicenseExpiresOn(),
+                driver.getQualificationCardExpiresOn(),
+                driver.getPsychologicalExamExpiresOn(),
+                driver.getDigitalCardExpiresOn()
+            };
+            for (LocalDate d : dates) {
+                if (d == null) continue;
+                long days = ChronoUnit.DAYS.between(today, d);
+                if (d.isBefore(today)) expired++;
+                else if (!d.isAfter(warningDate)) expiring++;
+                if (!d.isBefore(today) && (nextExpiry == null || days < nextExpiry)) nextExpiry = days;
+            }
+            dto.setExpiredDocsCount(expired);
+            dto.setExpiringDocsCount(expiring);
+            dto.setDaysUntilNextExpiry(nextExpiry);
+            if (driver.getVehicle() != null) {
+                dto.setAssignedVehiclePlate(driver.getVehicle().getPlateNumber());
+            }
+        }
+
+        return dto;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

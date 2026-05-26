@@ -6,7 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, EMPTY } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { DashboardStats, DashboardNotification } from '../../core/models/dashboard.model';
+import { DashboardStats, DashboardNotification, RoleStats } from '../../core/models/dashboard.model';
 
 type NavCard = { label: string; subtitle: string; icon: string; route: string; accent: string; };
 
@@ -34,44 +34,56 @@ export class Home implements OnInit {
 
   stats:         DashboardStats | null = null;
   notifications: DashboardNotification[] = [];
-  statsLoading   = false;
-  notifLoading   = false;
-  statsError     = '';
-  notifError     = '';
+  roleStats:     RoleStats | null = null;
+
+  statsLoading      = false;
+  notifLoading      = false;
+  roleStatsLoading  = false;
+  statsError        = '';
+  notifError        = '';
+  roleStatsError    = '';
 
   private readonly numFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   readonly roleLabels: Record<string, string> = {
     ADMIN: 'Администратор', MANAGER: 'Мениджър',
-    DISPATCHER: 'Спедитор', MECHANIC: 'Механик', DRIVER: 'Шофьор'
+    DISPATCHER: 'Спедитор', MECHANIC: 'Механик', DRIVER: 'Шофьор',
+    ACCOUNTANT: 'Счетоводител'
   };
 
   private readonly allCards: Record<string, NavCard[]> = {
     ADMIN: [
-      { label: 'Шофьори',   subtitle: 'Списък на всички шофьори и документи',       icon: 'drive_eta',      route: '/drivers',     accent: '#2563eb' },
-      { label: 'ППС',       subtitle: 'Управление на превозни средства',             icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' },
-      { label: 'Механици',  subtitle: 'Списък на механиците и групи',                icon: 'build',          route: '/mechanics',   accent: '#b45309' },
-      { label: 'Спедитори', subtitle: 'Списък на спедиторите и групи',               icon: 'local_shipping', route: '/dispatchers', accent: '#7c3aed' }
+      { label: 'Служители',  subtitle: 'Управление на всички служители',              icon: 'people',         route: '/employees',   accent: '#0f766e' },
+      { label: 'Шофьори',   subtitle: 'Списък на всички шофьори и документи',         icon: 'drive_eta',      route: '/drivers',     accent: '#2563eb' },
+      { label: 'ППС',        subtitle: 'Управление на превозни средства',              icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' },
+      { label: 'Механици',   subtitle: 'Списък на механиците и групи',                icon: 'build',          route: '/mechanics',   accent: '#b45309' },
+      { label: 'Спедитори',  subtitle: 'Списък на спедиторите и групи',               icon: 'local_shipping', route: '/dispatchers', accent: '#7c3aed' },
+      { label: 'Курсове',    subtitle: 'Всички товарни курсове',                      icon: 'map',            route: '/freight-trips', accent: '#0891b2' }
     ],
     MANAGER: [
-      { label: 'Шофьори',   subtitle: 'Списък на всички шофьори и документи',       icon: 'drive_eta',      route: '/drivers',     accent: '#2563eb' },
-      { label: 'ППС',       subtitle: 'Управление на превозни средства',             icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' },
-      { label: 'Механици',  subtitle: 'Списък на механиците и групи',                icon: 'build',          route: '/mechanics',   accent: '#b45309' },
-      { label: 'Спедитори', subtitle: 'Списък на спедиторите и групи',               icon: 'local_shipping', route: '/dispatchers', accent: '#7c3aed' }
+      { label: 'Шофьори',   subtitle: 'Списък на всички шофьори и документи',         icon: 'drive_eta',      route: '/drivers',     accent: '#2563eb' },
+      { label: 'ППС',        subtitle: 'Управление на превозни средства',              icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' },
+      { label: 'Механици',   subtitle: 'Списък на механиците и групи',                icon: 'build',          route: '/mechanics',   accent: '#b45309' },
+      { label: 'Спедитори',  subtitle: 'Списък на спедиторите и групи',               icon: 'local_shipping', route: '/dispatchers', accent: '#7c3aed' },
+      { label: 'Курсове',    subtitle: 'Всички товарни курсове',                      icon: 'map',            route: '/freight-trips', accent: '#0891b2' }
+    ],
+    ACCOUNTANT: [
+      { label: 'ППС',        subtitle: 'Преглед на превозните средства',              icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' },
+      { label: 'Курсове',    subtitle: 'Преглед на товарни курсове',                  icon: 'map',            route: '/freight-trips', accent: '#2563eb' }
     ],
     DISPATCHER: [
-      { label: 'Моите ППС',  subtitle: 'Превозни средства от вашите групи',          icon: 'local_shipping', route: '/dispatcher',  accent: '#2563eb' },
-      { label: 'Курсове',    subtitle: 'Активни и планирани курсове',                icon: 'map',            route: '/freight-trips', accent: '#0f766e' },
-      { label: 'Шофьори',   subtitle: 'Преглед на шофьори и документи',             icon: 'drive_eta',      route: '/drivers',     accent: '#7c3aed' },
-      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                  icon: 'directions_car', route: '/vehicles',    accent: '#0891b2' }
+      { label: 'Моите ППС',  subtitle: 'Превозни средства от вашите групи',           icon: 'local_shipping', route: '/dispatcher',  accent: '#2563eb' },
+      { label: 'Курсове',    subtitle: 'Активни и планирани курсове',                 icon: 'map',            route: '/freight-trips', accent: '#0f766e' },
+      { label: 'Шофьори',   subtitle: 'Преглед на шофьори и документи',              icon: 'drive_eta',      route: '/drivers',     accent: '#7c3aed' },
+      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                   icon: 'directions_car', route: '/vehicles',    accent: '#0891b2' }
     ],
     MECHANIC: [
-      { label: 'Моите ППС',  subtitle: 'Поддръжка на назначените превозни средства', icon: 'build',          route: '/mechanic',    accent: '#b45309' },
-      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                  icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' }
+      { label: 'Моите ППС',  subtitle: 'Поддръжка на назначените превозни средства',  icon: 'build',          route: '/mechanic',    accent: '#b45309' },
+      { label: 'Всички ППС', subtitle: 'Преглед на целия автопарк',                   icon: 'directions_car', route: '/vehicles',    accent: '#0f766e' }
     ],
     DRIVER: [
-      { label: 'Моите документи', subtitle: 'Преглед на личните ви документи',       icon: 'folder_open',    route: '/my-documents', accent: '#2563eb' },
-      { label: 'Профил',          subtitle: 'Вашата лична информация',               icon: 'person',         route: '/profile',      accent: '#0f766e' }
+      { label: 'Моите документи', subtitle: 'Преглед на личните ви документи',        icon: 'folder_open',    route: '/my-documents', accent: '#2563eb' },
+      { label: 'Профил',          subtitle: 'Вашата лична информация',                icon: 'person',         route: '/profile',      accent: '#0f766e' }
     ]
   };
 
@@ -79,7 +91,8 @@ export class Home implements OnInit {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     if (this.showNotifications) this.loadNotifications();
-    if (this.showFinancials) this.loadStats();
+    if (this.showFinancials)    this.loadStats();
+    if (this.showRoleStats)     this.loadRoleStats();
   }
 
   private loadStats(): void {
@@ -118,6 +131,24 @@ export class Home implements OnInit {
     });
   }
 
+  private loadRoleStats(): void {
+    this.roleStatsLoading = true;
+    this.roleStatsError   = '';
+    this.dashSvc.getRoleStats().pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.roleStatsError   = this.httpErrorMessage(err);
+        this.roleStatsLoading = false;
+        this.cdr.detectChanges();
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(rs => {
+      this.roleStats        = rs;
+      this.roleStatsLoading = false;
+      this.cdr.detectChanges();
+    });
+  }
+
   private httpErrorMessage(err: HttpErrorResponse): string {
     if (err.status === 0)   return 'Сървърът е недостъпен';
     if (err.status === 401) return 'Сесията е изтекла — пренасочване към вход...';
@@ -127,8 +158,8 @@ export class Home implements OnInit {
 
   // ── Auth helpers ──────────────────────────────────────────────────────────
   get showFinancials():    boolean { return ['ADMIN', 'MANAGER', 'ACCOUNTANT'].includes(this.role); }
-  /** Notifications panel shows fleet-wide alerts — only relevant for management roles. */
   get showNotifications(): boolean { return ['ADMIN', 'MANAGER', 'DISPATCHER', 'MECHANIC'].includes(this.role); }
+  get showRoleStats():     boolean { return ['DISPATCHER', 'MECHANIC', 'DRIVER'].includes(this.role); }
   get roleLabel():         string  { return this.roleLabels[this.role] ?? this.role; }
   get cards():             NavCard[]{ return this.allCards[this.role]  ?? []; }
 
@@ -168,6 +199,22 @@ export class Home implements OnInit {
     const d = Math.abs(n.daysUntilExpiry);
     if (n.status === 'expired') return `Изтекло преди ${d} ${d === 1 ? 'ден' : 'дни'}`;
     return d === 0 ? 'Изтича днес!' : `Изтича след ${d} ${d === 1 ? 'ден' : 'дни'}`;
+  }
+
+  // ── Driver doc-expiry label helper ────────────────────────────────────────
+  get driverNextExpiryLabel(): string {
+    const d = this.roleStats?.daysUntilNextExpiry;
+    if (d == null) return '—';
+    if (d <= 0)    return 'Изтекло';
+    if (d === 0)   return 'Изтича днес!';
+    return `${d} ${d === 1 ? 'ден' : 'дни'}`;
+  }
+
+  get driverDocStatus(): 'ok' | 'warn' | 'bad' {
+    if (!this.roleStats) return 'ok';
+    if ((this.roleStats.expiredDocsCount  ?? 0) > 0) return 'bad';
+    if ((this.roleStats.expiringDocsCount ?? 0) > 0) return 'warn';
+    return 'ok';
   }
 
   // ── Chart 1: Detailed expenses donut ─────────────────────────────────────

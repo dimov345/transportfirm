@@ -34,7 +34,8 @@
             <input class="tf-input" formControlName="egn" type="text" placeholder="10 цифри" />
             <div class="tf-error" *ngIf="field('egn')?.touched && field('egn')?.invalid">
               <small *ngIf="field('egn')?.errors?.['required']">ЕГН е задължително.</small>
-              <small *ngIf="field('egn')?.errors?.['pattern']">ЕГН трябва да е 10 цифри.</small>
+              <small *ngIf="field('egn')?.errors?.['pattern']">ЕГН трябва да е точно 10 цифри.</small>
+              <small *ngIf="field('egn')?.errors?.['egnChecksum']">Невалидна контролна цифра на ЕГН.</small>
             </div>
           </div>
 
@@ -216,6 +217,9 @@
 
       <div class="tf-banner error" *ngIf="errorMessage">
         {{ errorMessage }}
+        <ul *ngIf="validationErrors.length > 0" style="margin: 6px 0 0 0; padding-left: 18px; font-size: 12px;">
+          <li *ngFor="let e of validationErrors">{{ e }}</li>
+        </ul>
       </div>
     </div>
   </form>

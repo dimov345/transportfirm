@@ -63,6 +63,8 @@ public class EmployeeUserServiceImpl implements EmployeeUserService {
         user.setPassword(passwordEncoder.encode(tempPassword));
         user.setEmployee(employee);
         user.setIsAccountVerified(false);
+        user.setFirstLogin(true);      // @Builder.Default not applied on new User()
+        user.setTokenVersion(0L);      // @Builder.Default not applied on new User()
         // Store hashed OTP — plaintext is sent via email only
         user.setVerifyOtp(passwordEncoder.encode(otp));
         user.setVerifyOtpExpireAt(otpExpiry);

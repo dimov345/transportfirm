@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -48,6 +48,8 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
   saving = false;
   loading = false;
   errorMessage = '';
+  /** Detailed field-level errors returned by the backend @Valid handler. */
+  validationErrors: string[] = [];
 
   employeeId: string | null = null;
 
@@ -104,7 +106,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
 
   private initForm(): void {
     this.form = this.fb.group({
-      egn: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      egn: ['', [Validators.required, Validators.pattern(/^\d{10}$/), EmployeeForm.egnChecksum]],
       name: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
       phone: ['', Validators.required],
@@ -294,6 +296,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
 
   submit(): void {
     this.errorMessage = '';
+    this.validationErrors = [];
 
     // ✅ SSR safety: submit само в браузъра
     if (!this.isBrowser) return;
@@ -329,6 +332,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
           this.errorMessage =
             err?.error?.message ||
             (this.isEdit ? 'Грешка при редакция на служител' : 'Грешка при създаване на служител');
+          this.validationErrors = err?.error?.errors ?? [];
           console.error(err);
           this.cdr.detectChanges();
         }
@@ -341,6 +345,22 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
 
   field(name: string) {
     return this.form.get(name);
+  }
+
+  /**
+   * Bulgarian EGN MOD-11 checksum validator.
+   * Only runs when the value is already 10 digits (pattern check runs first).
+   */
+  static egnChecksum(ctrl: AbstractControl): ValidationErrors | null {
+    const v: string = ctrl.value ?? '';
+    if (!/^\d{10}$/.test(v)) return null; // let pattern validator report format errors
+    const WEIGHTS = [2, 4, 8, 5, 10, 9, 7, 3, 6];
+    const d = v.split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += d[i] * WEIGHTS[i];
+    const rem = sum % 11;
+    const expected = rem < 10 ? rem : 0;
+    return expected === d[9] ? null : { egnChecksum: true };
   }
 
   hasUnsavedChanges(): boolean {

@@ -76,8 +76,12 @@ export class ManagerStaffComponent implements OnInit {
       : [...this.employees];
   }
 
-  viewDetails(id: string): void { this.router.navigate([`/employees/details/${id}`]); }
-  editEmployee(id: string): void { this.router.navigate([`/employees/edit/${id}`]); }
+  viewDetails(id: string): void {
+    this.router.navigate([`/employees/details/${id}`], { queryParams: { returnUrl: '/manager-staff' } });
+  }
+  editEmployee(id: string): void {
+    this.router.navigate([`/employees/edit/${id}`], { queryParams: { returnUrl: '/manager-staff' } });
+  }
 
   /** Two-letter initials from full name. */
   initials(name: string): string {

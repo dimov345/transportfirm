@@ -306,6 +306,7 @@ export class EmployeeDetails implements OnInit {
   }
 
   back() {
-    this.router.navigate([this.backRoute]);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? this.backRoute;
+    this.router.navigate([returnUrl]);
   }
 }

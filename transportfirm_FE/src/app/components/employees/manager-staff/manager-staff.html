@@ -1,36 +1,37 @@
-<div class="ms-page">
+<div class="list-container">
 
   <!-- ── Header ─────────────────────────────────────────── -->
-  <div class="ms-header">
-    <div class="ms-header__left">
-      <h1 class="ms-header__title">
-        <i class="material-icons">groups</i>
-        Служители
-      </h1>
-      <span class="ms-header__count">{{ filtered.length }} служители</span>
-    </div>
-
-    <div class="ms-header__search">
-      <i class="material-icons ms-header__search-icon">search</i>
-      <input
-        type="text"
-        class="ms-header__search-input"
-        placeholder="Търси по име, длъжност, имейл..."
-        [(ngModel)]="searchText"
-        (input)="search()"
-      />
+  <div class="list-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Служители</h1>
+        <p class="subtitle">Общо {{ filtered.length }} служители</p>
+      </div>
     </div>
   </div>
 
+  <!-- ── Search ─────────────────────────────────────────── -->
+  <div class="search-bar-container filters-bar">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Търси по име, длъжност, имейл..."
+      [(ngModel)]="searchText"
+      (input)="search()"
+    />
+  </div>
+
   <!-- ── Loading ────────────────────────────────────────── -->
-  <div class="ms-loading" *ngIf="loading">
+  <div class="ms-grid" *ngIf="loading">
     <div class="ms-skeleton" *ngFor="let i of [1,2,3,4,5,6]"></div>
   </div>
 
   <!-- ── Empty ──────────────────────────────────────────── -->
-  <div class="ms-empty" *ngIf="!loading && filtered.length === 0">
-    <i class="material-icons">person_search</i>
-    <p>Няма намерени служители</p>
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <div class="empty-icon">
+      <i class="material-icons" style="font-size:48px;color:#9ca3af">person_search</i>
+    </div>
+    <h3>Няма намерени служители</h3>
   </div>
 
   <!-- ── Card grid ──────────────────────────────────────── -->
@@ -45,33 +46,34 @@
         <div class="ms-card__identity">
           <div class="ms-card__name">{{ emp.name }}</div>
           <span class="ms-card__role-chip"
-                [style.background]="colorFor(emp.jobTitle) + '1a'"
                 [style.color]="colorFor(emp.jobTitle)"
-                [style.border-color]="colorFor(emp.jobTitle) + '40'">
+                [style.border-color]="colorFor(emp.jobTitle) + '55'">
             {{ labelFor(emp.jobTitle) }}
           </span>
         </div>
       </div>
 
-      <!-- Contact info -->
+      <!-- Contact -->
       <div class="ms-card__contacts">
         <div class="ms-card__contact-row" *ngIf="emp.phone">
           <i class="material-icons">phone</i>
-          <a [href]="'tel:' + emp.phone">{{ emp.phone }}</a>
+          <span>{{ emp.phone }}</span>
         </div>
         <div class="ms-card__contact-row" *ngIf="emp.email">
           <i class="material-icons">email</i>
-          <a [href]="'mailto:' + emp.email" class="ms-card__email">{{ emp.email }}</a>
+          <span class="ms-card__email">{{ emp.email }}</span>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="ms-card__actions">
-        <button class="ms-btn ms-btn--primary" (click)="viewDetails(emp.id)">
+        <button class="btn-action btn-edit" type="button"
+                (click)="viewDetails(emp.id)" title="Детайли">
           <i class="material-icons">visibility</i>
           Детайли
         </button>
-        <button class="ms-btn ms-btn--secondary" (click)="editEmployee(emp.id)">
+        <button class="btn-action btn-edit" type="button"
+                (click)="editEmployee(emp.id)" title="Редакция">
           <i class="material-icons">edit</i>
           Редакция
         </button>

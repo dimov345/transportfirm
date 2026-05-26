@@ -35,7 +35,8 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
   private cdr = inject(ChangeDetectorRef);
 
   private get backRoute(): string {
-    return this.auth.hasRole('ADMIN') ? '/employees' : '/manager-staff';
+    return this.route.snapshot.queryParamMap.get('returnUrl')
+      ?? (this.auth.hasRole('ADMIN') ? '/employees' : '/manager-staff');
   }
 
   private platformId = inject(PLATFORM_ID);

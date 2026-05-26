@@ -23,7 +23,8 @@ export class EmployeeDetails implements OnInit {
   loading = true;
   errorMessage = '';
 
-  isAdmin = false;
+  get isAdmin():    boolean { return this.auth.hasRole('ADMIN'); }
+  get backRoute():  string  { return this.isAdmin ? '/employees' : '/manager-staff'; }
 
   // UI state
   showCreateGroup = false;
@@ -52,7 +53,7 @@ export class EmployeeDetails implements OnInit {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id || !id.trim()) {
-      this.router.navigate(['/employees']);
+      this.router.navigate([this.backRoute]);
       return;
     }
 
@@ -295,7 +296,7 @@ export class EmployeeDetails implements OnInit {
   }
 
   editEmployee(employeeId: string) {
-    if (!this.employee || !this.isAdmin) return;
+    if (!this.employee) return;
     this.router.navigate(['/employees/edit', employeeId]);
   }
 
@@ -305,6 +306,6 @@ export class EmployeeDetails implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/employees']);
+    this.router.navigate([this.backRoute]);
   }
 }

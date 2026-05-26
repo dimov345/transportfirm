@@ -17,6 +17,7 @@ import {
 } from '../../../core/services/admin.service';
 
 import { Employee } from '../../../core/models/employee/employee.model';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-employee-form',
@@ -30,7 +31,12 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private adminService = inject(AdminService);
+  private auth = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+
+  private get backRoute(): string {
+    return this.auth.hasRole('ADMIN') ? '/employees' : '/manager-staff';
+  }
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
@@ -317,7 +323,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: () => { invalidateCache(); this.form.markAsPristine(); this.router.navigate(['/employees']); },
+        next: () => { invalidateCache(); this.form.markAsPristine(); this.router.navigate([this.backRoute]); },
         error: (err: any) => {
           this.errorMessage =
             err?.error?.message ||
@@ -329,7 +335,7 @@ export class EmployeeForm implements OnInit, HasUnsavedChanges {
   }
 
   cancel(): void {
-    this.router.navigate(['/employees']);
+    this.router.navigate([this.backRoute]);
   }
 
   field(name: string) {

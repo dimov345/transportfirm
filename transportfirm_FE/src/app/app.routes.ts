@@ -111,19 +111,19 @@ export const routes: Routes = [
     data: { roles: ['MANAGER'] }
   },
 
-  // Employees — ADMIN, MANAGER only
+  // Employees — ADMIN only (list + create)
   {
     path: 'employees',
     loadComponent: () => import('./components/employees/employee-list/employee-list').then(m => m.EmployeeList),
     canActivate: [authGuard],
-    data: { roles: ADMIN_MANAGER }
+    data: { roles: ['ADMIN'] }
   },
   {
     path: 'employees/new',
     loadComponent: () => import('./components/employees/employee-form/employee-form').then(m => m.EmployeeForm),
     canActivate: [authGuard],
     canDeactivate: [unsavedChangesGuard],
-    data: { roles: ADMIN_MANAGER }
+    data: { roles: ['ADMIN'] }
   },
   {
     path: 'employees/edit/:id',

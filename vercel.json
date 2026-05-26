@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "installCommand": "cd transportfirm_FE && npm ci --ignore-scripts",
+  "buildCommand": "cd transportfirm_FE && npm run build",
+  "outputDirectory": "transportfirm_FE/dist/transportfirm_FE/browser",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

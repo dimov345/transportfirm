@@ -4,7 +4,6 @@ import com.example.transportfirm.enums.ContractType;
 import com.example.transportfirm.enums.EmploymentStatus;
 import com.example.transportfirm.enums.JobTitle;
 import com.example.transportfirm.enums.Role;
-import com.example.transportfirm.validation.EGNValid;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -41,7 +40,6 @@ public class Employee {
     private Long version;
 
     // Лични данни
-    @EGNValid
     @Column(length = 10, nullable = false, unique = true)
     private String egn;
 

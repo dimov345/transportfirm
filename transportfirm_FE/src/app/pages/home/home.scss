@@ -791,7 +791,7 @@ $expense:   #dc2626;
 // KPI grid inside role panel
 .role-kpi-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 12px;
 }
 
@@ -842,6 +842,9 @@ $expense:   #dc2626;
     font-weight: 800;
     color: $text;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__lbl {

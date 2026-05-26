@@ -216,25 +216,6 @@
           }
         </div>
 
-        <!-- Бързи действия -->
-        <div class="info-card">
-          <div class="card-header">
-            <i class="material-icons">flash_on</i>
-            <h2>Бързи действия</h2>
-          </div>
-
-          <div class="quick-actions">
-            <button *ngIf="isAdminOrManager" type="button" class="action-btn" (click)="editDriver()">
-              <i class="material-icons">edit</i>
-              <span>Редактирай данни</span>
-            </button>
-            <button type="button" class="action-btn" (click)="goBack()">
-              <i class="material-icons">arrow_back</i>
-              <span>Назад към списъка</span>
-            </button>
-          </div>
-        </div>
-
         @if (driverInfo?.id) {
           <div class="info-card">
             <div class="card-header">

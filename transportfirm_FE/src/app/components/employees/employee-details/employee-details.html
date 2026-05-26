@@ -167,7 +167,7 @@
             </div>
 
             <!-- Actions -->
-            <div style="margin-top: 12px; display:flex; gap:10px; flex-wrap: wrap;">
+            <div class="card-actions">
               @if (!hasGroup()) {
                 <button type="button" class="btn-primary" (click)="toggleCreateGroup()">
                   + Създай група
@@ -180,13 +180,15 @@
             </div>
 
             @if (showCreateGroup && !hasGroup()) {
-              <div style="margin-top: 12px;">
-                <div class="info-item">
-                  <label>Име на група</label>
-                  <input type="text" [(ngModel)]="groupName" placeholder="Напр. Mechanics A" />
-                </div>
-
-                <div style="margin-top: 10px; display:flex; gap:10px;">
+              <div class="group-form">
+                <label class="group-form__label">Име на група</label>
+                <input
+                  class="group-form__input"
+                  type="text"
+                  [(ngModel)]="groupName"
+                  placeholder="Напр. Mechanics A"
+                />
+                <div class="group-form__actions">
                   <button type="button" class="btn-primary" (click)="createGroup()">Запази</button>
                   <button type="button" class="btn-secondary" (click)="toggleCreateGroup()">Отказ</button>
                 </div>
@@ -194,7 +196,7 @@
             }
 
             @if (hasGroup() && showAssignVehicles) {
-              <div style="margin-top: 12px;">
+              <div class="group-form">
                 <app-group-vehicle-assignment
                   [groupId]="getGroupId()"
                   [groupType]="getGroupTypeValue()!"

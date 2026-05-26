@@ -507,6 +507,94 @@ $ease: 0.15s ease;
         }
       }
     }
+
+    /* =========================
+       Card actions (inline buttons)
+    ========================= */
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+
+      .btn-primary,
+      .btn-secondary {
+        height: 36px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: $radius-sm;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, transform 0.15s;
+        border: 1px solid transparent;
+
+        &:hover { transform: translateY(-1px); }
+        &:active { transform: translateY(0); }
+      }
+
+      .btn-primary {
+        background: $accent;
+        border-color: rgba($accent, 0.35);
+        color: #fff;
+        &:hover { background: #2c6bb4; border-color: #2c6bb4; }
+      }
+
+      .btn-secondary {
+        background: rgba($accent, 0.08);
+        border-color: rgba($accent, 0.25);
+        color: $accent;
+        &:hover { background: rgba($accent, 0.13); border-color: rgba($accent, 0.40); }
+      }
+    }
+
+    /* =========================
+       Group create form
+    ========================= */
+    .group-form {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border-radius: $radius-sm;
+      border: 1px solid $border;
+
+      .group-form__label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 6px;
+      }
+
+      .group-form__input {
+        width: 100%;
+        height: 38px;
+        padding: 0 10px;
+        border: 1px solid $border;
+        border-radius: $radius-sm;
+        font-size: 14px;
+        color: $text;
+        background: $surface;
+        box-sizing: border-box;
+        font-family: inherit;
+
+        &:focus {
+          outline: none;
+          border-color: $accent;
+          box-shadow: 0 0 0 3px rgba($accent, 0.12);
+        }
+      }
+
+      .group-form__actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+    }
   }
 
   /* =========================

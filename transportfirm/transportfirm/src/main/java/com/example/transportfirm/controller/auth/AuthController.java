@@ -67,10 +67,10 @@ public class AuthController {
 
             ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken)
                     .httpOnly(true)
-                    .secure(false) // true in production (requires HTTPS)
+                    .secure(true)
                     .path("/")
                     .maxAge(Duration.ofDays(1))
-                    .sameSite("Lax")
+                    .sameSite("None")
                     .build();
 
             return ResponseEntity.ok()
@@ -95,10 +95,10 @@ public class AuthController {
 
         ResponseCookie expired = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         return ResponseEntity.ok()
